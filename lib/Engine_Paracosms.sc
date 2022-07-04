@@ -1,20 +1,20 @@
-// Engine_Slinky
+// Engine_Paracosms
 
 // Inherit methods from CroneEngine
-Engine_Slinky : CroneEngine {
+Engine_Paracosms : CroneEngine {
 
-    // Slinky specific v0.1.0
-    var slinky;
+    // Paracosms specific v0.1.0
+    var paracosms;
     var fnOSC;
-    // Slinky ^
+    // Paracosms ^
 
     *new { arg context, doneCallback;
         ^super.new(context, doneCallback);
     }
 
     alloc {
-        // Slinky specific v0.0.1
-        slinky=Slinky.new(context.server,0);
+        // Paracosms specific v0.0.1
+        paracosms=Paracosms.new(context.server,0);
 
         fnOSC= OSCFunc({
             arg msg, time;
@@ -25,25 +25,25 @@ Engine_Slinky : CroneEngine {
         },'/tr', context.server.addr);
 
         this.addCommand("add","isff", { arg msg;
-            slinky.add(msg[1],msg[2].asString,msg[3],msg[4]);
+            paracosms.add(msg[1],msg[2].asString,msg[3],msg[4]);
         });
         this.addCommand("watch","i", { arg msg;
-            slinky.watch(msg[1]);
+            paracosms.watch(msg[1]);
         });
         this.addCommand("set","isff", { arg msg;
-            slinky.set(msg[1],msg[2],msg[3],msg[4]);
+            paracosms.set(msg[1],msg[2],msg[3],msg[4]);
         });
 
 
 
-        // ^ Slinky specific
+        // ^ Paracosms specific
 
     }
 
     free {
-        // Slinky Specific v0.0.1
-        slinky.free;
+        // Paracosms Specific v0.0.1
+        paracosms.free;
         fnOSC.free;
-        // ^ Slinky specific
+        // ^ Paracosms specific
     }
 }

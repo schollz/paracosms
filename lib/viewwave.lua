@@ -16,7 +16,7 @@ end
 function ViewWave:init()
   print("ViewWave:init",self.path)
   pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-  self.path="/tmp/slinky"..filename
+  self.path="/tmp/paracosms"..filename
   self.filename=string.upper(filename)
   local ch,samples,samplerate=audio.file_info(self.path)
   if samples<10 or samples==nil then
@@ -24,18 +24,18 @@ function ViewWave:init()
     do return end
   end
   self.duration=samples/samplerate
-  self.waveform_file=_path.data.."112-turntables/"..self.id
-  self.dat_file=_path.data.."112-turntables/"..self.id..".dat"
+  self.waveform_file=_path.data.."paracosms/"..self.id
+  self.dat_file=_path.data.."paracosms/"..self.id..".dat"
   self.png_file="/dev/shm/"..self.id..".png"
   local resolution=2
-  os.execute(string.format("/home/we/dust/code/112-turntables/lib/audiowaveform -q -i %s -o %s -z %d -b 8",self.path,self.dat_file,resolution))
+  os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -z %d -b 8",self.path,self.dat_file,resolution))
   self.width=0
   self.height=0
 end
 
 function ViewWave:render()
   print(self.dat_file,self.png_file,0,self.duration,self.width,self.height)
-  os.execute(string.format("/home/we/dust/code/112-turntables/lib/audiowaveform -q -i %s -o %s -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.dat_file,self.png_file,0,self.duration,self.width,self.height))
+  os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.dat_file,self.png_file,0,self.duration,self.width,self.height))
 end
 
 function ViewWave:redraw(x,y,width,height)

@@ -4,7 +4,7 @@ viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
 
-engine.name="Slinky"
+engine.name="Paracosms"
 dat={}
 
 function lines_from(file)
