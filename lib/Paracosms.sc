@@ -1,4 +1,4 @@
-Slinky {
+Paracosms {
 
 	var server;
 	var busOut;
@@ -61,7 +61,7 @@ Slinky {
 
 	add {
 		arg id,fnameOriginal,bpm_source,bpm_target;
-		var fname=PathName.tmp +/+ ("slinky"++PathName.new(fnameOriginal).fileName);
+		var fname=PathName.tmp +/+ ("paracosms"++PathName.new(fnameOriginal).fileName);
 		var cmd="sox"+fnameOriginal+fname+"tempo -m "+(bpm_target/bpm_source);
 		if (fnameOriginal.contains("drums-"),{
 			cmd="sox"+fnameOriginal+fname+"speed "+(bpm_target/bpm_source)+"rate -v 48k";
