@@ -1,4 +1,4 @@
--- 108 turntables
+-- paracosms
 
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
@@ -29,19 +29,21 @@ function init()
   local lines=lines_from("/home/we/dust/audio/seamlessloops/files.txt")
   local possible_files={}
   for i,line in pairs(lines) do
-    if string.find(line,string.format("/%d/",clock.get_tempo())) then
-      table.insert(possible_files,line)
+    for tempo=clock.get_tempo()-2,clock.get_tempo()+2 do
+      if string.find(line,string.format("/%d/",tempo)) then
+        table.insert(possible_files,line)
+      end
     end
   end
   shuffle(possible_files)
 
   clock.run(function()
     local id=1
-    for _,filetype in ipairs({"vocals","drums--ambient","synth--bass","pad--synth","chords--synth","synth--arp"}) do
+    for _,filetype in ipairs({"pad--synth","drums--ambient","synth--bass","synth--arp","drums--dnb","chords--synth","vocals"}) do
       for _,file in ipairs(possible_files) do
         if string.find(file,filetype) then
           table.insert(dat.tt,turntable_:new{id=id,path=file})
-          for j=1,40 do
+          for j=1,80 do
             clock.sleep(0.05)
             if dat.tt[id].ready then
               break
@@ -49,6 +51,7 @@ function init()
           end
           id=id+1
           if (id-1)%16==0 then
+            print("breaking")
             break
           end
         end
