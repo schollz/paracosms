@@ -22,20 +22,22 @@ Paracosms {
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
 			SynthDef("defPlay"++ch,{
-				arg amp=0,ampLag=0.2,
+				arg amp=0.01,ampLag=0.2,
 				lpf=20000,lpfLag=0.2,
 				offset=0,offsetLag=0.0,
-				id=0,dataout=0,bufnum,busPhase,out;
+				id=0,dataout=0,fadeInTime=0.1,bufnum,busPhase,out;
 				var snd;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
 				var seconds=(In.ar(busPhase)+offset).mod(duration);
+				amp=VarLag.kr(amp,ampLag,warp:\sine);
 				snd=BufRd.ar(ch,bufnum,seconds/duration*frames);
-				snd=snd*VarLag.kr(amp,ampLag,warp:\sine);
+				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,seconds);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				Out.ar(out,snd);
+				FreeSelf.kr(Trig.kr(amp<0.01));
+				Out.ar(out,snd/10);
 			}).send(server);
 		});
 
@@ -71,29 +73,34 @@ Paracosms {
 		});
 		cmd.postln;
 		cmd.systemCmd;
-		if (bufs.at(fname).isNil,{
-			Buffer.read(server,fname,action:{arg buf;
-				bufs.put(fname,buf);
-				syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(fname).numChannels,
-					[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(fname),\amp,0]
-				));
-				NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
-			});
-		},{
-			if (syns.at(id).isNil,{
-				syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(fname).numChannels,
-					[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(fname),\amp,0]
-				));
-			});
+		if (bufs.at(fname).notNil,{
+			bufs.at(id).free;
+		});
+		Buffer.read(server,fname,action:{arg buf;
+			bufs.put(id,buf);
+			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
 		});
 	}
 
 	set {
 		arg id,key,val,valLag;
+		var makeSynth=false;
 		if (syns.at(id).notNil,{
-			[key.asSymbol,val].postln;
-			syns.at(id).set(key,val,key++"Lag",valLag);
+			if (syns.at(id).isRunning,{},{
+				makeSynth=true;
+			});
+		},{
+			makeSynth=true;
 		});
+		if (makeSynth,{
+			syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(id).numChannels,
+				[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag]
+			).onFree({["freed"+id].postln}));
+			server.sync;
+			NodeWatcher.register(syns.at(id));
+			// TODO: put all the current parameters into it
+		});
+		syns.at(id).set(key,val,key++"Lag",valLag);
 	}
 
 	setRate {

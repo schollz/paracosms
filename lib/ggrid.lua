@@ -82,6 +82,10 @@ function GGrid:get_visual()
     for col=1,self.grid_width do
       id=id+1
       self.visual[row][col]=self.light_setting[id] or 0
+      if dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
+        self.visual[row][col]=2
+      end
+
     end
   end
 

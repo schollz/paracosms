@@ -24,6 +24,9 @@ function ViewWave:init()
     do return end
   end
   self.duration=samples/samplerate
+  if self.duration==nil then
+    do return end
+  end
   self.waveform_file=_path.data.."paracosms/"..self.id
   self.dat_file=_path.data.."paracosms/"..self.id..".dat"
   self.png_file="/dev/shm/"..self.id..".png"
@@ -34,11 +37,17 @@ function ViewWave:init()
 end
 
 function ViewWave:render()
+  if self.duration==nil then
+    do return end
+  end
   print(self.dat_file,self.png_file,0,self.duration,self.width,self.height)
   os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.dat_file,self.png_file,0,self.duration,self.width,self.height))
 end
 
 function ViewWave:redraw(x,y,width,height)
+  if self.duration==nil then
+    do return end
+  end
   x=x or 0
   y=y or 0
   width=width or 128
