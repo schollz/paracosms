@@ -5,7 +5,7 @@ Slinky {
 	var busPhasor;
 	var syns;
 	var bufs;
-	var oscTrig;
+	var watching;
 
 	*new {
 		arg serverName,argBusOut;
@@ -18,21 +18,23 @@ Slinky {
 		busOut=argBusOut;
 		syns=Dictionary.new();
 		bufs=Dictionary.new();
+		watching=0;
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
 			SynthDef("defPlay"++ch,{
 				arg amp=0,ampLag=0.2,
 				lpf=20000,lpfLag=0.2,
 				offset=0,offsetLag=0.0,
-				id=0,bufnum,busPhase,out;
+				id=0,dataout=0,bufnum,busPhase,out;
 				var snd;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
-				var phase=(In.ar(busPhase)+offset).mod(duration)/duration*frames;
-				snd=BufRd.ar(ch,bufnum,phase);
+				var seconds=(In.ar(busPhase)+offset).mod(duration);
+				snd=BufRd.ar(ch,bufnum,seconds/duration*frames);
 				snd=snd*VarLag.kr(amp,ampLag,warp:\sine);
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
-				SendTrig.kr(Impulse.kr(10),id,Lag.kr(Amplitude.kr(snd)));
+				SendTrig.kr(Impulse.kr((dataout>0)*10),id,seconds);
+				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				Out.ar(out,snd);
 			}).send(server);
 		});
@@ -44,20 +46,18 @@ Slinky {
 
 		server.sync;
 
-		oscTrig= OSCFunc({
-			arg msg, time;
-			[msg,time].postln;
-			if (msg[2]>0,{
-				// NetAddr("127.0.0.1", 10111).sendMsg("ampcheck",msg[2],msg[3]);
-			});
-		},'/tr', server);
-
-		server.sync;
-
 		syns.put("phasor",Synth.head(server,"defPhasor",[\out,busPhasor]));
 
 	}
 
+	watch {
+		arg id;
+		if (watching>0,{
+			syns.at(watching).set(\dataout,0);
+		});
+		watching=id;
+		syns.at(watching).set(\dataout,1);
+	}
 
 	add {
 		arg id,fnameOriginal,bpm_source,bpm_target;
@@ -77,6 +77,7 @@ Slinky {
 				syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(fname).numChannels,
 					[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(fname),\amp,0]
 				));
+				NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
 			});
 		},{
 			if (syns.at(id).isNil,{
@@ -108,7 +109,6 @@ Slinky {
 		syns.keysValuesDo({ arg note, val;
 			val.free;
 		});
-		oscTrig.free;
 	}
 
 }
