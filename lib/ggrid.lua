@@ -61,7 +61,7 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   print(row,col,hold_time)
-  local id=(row-1)*8+col
+  local id=(row-1)*16+col
   if on then
     switch_view(id)
   end
