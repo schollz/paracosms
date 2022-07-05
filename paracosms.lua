@@ -7,6 +7,19 @@ grid_=include("lib/ggrid")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 
+dat.folders={
+  "/home/we/dust/audio/seamlessloops/drums-ambient"
+}
+
+function find_files(folder)
+  local lines=util.os_capture("find "..folder.." -name '*.flac' -o -name '*.wav'")
+  local files={}
+  for s in lines:gmatch("[^\r\n]+") do
+    table.insert(files,s)
+  end
+  return files
+end
+
 function lines_from(file)
   if not util.file_exists(file) then return {} end
   local lines={}
@@ -71,6 +84,7 @@ function initialize()
   end)
 end
 function init()
+  tab.print(find_files(dat.folders))
   -- parameters
   for id=1,112 do
     params:add_group("table "..id,2)
