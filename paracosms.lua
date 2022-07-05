@@ -8,16 +8,17 @@ engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 
 dat.folders={
+  "/home/we/dust/audio/seamlessloops/pad-synth"
   "/home/we/dust/audio/seamlessloops/drums-ambient"
+  "/home/we/dust/audio/seamlessloops/drums-dnb"
+  "/home/we/dust/audio/seamlessloops/synth-bass"
+  "/home/we/dust/audio/seamlessloops/chords-synth"
+  "/home/we/dust/audio/seamlessloops/vocals"
 }
 
 function find_files(folder)
-  local lines=util.os_capture("find "..folder.." -name '*.flac' -o -name '*.wav'")
-  local files={}
-  for s in lines:gmatch("[^\r\n]+") do
-    table.insert(files,s)
-  end
-  return files
+  local lines=util.os_capture("find "..folder.." -print -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
+  return lines_from("/tmp/files")
 end
 
 function lines_from(file)
@@ -41,29 +42,26 @@ function initialize()
   dat.ti=1
   dat.tt={}
   dat.percent_loaded=0
-  local lines=lines_from("/home/we/dust/audio/seamlessloops/files.txt")
-  local possible_files={}
-  for i,line in pairs(lines) do
-    for tempo=clock.get_tempo()-0,clock.get_tempo()+0 do
-      if string.find(line,string.format("/%d/",tempo)) then
-        table.insert(possible_files,line)
-      end
-    end
-  end
-  math.randomseed(dat.seed)
-  shuffle(possible_files)
 
   dat.files_to_load={}
   clock.run(function()
-    for _,filetype in ipairs({"pad--synth","drums--ambient","synth--bass","synth--arp","drums--dnb","chords--synth","vocals"}) do
+    for _,folder in ipairs(dat.folders) do
+      local possible_files=lines_from(folder)
+      math.randomseed(dat.seed)
+      shuffle(possible_files)
       local found=0
       for _,file in ipairs(possible_files) do
-        if string.find(file,filetype) then
-          table.insert(dat.files_to_load,file)
-          found=found+1
-          if found==16 then
-            break
+        for tempo=clock.get_tempo()-1,clock.get_tempo()+1 do
+          if string.find(file,string.format("bpm%d",tempo)) then
+            table.insert(dat.files_to_load,file)
+            found=found+1
+            if found==16 then
+              break
+            end
           end
+        end
+        if found==16 then
+          break
         end
       end
     end
@@ -84,7 +82,7 @@ function initialize()
   end)
 end
 function init()
-  tab.print(find_files(dat.folders))
+  tab.print(find_files(dat.folders[1]))
   -- parameters
   for id=1,112 do
     params:add_group("table "..id,2)
@@ -135,7 +133,7 @@ function init()
     end
   end)
 
-  initialize()
+  --initialize()
 
 end
 
