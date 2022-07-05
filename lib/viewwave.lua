@@ -49,7 +49,7 @@ function ViewWave:redraw(x,y,width,height)
     do return end
   end
   x=x or 0
-  y=y or 0
+  y=y or 6
   width=width or 128
   height=height or 64
   if width~=self.width or height~=self.height then

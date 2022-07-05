@@ -196,7 +196,7 @@ function redraw()
     end
   end
 
-  if dat.percent_loaded<100 then
+  if dat.percent_loaded<99.0 then
     screen.move(1,7)
     screen.text(string.format("loaded %2.1f%%",dat.percent_loaded))
   end
