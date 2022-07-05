@@ -31,7 +31,7 @@ Paracosms {
 				var duration=BufDur.ir(bufnum);
 				var seconds=(In.ar(busPhase)+offset).mod(duration);
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
-				snd=BufRd.ar(ch,bufnum,seconds/duration*frames);
+				snd=BufRd.ar(ch,bufnum,seconds/duration*frames,interpolation:4);
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,seconds);
