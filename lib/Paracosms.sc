@@ -73,8 +73,11 @@ Paracosms {
 		});
 		cmd.postln;
 		cmd.systemCmd;
-		if (bufs.at(fname).notNil,{
+		if (bufs.at(id).notNil,{
 			bufs.at(id).free;
+		});
+		if (syns.at(id).notNil,{
+			syns.at(id).free;
 		});
 		Buffer.read(server,fname,action:{arg buf;
 			bufs.put(id,buf);
@@ -93,14 +96,15 @@ Paracosms {
 			makeSynth=true;
 		});
 		if (makeSynth,{
+			"making synth".postln;
 			syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(id).numChannels,
-				[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag]
+				[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag]
 			).onFree({["freed"+id].postln}));
-			server.sync;
 			NodeWatcher.register(syns.at(id));
 			// TODO: put all the current parameters into it
+		},{
+			syns.at(id).set(key,val,key++"Lag",valLag);
 		});
-		syns.at(id).set(key,val,key++"Lag",valLag);
 	}
 
 	setRate {
@@ -116,6 +120,9 @@ Paracosms {
 		syns.keysValuesDo({ arg note, val;
 			val.free;
 		});
+		syns.free;
+		bufs.free;
+		busPhasor.free;
 	}
 
 }

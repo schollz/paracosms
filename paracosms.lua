@@ -5,7 +5,7 @@ turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
 
 engine.name="Paracosms"
-dat={}
+dat={percent_loaded=0,tt={},files_to_load={}}
 
 function lines_from(file)
   if not util.file_exists(file) then return {} end
@@ -23,44 +23,67 @@ function shuffle(tbl)
   end
 end
 
-function init()
+function initialize()
+  dat.seed=1
   dat.ti=1
   dat.tt={}
+  dat.percent_loaded=0
   local lines=lines_from("/home/we/dust/audio/seamlessloops/files.txt")
   local possible_files={}
   for i,line in pairs(lines) do
-    for tempo=clock.get_tempo()-2,clock.get_tempo()+2 do
+    for tempo=clock.get_tempo()-0,clock.get_tempo()+0 do
       if string.find(line,string.format("/%d/",tempo)) then
         table.insert(possible_files,line)
       end
     end
   end
+  math.randomseed(dat.seed)
   shuffle(possible_files)
 
+  dat.files_to_load={}
   clock.run(function()
-    local id=1
     for _,filetype in ipairs({"pad--synth","drums--ambient","synth--bass","synth--arp","drums--dnb","chords--synth","vocals"}) do
+      local found=0
       for _,file in ipairs(possible_files) do
         if string.find(file,filetype) then
-          table.insert(dat.tt,turntable_:new{id=id,path=file})
-          for j=1,80 do
-            clock.sleep(0.05)
-            if dat.tt[id].ready then
-              break
-            end
-          end
-          id=id+1
-          if (id-1)%16==0 then
-            print("breaking")
+          table.insert(dat.files_to_load,file)
+          found=found+1
+          if found==16 then
             break
           end
         end
       end
     end
-  end)
 
+    for id,file in ipairs(dat.files_to_load) do
+      table.insert(dat.tt,turntable_:new{id=id,path=file})
+      for j=1,80 do
+        clock.sleep(0.05)
+        if dat.tt[id].ready then
+          break
+        end
+      end
+      -- if id==24 then
+      --   break
+      -- end
+    end
+
+  end)
+end
+function init()
+  -- parameters
+  for id=1,112 do
+    params:add_group("table "..id,2)
+    params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
+      engine.set(id,"amp",v==1 and 1.0 or 0,params:get(id.."fadetime"))
+    end}
+    params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
+  end
+
+  -- grid
   g_=grid_:new()
 
+  -- osc
   osc.event=function(path,args,from)
     if args[1]==0 then
       do return end
@@ -71,7 +94,7 @@ function init()
       id=id-200
       datatype="amplitude"
       local val=util.round(util.clamp(util.linlin(0,0.25,0,16,args[2]),2,15))
-      if dat.tt[id]~=nil and dat.tt[id].ready then
+      if dat~=nil and dat.tt[id]~=nil and dat.tt[id].ready then
         g_:light_up(id,val)
       end
       do return end
@@ -79,16 +102,27 @@ function init()
     if path=="ready" then
       datatype=path
     end
-    if dat.tt[id]~=nil then
+    if dat~=nil and dat.tt[id]~=nil then
       dat.tt[id]:oscdata(datatype,args[2])
     end
   end
+
   clock.run(function()
     while true do
+      if #dat.files_to_load>1 and dat.percent_loaded<100 then
+        local inc=100.0/#dat.files_to_load
+        dat.percent_loaded=0
+        for _,v in ipairs(dat.tt) do
+          dat.percent_loaded=dat.percent_loaded+(v.ready and inc or 0)
+        end
+      end
       clock.sleep(1/10)
       redraw()
     end
   end)
+
+  initialize()
+
 end
 
 function switch_view(id)
@@ -97,6 +131,10 @@ function switch_view(id)
   end
   dat.ti=id
   engine.watch(id)
+end
+
+function engine_reset()
+  engine.reset()
 end
 
 function key(k,z)
@@ -157,5 +195,13 @@ function redraw()
       screen.blend_mode(0)
     end
   end
+
+  if dat.percent_loaded<100 then
+    screen.move(1,7)
+    screen.text(string.format("loaded %2.1f%%",dat.percent_loaded))
+  end
+
+  screen.move(128,7)
+  screen.text_right(dat.ti)
   screen.update()
 end
