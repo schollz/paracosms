@@ -30,7 +30,7 @@ function ViewWave:init()
   self.waveform_file=_path.data.."paracosms/"..self.id
   self.dat_file=_path.data.."paracosms/"..self.id..".dat"
   self.png_file="/dev/shm/"..self.id..".png"
-  local resolution=2
+  local resolution=120
   os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -z %d -b 8",self.path,self.dat_file,resolution))
   self.width=0
   self.height=0

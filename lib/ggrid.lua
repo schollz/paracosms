@@ -34,7 +34,7 @@ function GGrid:new(args)
 
   -- grid refreshing
   m.grid_refresh=metro.init()
-  m.grid_refresh.time=midigrid and 0.12 or 0.03
+  m.grid_refresh.time=midigrid and 0.12 or 0.105
   m.grid_refresh.event=function()
     if m.grid_on then
       m:grid_redraw()
@@ -82,10 +82,12 @@ function GGrid:get_visual()
     for col=1,self.grid_width do
       id=id+1
       self.visual[row][col]=self.light_setting[id] or 0
-      if dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
-        self.visual[row][col]=2
+      if self.light_setting[id]~=nil and self.light_setting[id]>0 then
+        self.light_setting[id]=self.light_setting[id]-1
       end
-
+      if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
+        self.visual[row][col]=1
+      end
     end
   end
 

@@ -14,8 +14,6 @@ Engine_Paracosms : CroneEngine {
 
     alloc {
         // Paracosms specific v0.0.1
-        paracosms=Paracosms.new(context.server,0);
-
         fnOSC= OSCFunc({
             arg msg, time;
             if (msg[2]>0,{
@@ -23,6 +21,9 @@ Engine_Paracosms : CroneEngine {
                 NetAddr("127.0.0.1", 10111).sendMsg("data",msg[2],msg[3]);
             });
         },'/tr', context.server.addr);
+        context.server.sync;
+        paracosms=Paracosms.new(context.server,0);
+        context.server.sync;
 
         this.addCommand("add","isff", { arg msg;
             paracosms.add(msg[1],msg[2].asString,msg[3],msg[4]);
@@ -33,8 +34,6 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("set","isff", { arg msg;
             paracosms.set(msg[1],msg[2],msg[3],msg[4]);
         });
-
-
 
         // ^ Paracosms specific
 
