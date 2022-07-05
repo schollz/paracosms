@@ -8,16 +8,17 @@ engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 
 dat.folders={
-  "/home/we/dust/audio/seamlessloops/pad-synth"
-  "/home/we/dust/audio/seamlessloops/drums-ambient"
-  "/home/we/dust/audio/seamlessloops/drums-dnb"
-  "/home/we/dust/audio/seamlessloops/synth-bass"
-  "/home/we/dust/audio/seamlessloops/chords-synth"
-  "/home/we/dust/audio/seamlessloops/vocals"
+  "/home/we/dust/audio/seamlessloops/pad-synth",
+  "/home/we/dust/audio/seamlessloops/drums-ambient",
+  "/home/we/dust/audio/seamlessloops/drums-dnb",
+  "/home/we/dust/audio/seamlessloops/synth-bass",
+  "/home/we/dust/audio/seamlessloops/synth-arp",
+  "/home/we/dust/audio/seamlessloops/vocals",
+  "/home/we/dust/audio/seamlessloops/pad-synth",
 }
 
 function find_files(folder)
-  local lines=util.os_capture("find "..folder.." -print -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
+  local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
   return lines_from("/tmp/files")
 end
 
@@ -38,16 +39,16 @@ function shuffle(tbl)
 end
 
 function initialize()
-  dat.seed=1
+  dat.seed=18
   dat.ti=1
   dat.tt={}
   dat.percent_loaded=0
 
+  math.randomseed(dat.seed)
   dat.files_to_load={}
   clock.run(function()
     for _,folder in ipairs(dat.folders) do
-      local possible_files=lines_from(folder)
-      math.randomseed(dat.seed)
+      local possible_files=find_files(folder)
       shuffle(possible_files)
       local found=0
       for _,file in ipairs(possible_files) do
@@ -74,15 +75,14 @@ function initialize()
           break
         end
       end
-      -- if id==24 then
-      --   break
-      -- end
+      if id==24 then
+        break
+      end
     end
 
   end)
 end
 function init()
-  tab.print(find_files(dat.folders[1]))
   -- parameters
   for id=1,112 do
     params:add_group("table "..id,2)
@@ -133,7 +133,7 @@ function init()
     end
   end)
 
-  --initialize()
+  initialize()
 
 end
 

@@ -34,6 +34,7 @@ function ViewWave:init()
   os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -z %d -b 8",self.path,self.dat_file,resolution))
   self.width=0
   self.height=0
+  self.loaded=true
 end
 
 function ViewWave:render()
