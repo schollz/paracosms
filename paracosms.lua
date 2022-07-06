@@ -28,6 +28,7 @@ function lines_from(file)
   for line in io.lines(file) do
     lines[#lines+1]=line
   end
+  table.sort(lines)
   return lines
 end
 
@@ -75,9 +76,9 @@ function initialize()
           break
         end
       end
-      if id==24 then
-        break
-      end
+      -- if id==24 then
+      --   break
+      -- end
     end
 
   end)

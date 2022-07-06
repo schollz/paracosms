@@ -42,8 +42,8 @@ Paracosms {
 		});
 
 		SynthDef("defPhasor",{
-			arg out,rate=1,rateLag=0.2;
-			Out.ar(out,Phasor.ar(0,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
+			arg out,rate=1,rateLag=0.2,t_trig=0;
+			Out.ar(out,Phasor.ar(t_trig,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
 		}).send(server);
 
 		server.sync;
@@ -110,6 +110,10 @@ Paracosms {
 	setRate {
 		arg rate,rateLag;
 		syns.at("phasor").set(\rate,rate,\rateLag,rateLag);
+	}
+
+	resetPhase {
+		syns.at("phasor").set(\t_trig,1);
 	}
 
 	free {
