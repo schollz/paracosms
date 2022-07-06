@@ -34,6 +34,10 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("set","isff", { arg msg;
             paracosms.set(msg[1],msg[2],msg[3],msg[4]);
         });
+        this.addCommand("resetPhase","", { arg msg;
+            paracosms.resetPhase();
+        });
+	
 
         // ^ Paracosms specific
 
