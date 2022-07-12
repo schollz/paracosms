@@ -87,7 +87,7 @@ function init()
     end}
     params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
     params:set_action(id.."amp",function(v)
-      debounce_fn[id]={
+      debounce_fn[id.."amp"]={
         3,function()
           if params:get(id.."play")==1 and params:get(id.."amp")==0 then
             params:set(id.."play",0)

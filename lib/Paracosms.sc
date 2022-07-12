@@ -6,6 +6,7 @@ Paracosms {
 	var busPhasor;
 	var syns;
 	var bufs;
+	var params;
 	var watching;
 
 	*new {
@@ -23,6 +24,8 @@ Paracosms {
 
 		syns=Dictionary.new();
 		bufs=Dictionary.new();
+		params=Dictionary.new();
+
 		watching=0;
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
@@ -154,13 +157,22 @@ Paracosms {
 				makeSynth=true;
 			});
 			if (makeSynth,{
+				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag];
+				if (params.at(id).notNil,{
+					params.at(id).keysValuesDo({ arg pk,pv; 
+						pars=pars++[pk,pv];
+					});
+				},{
+					params.put(id,Dictionary.new());
+				})
 				"making synth".postln;
-				syns.put(id,Synth.after(syns.at("phasor"),"defPlay"++bufs.at(id).numChannels,
-					[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag]
+				syns.put(id,Synth.after(syns.at("phasor"),
+					"defPlay"++bufs.at(id).numChannels,pars,
 				).onFree({["freed"+id].postln}));
 				NodeWatcher.register(syns.at(id));
 				// TODO: put all the current parameters into it
 			},{
+				params.at(id).put(key,val);
 				syns.at(id).set(key,val,key++"Lag",valLag);
 			});
 		});
