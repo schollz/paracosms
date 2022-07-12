@@ -5,6 +5,7 @@ Paracosms {
 	var busPhasor;
 	var syns;
 	var bufs;
+	var doDelete;
 	var watching;
 
 	*new {
@@ -18,6 +19,7 @@ Paracosms {
 		busOut=argBusOut;
 		syns=Dictionary.new();
 		bufs=Dictionary.new();
+		doDelete=Dictionary.new();
 		watching=0;
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
@@ -71,15 +73,17 @@ Paracosms {
 	add {
 		arg id,fnameOriginal,bpm_source,bpm_target;
 		var fname=PathName.tmp +/+ ("paracosms"++PathName.new(fnameOriginal).fileName);
-		var cmd="sox"+fnameOriginal+fname+"tempo -m "+(bpm_target/bpm_source);
-		if (fnameOriginal.toLower.contains("drum"),{
-			cmd="sox"+fnameOriginal+fname+"speed "+(bpm_target/bpm_source)+"rate -v 48k";
-		});
 		if (bpm_source==bpm_target,{
-			cmd="cp"+fnameOriginal+fname;
+			fname=fnameOriginal;
+		},{
+			var cmd="sox"+fnameOriginal+fname+"tempo -m "+(bpm_target/bpm_source);
+			if (fnameOriginal.contains("drums-"),{
+				cmd="sox"+fnameOriginal+fname+"speed "+(bpm_target/bpm_source)+"rate -v 48k";
+			});
+			cmd.postln;
+			cmd.systemCmd;
+			doDelete.put(id,1);
 		});
-		cmd.postln;
-		cmd.systemCmd;
 		if (bufs.at(id).notNil,{
 			bufs.at(id).free;
 		});
@@ -125,7 +129,9 @@ Paracosms {
 
 	free {
 		bufs.keysValuesDo({ arg buf, val;
-			File.delete(val.path).postln;
+			if (doDelete.at(id).notNil,{
+				File.delete(val.path).postln;
+			});
 			val.free;
 		});
 		syns.keysValuesDo({ arg note, val;

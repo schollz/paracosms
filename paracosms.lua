@@ -7,14 +7,15 @@ grid_=include("lib/ggrid")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 
-dat.folders={
-  "/home/we/dust/audio/seamlessloops/pad-synth",
-  "/home/we/dust/audio/seamlessloops/drums-ambient",
-  "/home/we/dust/audio/seamlessloops/drums-dnb",
-  "/home/we/dust/audio/seamlessloops/synth-bass",
-  "/home/we/dust/audio/seamlessloops/synth-arp",
+dat.rows={
+  "/home/we/dust/audio/seamlessloops/ambientdrums",
+  "/home/we/dust/audio/seamlessloops/dnbdrums",
+  "/home/we/dust/audio/seamlessloops/glitchdrums",
+  "/home/we/dust/audio/seamlessloops/bass",
+  "/home/we/dust/audio/seamlessloops/pads",
+  "/home/we/dust/audio/seamlessloops/chords",
+  "/home/we/dust/audio/seamlessloops/arp",
   "/home/we/dust/audio/seamlessloops/vocals",
-  "/home/we/dust/audio/seamlessloops/pad-synth",
 }
 
 function find_files(folder)
@@ -46,46 +47,29 @@ function initialize()
   dat.percent_loaded=0
   params:set("clock_tempo",120)
   math.randomseed(dat.seed)
-  dat.files_to_load={}
   clock.run(function()
-    for _,folder in ipairs(dat.folders) do
+    for row,folder in ipairs(dat.rows) do
       local possible_files=find_files(folder)
       shuffle(possible_files)
-      local found=0
-      for _,file in ipairs(possible_files) do
-        for tempo=clock.get_tempo()-1,clock.get_tempo()+1 do
-          if string.find(file,string.format("bpm%d",tempo)) then
-            table.insert(dat.files_to_load,file)
-            found=found+1
-            if found==16 then
-              break
-            end
+      for i,file in ipairs(possible_files) do
+        table.insert(dat.tt,turntable_:new{id=(row-1)*16+i,path=file})
+        for j=1,80 do
+          clock.sleep(0.05)
+          if dat.tt[id].ready then
+            break
           end
         end
-        if found==16 then
+        if i==16 then 
           break
         end
       end
     end
-
-    for id,file in ipairs(dat.files_to_load) do
-      table.insert(dat.tt,turntable_:new{id=id,path=file})
-      for j=1,80 do
-        clock.sleep(0.05)
-        if dat.tt[id].ready then
-          break
-        end
-      end
-      -- if id==24 then
-      --   break
-      -- end
-    end
-
   end)
 end
+
 function init()
   -- parameters
-  for id=1,112 do
+  for id=1,128 do
     params:add_group("table "..id,2)
     params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
       engine.set(id,"amp",v==1 and 1.0 or 0,params:get(id.."fadetime"))
