@@ -78,10 +78,16 @@ function init()
 
   -- parameters for each sample
   local debounce_fn={}
+  local params_menu={
+    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=10,default=20000,unit="Hz"},
+    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0},
+    {id="tsSlow",name="timestretch slow",min=10,max=20000,exp=true,div=10,default=20000,unit="x"},
+    {id="tsSeconds",name="timestretch window",min=0.01,max=20,exp=false,div=clock.get_beat_sec()/16,default=clock.get_beat_sec(),unit="s"},
+  }
   for _,v in ipairs(dat.files_to_load) do
     local pathname,filename,ext=string.match(v.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
     local id=v.id
-    params:add_group(filename:sub(1,18),3)
+    params:add_group(filename:sub(1,18),3+#params_menu)
     params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
       engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
     end}
@@ -97,6 +103,18 @@ function init()
         end,
       }
     end)
+    for _,pram in ipairs(param_menu) do
+      params:add_control(id..pram.id,pram.name,controlspec.new(pram.min,pram.max,
+      pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)))
+      params:set_action(id..pram.id,,function(v)
+        debounce_fn[id..pram.id]={
+          3,function()
+            engine.set(id,pram.id,params:get(id..pram.id),0.2)
+          end,
+        }
+      end)
+
+    end
     params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
   end
 
