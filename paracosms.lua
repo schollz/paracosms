@@ -44,7 +44,7 @@ function initialize()
   dat.ti=1
   dat.tt={}
   dat.percent_loaded=0
-
+  params:set("clock_tempo",120)
   math.randomseed(dat.seed)
   dat.files_to_load={}
   clock.run(function()

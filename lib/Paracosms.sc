@@ -26,12 +26,19 @@ Paracosms {
 				lpf=20000,lpfLag=0.2,
 				offset=0,offsetLag=0.0,
 				id=0,dataout=0,fadeInTime=0.1,bufnum,busPhase,out;
-				var snd;
+				var snd,pos,seconds;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
-				var seconds=(In.ar(busPhase)+offset).mod(duration);
+				var secondsStart=DC.ar((In.ar(busPhase)+offset).mod(duration));
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
-				snd=BufRd.ar(ch,bufnum,seconds/duration*frames,interpolation:4);
+				pos=Phasor.ar(Impulse.kr(0),
+					rate:1.0*BufRateScale.ir(bufnum),
+					start:0.0,
+					end:frames,
+					resetPos:secondsStart/duration*frames,
+				);
+				seconds=pos/frames*duration;
+				snd=BufRd.ar(ch,bufnum,pos,interpolation:4);
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,seconds);
@@ -65,7 +72,7 @@ Paracosms {
 		arg id,fnameOriginal,bpm_source,bpm_target;
 		var fname=PathName.tmp +/+ ("paracosms"++PathName.new(fnameOriginal).fileName);
 		var cmd="sox"+fnameOriginal+fname+"tempo -m "+(bpm_target/bpm_source);
-		if (fnameOriginal.contains("drums-"),{
+		if (fnameOriginal.toLower.contains("drum"),{
 			cmd="sox"+fnameOriginal+fname+"speed "+(bpm_target/bpm_source)+"rate -v 48k";
 		});
 		if (bpm_source==bpm_target,{
