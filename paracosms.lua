@@ -1,4 +1,9 @@
 -- paracosms
+--
+-- K2/K3 - switch between playing samples
+-- E1 switch sample
+-- E2 ?
+-- E3 volume
 
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
@@ -8,14 +13,7 @@ engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 
 dat.rows={
-  "/home/we/dust/audio/seamlessloops/ambientdrums",
-  "/home/we/dust/audio/seamlessloops/dnbdrums",
-  "/home/we/dust/audio/seamlessloops/glitchdrums",
-  "/home/we/dust/audio/seamlessloops/bass",
-  "/home/we/dust/audio/seamlessloops/pads",
-  "/home/we/dust/audio/seamlessloops/chords",
-  "/home/we/dust/audio/seamlessloops/arp",
-  "/home/we/dust/audio/seamlessloops/vocals",
+  "/home/we/dust/audio/seamlessloops/test",
 }
 
 function find_files(folder)
@@ -45,22 +43,18 @@ function initialize()
   dat.ti=1
   dat.tt={}
   dat.percent_loaded=0
-  params:set("clock_tempo",120)
   math.randomseed(dat.seed)
   clock.run(function()
     for row,folder in ipairs(dat.rows) do
       local possible_files=find_files(folder)
       shuffle(possible_files)
-      for i,file in ipairs(possible_files) do
-        table.insert(dat.tt,turntable_:new{id=(row-1)*16+i,path=file})
+      for col,file in ipairs(possible_files) do
+        table.insert(dat.tt,turntable_:new{id=#dat.tt+1,path=file,row=row,col=col})
         for j=1,80 do
           clock.sleep(0.05)
-          if dat.tt[id].ready then
+          if dat.tt[#dat.tt].ready then
             break
           end
-        end
-        if i==16 then 
-          break
         end
       end
     end
@@ -68,12 +62,41 @@ function initialize()
 end
 
 function init()
-  -- parameters
-  for id=1,128 do
-    params:add_group("table "..id,2)
+  -- make sure cache directory exists
+  os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
+
+  -- collect which files
+  for row,folder in ipairs(dat.rows) do
+    local possible_files=find_files(folder)
+    for col,fname in ipairs(possible_files) do
+      table.insert(dat.files_to_load,{fname=fname,id=(row-1)*16+col})
+      if i==16 then
+        break
+      end
+    end
+  end
+
+  -- parameters for each sample
+  local debounce_fn={}
+  for _,v in ipairs(dat.files_to_load) do
+    local pathname,filename,ext=string.match(v.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+    local id=v.id
+    params:add_group(filename:sub(1,18),3)
     params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
-      engine.set(id,"amp",v==1 and 1.0 or 0,params:get(id.."fadetime"))
+      engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
     end}
+    params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
+    params:set_action(id.."amp",function(v)
+      debounce_fn[id]={
+        3,function()
+          if params:get(id.."play")==1 and params:get(id.."amp")==0 then
+            params:set(id.."play",0)
+          elseif params:get(id.."play")==1 then
+            engine.set(id,"amp",params:get(id.."amp"),params:get(id.."fadetime"))
+          end
+        end,
+      }
+    end)
     params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
   end
 
@@ -115,6 +138,15 @@ function init()
       end
       clock.sleep(1/10)
       redraw()
+      for k,v in pairs(debounce_fn) do
+        if v[1]>0 then
+          debounce_fn[k][1]=debounce_fn[k][1]-1
+          if debounce_fn[k][1]==0 then
+            debounce_fn[k][2]()
+            debounce_fn[k]=nil
+          end
+        end
+      end
     end
   end)
 
@@ -134,12 +166,22 @@ function engine_reset()
   engine.reset()
 end
 
+local hold_beats=0
 function key(k,z)
-
+  if k==3 and z==1 then
+    hold_beats=clock.get_beats()
+  elseif k==3 and z==0 then
+    params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
+    params:set(dat.ti.."play",1-params:get(dat.ti.."play"))
+  end
 end
 
 function enc(k,d)
-
+  if k==1 then
+    dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+  elseif k==3 then
+    params:delta(dat.ti.."amp",d)
+  end
 end
 
 local show_message_text=""
@@ -168,7 +210,7 @@ function redraw()
   if dat.tt[dat.ti]==nil then
     do return end
   end
-  dat.tt[dat.ti]:redraw()
+  local topleft=dat.tt[dat.ti]:redraw()
   if show_message_text~="" then
     screen.blend_mode(0)
     local x=64
@@ -193,12 +235,19 @@ function redraw()
     end
   end
 
+  -- top left corner
+  screen.move(1,7)
   if dat.percent_loaded<99.0 then
-    screen.move(1,7)
     screen.text(string.format("loaded %2.1f%%",dat.percent_loaded))
+  elseif topleft~=nil then
+    screen.text(topleft:sub(1,24))
   end
 
   screen.move(128,7)
   screen.text_right(dat.ti)
+
+  screen.move(128,64)
+  screen.text_right(math.floor(params:get(dat.ti.."amp")*100))
+
   screen.update()
 end
