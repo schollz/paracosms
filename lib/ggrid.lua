@@ -67,6 +67,9 @@ function GGrid:key_press(row,col,on)
   end
   if hold_time>0.25 then
     params:set(id.."fadetime",hold_time*3)
+    if params:get(id.."amp")==0 and params:get(id.."play")==0 then
+      params:set(id.."amp",1,true)
+    end
     params:set(id.."play",1-params:get(id.."play"))
   end
 end

@@ -22,11 +22,11 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,0);
+        paracosms=Paracosms.new(context.server,0,"/home/we/dust/data/paracosms/cache");
         context.server.sync;
 
-        this.addCommand("add","isff", { arg msg;
-            paracosms.add(msg[1],msg[2].asString,msg[3],msg[4]);
+        this.addCommand("add","is", { arg msg;
+            paracosms.add(msg[1],msg[2].asString);
         });
         this.addCommand("watch","i", { arg msg;
             paracosms.watch(msg[1]);
