@@ -16,6 +16,28 @@ dat.rows={
   "/home/we/dust/audio/seamlessloops/test",
 }
 
+local shift=false
+local enc_page=1
+local enc_func={}
+-- page 1
+table.insert(encoder,{
+  function(d) delta_ti() end,
+  function(d) params:delta(ti.."lpf",d) end,
+  function(d) params:delta(ti.."amp",d) end,
+  function(d) delta_page() end,
+  function(d) end,
+  function(d) end,
+})
+-- page 2
+table.insert(encoder,{
+  function(d) delta_ti() end,
+  function(d) params:delta(ti.."tsSlow",d) end,
+  function(d) params:delta(ti.."tsSeconds",d) end,
+  function(d) delta_page() end,
+  function(d) end,
+  function(d) params:delta(ti.."ts",d) end,
+})
+
 function find_files(folder)
   local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
   return lines_from("/tmp/files")
@@ -184,9 +206,21 @@ function engine_reset()
   engine.reset()
 end
 
+function delta_page(d)
+  enc_page=util.wrap(enc_page,1,#enc_func)
+end
+
+function delta_ti(d)
+  dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+end
+
+
 local hold_beats=0
+
 function key(k,z)
-  if k==3 and z==1 then
+  if k==1 then
+    shift=z==1
+  elseif k==3 and z==1 then
     hold_beats=clock.get_beats()
   elseif k==3 and z==0 then
     params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
@@ -195,11 +229,7 @@ function key(k,z)
 end
 
 function enc(k,d)
-  if k==1 then
-    dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
-  elseif k==3 then
-    params:delta(dat.ti.."amp",d)
-  end
+  enc_func[enc_page][k+(shift and 3 or 0)](d)
 end
 
 local show_message_text=""
