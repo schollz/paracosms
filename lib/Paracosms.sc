@@ -50,6 +50,7 @@ Paracosms {
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
+				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 
 				pos=Phasor.ar(
 					trig:t_sync+t_manu,
@@ -149,15 +150,22 @@ Paracosms {
 		arg id,key,val,valLag;
 		if (bufs.at(id).notNil,{
 			var makeSynth=false;
+			var isRunning=false;
 			if (syns.at(id).notNil,{
 				if (syns.at(id).isRunning,{},{
 					makeSynth=true;
+					isRunning=true;
 				});
 			},{
 				makeSynth=true;
 			});
+			// never make a synth if its not an amp
+			if (key!="amp",{
+				makeSynth=false;
+			});
 			if (makeSynth,{
 				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag];
+				// put all the current parameters into it
 				if (params.at(id).notNil,{
 					params.at(id).keysValuesDo({ arg pk,pv; 
 						pars=pars++[pk,pv];
@@ -170,10 +178,11 @@ Paracosms {
 					"defPlay"++bufs.at(id).numChannels,pars,
 				).onFree({["freed"+id].postln}));
 				NodeWatcher.register(syns.at(id));
-				// TODO: put all the current parameters into it
 			},{
 				params.at(id).put(key,val);
-				syns.at(id).set(key,val,key++"Lag",valLag);
+				if (isRunning,{
+					syns.at(id).set(key,val,key++"Lag",valLag);
+				});
 			});
 		});
 	}
