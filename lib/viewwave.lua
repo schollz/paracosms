@@ -13,6 +13,10 @@ function ViewWave:cursor(data)
   self.show=1
 end
 
+function ViewWave:is_playing()
+  return self.show~=nil and self.show>0
+end
+
 function ViewWave:init()
   -- extract filename
   local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -56,7 +60,7 @@ function ViewWave:redraw(x,y,width,height)
     do return end
   end
   screen.display_png(self.png_file,x,y)
-  if self.show~=nil and self.show>0 then
+  if self:is_playing() then
     self.show=self.show-1
     screen.level(15)
     local cursor=self.show_pos

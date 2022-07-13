@@ -17,26 +17,28 @@ dat.rows={
 }
 
 local shift=false
-local enc_page=1
+local ui_page=1
 local enc_func={}
 -- page 1
-table.insert(encoder,{
-  function(d) delta_ti() end,
+table.insert(enc_func,{
+  function(d) delta_ti(d) end,
   function(d) params:delta(ti.."lpf",d) end,
   function(d) params:delta(ti.."amp",d) end,
-  function(d) delta_page() end,
+  function(d) delta_ti(d,true) end,
   function(d) end,
   function(d) end,
 })
 -- page 2
-table.insert(encoder,{
-  function(d) delta_ti() end,
+table.insert(enc_func,{
+  function(d) delta_ti(d) end,
   function(d) params:delta(ti.."tsSlow",d) end,
   function(d) params:delta(ti.."tsSeconds",d) end,
-  function(d) delta_page() end,
+  function(d) delta_ti(d,true) end,
   function(d) end,
   function(d) params:delta(ti.."ts",d) end,
 })
+
+
 
 function find_files(folder)
   local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
@@ -109,10 +111,14 @@ function init()
   for _,v in ipairs(dat.files_to_load) do
     local pathname,filename,ext=string.match(v.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
     local id=v.id
-    params:add_group(filename:sub(1,18),3+#params_menu)
+    params:add_group(filename:sub(1,18),4+#params_menu)
     params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
       engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
     end}
+    params:add_option(id.."oneshot","mode",{"loop","oneshot"})
+    params:set_action(id.."oneshot",function(v)
+      engine.set(id,"oneshot",v-1,0)
+    end)
     params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
     params:set_action(id.."amp",function(v)
       debounce_fn[id.."amp"]={
@@ -207,11 +213,33 @@ function engine_reset()
 end
 
 function delta_page(d)
-  enc_page=util.wrap(enc_page,1,#enc_func)
+  ui_page=util.wrap(ui_page,1,#enc_func)
 end
 
-function delta_ti(d)
-  dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+function delta_ti(d,is_playing)
+  if is_playing then 
+    local available_ti={}
+    for i, v in ipairs(dat.tt) do 
+      if v:is_playing() then 
+        table.insert(available_ti,i)
+      end
+    end
+    if next(available_ti)==nil then 
+      do return end 
+    end
+    -- find the closest index for dat.ti 
+    local closest={1,10000}
+    for i, ti in ipairs(available_ti) do 
+      if math.abs(ti-dat.ti)<closest[2] then 
+        closest={i,math.abs(ti-dat.ti)}
+      end
+    end
+    local i=closest[1]
+    i=util.wrap(i+d,1,#available_ti)
+    dat.ti=available_ti[i]
+  else
+    dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+  end
 end
 
 
@@ -220,6 +248,10 @@ local hold_beats=0
 function key(k,z)
   if k==1 then
     shift=z==1
+  elseif shift and k==3 then 
+    if z==1 then 
+      delta_page(1)
+    end
   elseif k==3 and z==1 then
     hold_beats=clock.get_beats()
   elseif k==3 and z==0 then
@@ -229,7 +261,7 @@ function key(k,z)
 end
 
 function enc(k,d)
-  enc_func[enc_page][k+(shift and 3 or 0)](d)
+  enc_func[ui_page][k+(shift and 3 or 0)](d)
 end
 
 local show_message_text=""
