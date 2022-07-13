@@ -43,6 +43,10 @@ function Turntable:init()
   engine.add(self.id,self.path)
 end
 
+function Turntable:is_playing() 
+  return (not self.ready) and false or self.vw:is_playing()
+end
+
 function Turntable:redraw()
   if self.ready then
     return self.vw:redraw()
