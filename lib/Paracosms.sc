@@ -35,6 +35,9 @@ Paracosms {
 				offset=0,offsetLag=0.0,
 				t_sync=1,t_syncLag=0.0,
 				t_manu=0,t_manuLag=0.0,
+				oneshot=0,oneshotLag=0.0,
+				sampleStart=0,sampleStartLag=0.0,
+				sampleEnd=1.0,sampleEndLag=0.0,
 				ts=0,tsLag=0.0,
 				tsSeconds=0.25,tsSecondsLag=0.0,
 				tsSlow=1,tsSlowLag=0.0,
@@ -49,6 +52,9 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
+				resetPos=Select.ar(oneshot,[resetPos,0]); // if one-shot then start at the beginning
+				fadeInTime=Select.kr(oneshot,[fadeInTime,0]); // if one-shot then don't fade in
+
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 
@@ -59,6 +65,8 @@ Paracosms {
 					end:frames,
 					resetPos:resetPos,
 				);
+				pos=Wrap.ar(pos,sampleStart*frames,sampleEnd*frames);
+
 				tsWindow=Phasor.ar(
 					trig:t_sync+t_manu,
 					rate:1.0*BufRateScale.ir(bufnum),
@@ -74,6 +82,10 @@ Paracosms {
 				));
 
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
+
+				// one-shot envelope
+				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(sampleEnd-sampleStart)-0.01,0.005]),doneAction:oneshot*2);
+
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
