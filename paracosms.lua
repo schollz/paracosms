@@ -11,32 +11,59 @@ grid_=include("lib/ggrid")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
-
 dat.rows={
   "/home/we/dust/audio/seamlessloops/test",
 }
 
+debounce_fn={}
 local shift=false
 local ui_page=1
 local enc_func={}
 -- page 1
 table.insert(enc_func,{
-  function(d) delta_ti(d) end,
-  function(d) params:delta(ti.."lpf",d) end,
-  function(d) params:delta(ti.."amp",d) end,
-  function(d) delta_ti(d,true) end,
-  function(d) end,
-  function(d) end,
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."lpf",d) end,function() return params:string(dat.ti.."lpf") end},
+  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) end},
+  {function(d) end},
 })
 -- page 2
 table.insert(enc_func,{
-  function(d) delta_ti(d) end,
-  function(d) params:delta(ti.."tsSlow",d) end,
-  function(d) params:delta(ti.."tsSeconds",d) end,
-  function(d) delta_ti(d,true) end,
-  function(d) end,
-  function(d) params:delta(ti.."ts",d) end,
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."ts",d) end,function() return "timestretch "..(params:get(dat.ti.."ts")>0 and "on" or "off") end},
+  {function(d) params:delta(dat.ti.."tsSlow",d) end,function() return "slow "..params:string(dat.ti.."tsSlow") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) end},
+  {function(d) params:delta(dat.ti.."tsSeconds",d) end,function() return "window "..params:string(dat.ti.."tsSeconds") end},
 })
+-- page 1
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return params:string(dat.ti.."sampleStart") end},
+  {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return params:string(dat.ti.."sampleEnd") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
+  {function(d) end},
+})
+-- -- page 2
+-- table.insert(enc_func,{
+--   function(d) delta_ti(d) end,
+--   function(d) params:delta(dat.ti.."tsSlow",d) end,
+--   function(d) params:delta(dat.ti.."tsSeconds",d) end,
+--   function(d) delta_ti(d,true) end,
+--   function(d) end,
+--   function(d) params:delta(dat.ti.."ts",d) end,
+-- })
+-- -- page 3
+-- table.insert(enc_func,{
+--   function(d) delta_ti(d) end,
+--   function(d) params:delta(dat.ti.."sampleStart",d) end,
+--   function(d) params:delta(dat.ti.."sampleEnd",d) end,
+--   function(d) delta_ti(d,true) end,
+--   function(d) end,
+--   function(d) end,
+-- })
 
 function find_files(folder)
   local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
@@ -80,6 +107,8 @@ function initialize()
         end
       end
     end
+
+    params:bang()
   end)
 end
 
@@ -96,54 +125,6 @@ function init()
         break
       end
     end
-  end
-
-  -- parameters for each sample
-  local debounce_fn={}
-  local params_menu={
-    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=10,default=20000,unit="Hz"},
-    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0},
-    {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,unit="x"},
-    {id="tsSeconds",name="timestretch window",min=0.01,max=20,exp=false,div=clock.get_beat_sec()/16,default=clock.get_beat_sec(),unit="s"},
-    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
-    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
-  }
-  for _,v in ipairs(dat.files_to_load) do
-    local pathname,filename,ext=string.match(v.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-    local id=v.id
-    params:add_group(filename:sub(1,18),4+#params_menu)
-    params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
-      engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
-    end}
-    params:add_option(id.."oneshot","mode",{"loop","oneshot"})
-    params:set_action(id.."oneshot",function(v)
-      engine.set(id,"oneshot",v-1,0)
-    end)
-    params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
-    params:set_action(id.."amp",function(v)
-      debounce_fn[id.."amp"]={
-        3,function()
-          if params:get(id.."play")==1 and params:get(id.."amp")==0 then
-            params:set(id.."play",0)
-          elseif params:get(id.."play")==1 then
-            engine.set(id,"amp",params:get(id.."amp"),params:get(id.."fadetime"))
-          end
-        end,
-      }
-    end)
-    for _,pram in ipairs(params_menu) do
-      params:add_control(id..pram.id,pram.name,controlspec.new(pram.min,pram.max,
-      pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)))
-      params:set_action(id..pram.id,function(v)
-        debounce_fn[id..pram.id]={
-          3,function()
-            engine.set(id,pram.id,params:get(id..pram.id),0.2)
-          end,
-        }
-      end)
-
-    end
-    params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
   end
 
   -- grid
@@ -213,7 +194,7 @@ function engine_reset()
 end
 
 function delta_page(d)
-  ui_page=util.wrap(ui_page,1,#enc_func)
+  ui_page=util.wrap(ui_page+d,1,#enc_func)
 end
 
 function delta_ti(d,is_playing)
@@ -247,10 +228,8 @@ local hold_beats=0
 function key(k,z)
   if k==1 then
     shift=z==1
-  elseif shift and k==3 then
-    if z==1 then
-      delta_page(1)
-    end
+  elseif k==2 and z==1 then
+    delta_page(1)
   elseif k==3 and z==1 then
     hold_beats=clock.get_beats()
   elseif k==3 and z==0 then
@@ -260,7 +239,7 @@ function key(k,z)
 end
 
 function enc(k,d)
-  enc_func[ui_page][k+(shift and 3 or 0)](d)
+  enc_func[ui_page][k+(shift and 3 or 0)][1](d)
 end
 
 local show_message_text=""
@@ -325,8 +304,16 @@ function redraw()
   screen.move(128,7)
   screen.text_right(dat.ti)
 
+  screen.level(10)
   screen.move(128,64)
-  screen.text_right(math.floor(params:get(dat.ti.."amp")*100))
+  if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
+    screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
+  end
+
+  screen.move(0,64)
+  if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
+    screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
+  end
 
   screen.update()
 end
