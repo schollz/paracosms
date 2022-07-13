@@ -31,6 +31,12 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("watch","i", { arg msg;
             paracosms.watch(msg[1]);
         });
+        this.addCommand("play","i", { arg msg;
+            paracosms.play(msg[1]);
+        });
+        this.addCommand("stop","i", { arg msg;
+            paracosms.stop(msg[1]);
+        });
         this.addCommand("set","isff", { arg msg;
             paracosms.set(msg[1],msg[2],msg[3],msg[4]);
         });

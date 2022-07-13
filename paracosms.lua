@@ -231,10 +231,17 @@ function key(k,z)
   elseif k==2 and z==1 then
     delta_page(1)
   elseif k==3 and z==1 then
-    hold_beats=clock.get_beats()
+    if params:get(dat.ti.."oneshot")==2 then
+      params:set(dat.ti.."fadetime",0.001)
+      params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
+    else
+      hold_beats=clock.get_beats()
+    end
   elseif k==3 and z==0 then
-    params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
-    params:set(dat.ti.."play",1-params:get(dat.ti.."play"))
+    if params:get(dat.ti.."oneshot")==1 then
+      params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
+      params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
+    end
   end
 end
 
@@ -292,8 +299,8 @@ function redraw()
       screen.blend_mode(0)
     end
   end
-
   -- top left corner
+  screen.level(7)
   screen.move(1,7)
   if dat.percent_loaded<99.0 then
     screen.text(string.format("loaded %2.1f%%",dat.percent_loaded))
@@ -304,7 +311,7 @@ function redraw()
   screen.move(128,7)
   screen.text_right(dat.ti)
 
-  screen.level(10)
+  screen.level(5)
   screen.move(128,64)
   if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
     screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
