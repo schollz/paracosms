@@ -38,8 +38,6 @@ table.insert(enc_func,{
   function(d) params:delta(ti.."ts",d) end,
 })
 
-
-
 function find_files(folder)
   local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
   return lines_from("/tmp/files")
@@ -105,8 +103,10 @@ function init()
   local params_menu={
     {id="lpf",name="lpf",min=10,max=20000,exp=true,div=10,default=20000,unit="Hz"},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0},
-    {id="tsSlow",name="timestretch slow",min=10,max=20000,exp=true,div=10,default=20000,unit="x"},
+    {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,unit="x"},
     {id="tsSeconds",name="timestretch window",min=0.01,max=20,exp=false,div=clock.get_beat_sec()/16,default=clock.get_beat_sec(),unit="s"},
+    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
+    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
   }
   for _,v in ipairs(dat.files_to_load) do
     local pathname,filename,ext=string.match(v.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -131,10 +131,10 @@ function init()
         end,
       }
     end)
-    for _,pram in ipairs(param_menu) do
+    for _,pram in ipairs(params_menu) do
       params:add_control(id..pram.id,pram.name,controlspec.new(pram.min,pram.max,
       pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)))
-      params:set_action(id..pram.id,,function(v)
+      params:set_action(id..pram.id,function(v)
         debounce_fn[id..pram.id]={
           3,function()
             engine.set(id,pram.id,params:get(id..pram.id),0.2)
@@ -217,20 +217,20 @@ function delta_page(d)
 end
 
 function delta_ti(d,is_playing)
-  if is_playing then 
+  if is_playing then
     local available_ti={}
-    for i, v in ipairs(dat.tt) do 
-      if v:is_playing() then 
+    for i,v in ipairs(dat.tt) do
+      if v:is_playing() then
         table.insert(available_ti,i)
       end
     end
-    if next(available_ti)==nil then 
-      do return end 
+    if next(available_ti)==nil then
+      do return end
     end
-    -- find the closest index for dat.ti 
+    -- find the closest index for dat.ti
     local closest={1,10000}
-    for i, ti in ipairs(available_ti) do 
-      if math.abs(ti-dat.ti)<closest[2] then 
+    for i,ti in ipairs(available_ti) do
+      if math.abs(ti-dat.ti)<closest[2] then
         closest={i,math.abs(ti-dat.ti)}
       end
     end
@@ -242,14 +242,13 @@ function delta_ti(d,is_playing)
   end
 end
 
-
 local hold_beats=0
 
 function key(k,z)
   if k==1 then
     shift=z==1
-  elseif shift and k==3 then 
-    if z==1 then 
+  elseif shift and k==3 then
+    if z==1 then
       delta_page(1)
     end
   elseif k==3 and z==1 then
