@@ -87,31 +87,6 @@ function shuffle(tbl)
   end
 end
 
-function initialize()
-  dat.seed=18
-  dat.ti=1
-  dat.tt={}
-  dat.percent_loaded=0
-  math.randomseed(dat.seed)
-  clock.run(function()
-    for row,folder in ipairs(dat.rows) do
-      local possible_files=find_files(folder)
-      shuffle(possible_files)
-      for col,file in ipairs(possible_files) do
-        table.insert(dat.tt,turntable_:new{id=#dat.tt+1,path=file,row=row,col=col})
-        for j=1,80 do
-          clock.sleep(0.05)
-          if dat.tt[#dat.tt].ready then
-            break
-          end
-        end
-      end
-    end
-
-    params:bang()
-  end)
-end
-
 function init()
   -- make sure cache directory exists
   os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
@@ -177,7 +152,35 @@ function init()
     end
   end)
 
-  initialize()
+  -- initialize the dat turntables
+  dat.seed=18
+  dat.ti=1
+  dat.tt={}
+  dat.percent_loaded=0
+  math.randomseed(dat.seed)
+  for i=1,112 do
+    table.insert(dat.tt,turntable_:new{id=i})
+  end
+
+  -- load in hardcoded files
+  clock.run(function()
+    for row,folder in ipairs(dat.rows) do
+      local possible_files=find_files(folder)
+      shuffle(possible_files)
+      for col,file in ipairs(possible_files) do
+        local id=(row-1)*16+col
+        params:set(id.."file",file)
+        for j=1,80 do
+          clock.sleep(0.05)
+          if dat.tt[id].ready then
+            break
+          end
+        end
+      end
+    end
+
+    params:bang()
+  end)
 
 end
 
@@ -219,7 +222,27 @@ function delta_ti(d,is_playing)
     i=util.wrap(i+d,1,#available_ti)
     dat.ti=available_ti[i]
   else
-    dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+    -- find only the ones that are ready
+    local available_ti={}
+    for i,v in ipairs(dat.tt) do
+      if v.ready then
+        table.insert(available_ti,i)
+      end
+    end
+    if next(available_ti)==nil then
+      do return end
+    end
+    -- find the closest index for dat.ti
+    local closest={1,10000}
+    for i,ti in ipairs(available_ti) do
+      if math.abs(ti-dat.ti)<closest[2] then
+        closest={i,math.abs(ti-dat.ti)}
+      end
+    end
+    local i=closest[1]
+    i=util.wrap(i+d,1,#available_ti)
+    dat.ti=available_ti[i]
+    -- dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
   end
 end
 
