@@ -52,7 +52,7 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
-				resetPos=Select.ar(oneshot,[resetPos,0]); // if one-shot then start at the beginning
+				//resetPos=Select.ar(K2A.ar(oneshot),[resetPos,0]); // if one-shot then start at the beginning
 				fadeInTime=Select.kr(oneshot,[fadeInTime,0]); // if one-shot then don't fade in
 
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
@@ -84,7 +84,7 @@ Paracosms {
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 
 				// one-shot envelope
-				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(sampleEnd-sampleStart)-0.01,0.005]),doneAction:oneshot*2);
+				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart))-0.01,0.005]),doneAction:oneshot*2);
 
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
@@ -153,6 +153,7 @@ Paracosms {
 		});
 		Buffer.read(server,fname,action:{arg buf;
 			bufs.put(id,buf);
+			params.put(id,Dictionary.new());
 			("loaded"+PathName(fname).fileName).postln;
 			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
 		});
@@ -163,35 +164,43 @@ Paracosms {
 		if (bufs.at(id).notNil,{
 			var makeSynth=false;
 			var isRunning=false;
+			var doUpdateParams=true;
 			if (syns.at(id).notNil,{
-				if (syns.at(id).isRunning,{},{
-					makeSynth=true;
+				if (syns.at(id).isRunning,{
 					isRunning=true;
+				},{
+					makeSynth=true;	
 				});
 			},{
 				makeSynth=true;
 			});
+			[key,makeSynth].postln;
 			// never make a synth if its not an amp
-			if (key!="amp",{
+			if (key.asString!="amp",{
 				makeSynth=false;
+			},{
+				if (val==0,{
+					// don't update the params if its 0
+					doUpdateParams=false;
+				});
 			});
+			[key,makeSynth,isRunning].postln;
 			if (makeSynth,{
 				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag];
 				// put all the current parameters into it
-				if (params.at(id).notNil,{
-					params.at(id).keysValuesDo({ arg pk,pv; 
-						pars=pars++[pk,pv];
-					});
-				},{
-					params.put(id,Dictionary.new());
-				})
+				params.at(id).keysValuesDo({ arg pk,pv; 
+					pars=pars++[pk,pv];
+				});
+				pars.postln;
 				"making synth".postln;
 				syns.put(id,Synth.after(syns.at("phasor"),
 					"defPlay"++bufs.at(id).numChannels,pars,
 				).onFree({["freed"+id].postln}));
 				NodeWatcher.register(syns.at(id));
 			},{
-				params.at(id).put(key,val);
+				if (doUpdateParams,{
+					params.at(id).put(key,val);
+				});
 				if (isRunning,{
 					syns.at(id).set(key,val,key++"Lag",valLag);
 				});
