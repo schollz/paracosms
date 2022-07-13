@@ -55,7 +55,7 @@ function ViewWave:redraw(x,y,width,height)
     do return end
   end
   x=x or 0
-  y=y or 4
+  y=y or 2
   if not util.file_exists(self.png_file) then
     do return end
   end
@@ -67,11 +67,27 @@ function ViewWave:redraw(x,y,width,height)
     local pos=util.linlin(0,self.duration,1,128,cursor)
     screen.aa(1)
     screen.level(15)
-    screen.move(pos,64-self.height+y+2)
-    screen.line(pos,self.height-4)
+    screen.move(pos,10)
+    screen.line(pos,60)
     screen.stroke()
     screen.aa(0)
   end
+  -- draw the start/stop positions
+  for _,param in ipairs({"sampleStart","sampleEnd"}) do
+    if params:get(self.id..param)~=0 and params:get(self.id..param)~=1 then
+      local pos=util.linlin(0,1,1,128,params:get(self.id..param))
+      screen.aa(1)
+      screen.blend_mode(2)
+      screen.level(3)
+      screen.line_cap("square")
+      screen.move(pos,10)
+      screen.line(pos,60)
+      screen.stroke()
+      screen.blend_mode(0)
+      screen.aa(0)
+    end
+  end
+
   return self.filename
 end
 

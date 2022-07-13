@@ -52,7 +52,7 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
-				//resetPos=Select.ar(K2A.ar(oneshot),[resetPos,0]); // if one-shot then start at the beginning
+				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
 				fadeInTime=Select.kr(oneshot,[fadeInTime,0]); // if one-shot then don't fade in
 
 				amp=VarLag.kr(amp,ampLag,warp:\sine);
