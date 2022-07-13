@@ -18,26 +18,38 @@ function Turntable:oscdata(datatype,data)
 end
 
 function Turntable:init()
-  local id=self.id
-  local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+  local file_exists=function(name)
+    local f=io.open(name,"r")
+    if f~=nil then io.close(f) return true else return false end
+  end
+
+  -- initialize cache
+  self.cache=self.cache or _path.data.."paracosms/cache/"
+  -- not ready until file is loaded
+  self.ready=false
 
   -- setup params
+  local id=self.id
   local params_menu={
-    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=10,default=20000,unit="Hz"},
+    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz"},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,unit="x"},
-    {id="tsSeconds",name="timestretch window",min=0.01,max=20,exp=false,div=clock.get_beat_sec()/16,default=clock.get_beat_sec(),unit="s"},
+    {id="tsSeconds",name="timestretch window",min=clock.get_beat_sec()/64,max=20,exp=false,div=clock.get_beat_sec()/64,default=clock.get_beat_sec()/8,unit="s"},
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
   }
-  params:add_group(filename:sub(1,18),4+#params_menu)
+  params:add_group("sample "..self.id,5+#params_menu)
+  params:add_file(id.."file","file",_path.audio)
+  params:set_action(id.."file",function(x)
+    if file_exists(x) and string.sub(x,-1)~="/" then
+      print("loading",x)
+      self:load_file(x)
+    end
+  end)
   params:add_option(id.."play","play",{"stopped","playing"},1)
   params:set_action(id.."play",function(v)
     engine[v==1 and "stop" or "play"](id)
   end)
-  -- params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
-  --   engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
-  -- end}
   params:add_option(id.."oneshot","mode",{"loop","oneshot"})
   params:set_action(id.."oneshot",function(v)
     engine.set(id,"oneshot",v-1,0)
@@ -71,9 +83,11 @@ function Turntable:init()
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
 
-  -- initialize with path
-  self.cache=self.cache or _path.data.."paracosms/cache/"
-  self.ready=false
+end
+
+function Turntable:load_file(path)
+  self.path=path
+  local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
   local bpm=clock.get_tempo()
   for word in string.gmatch(self.path,'([^_]+)') do
     if string.find(word,"bpm") then
@@ -98,7 +112,10 @@ function Turntable:init()
 end
 
 function Turntable:is_playing()
-  return (not self.ready) and false or self.vw:is_playing()
+  if not self.ready or self.vw==nil then
+    do return false end
+  end
+  return self.vw:is_playing()
 end
 
 function Turntable:redraw()

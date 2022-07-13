@@ -45,9 +45,9 @@ Paracosms {
 				var snd,pos,seconds,tsWindow;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
-				var syncTrig=Trig.ar(t_sync);
+				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts)));
 				var manuTrig=Trig.ar(t_manu);
-				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,t_sync);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
 				//engine.set(4,"t_manu",0.000001,0)
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
@@ -59,16 +59,15 @@ Paracosms {
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 
 				pos=Phasor.ar(
-					trig:t_sync+t_manu,
+					trig:syncTrig+t_manu,
 					rate:1.0*BufRateScale.ir(bufnum)/tsSlow,
-					start:0.0,
-					end:frames,
-					resetPos:resetPos,
+					start:sampleStart*frames,
+					end:sampleEnd*frames,
+					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
-				pos=Wrap.ar(pos,sampleStart*frames,sampleEnd*frames);
 
 				tsWindow=Phasor.ar(
-					trig:t_sync+t_manu,
+					trig:manuTrig+t_manu,
 					rate:1.0*BufRateScale.ir(bufnum),
 					start:pos,
 					end:pos+(tsSeconds/duration*frames),
