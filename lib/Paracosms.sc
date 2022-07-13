@@ -159,51 +159,48 @@ Paracosms {
 		});
 	}
 
+	stop {
+		arg id;
+		if (syns.at(id).notNil,{
+			if (syns.at(id).isRunning,{
+				syns.at(id).set("amp",0);
+			});
+		});
+	}
+
+	play {
+		arg id;
+		stop(id);
+		if (params.at(id).notNil,{
+			var ampLag=0;
+			var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+			if (params.at(id).at("ampLag").notNil,{
+				ampLag=params.at(id).at("ampLag");
+			});
+			pars=pars++[\fadeInTime,ampLag];
+			params.at(id).keysValuesDo({ arg pk,pv; 
+				pars=pars++[pk,pv];
+			});
+			("making synth"+id).postln;
+			syns.put(id,Synth.after(syns.at("phasor"),
+				"defPlay"++bufs.at(id).numChannels,pars,
+			).onFree({["freed"+id].postln}));
+			NodeWatcher.register(syns.at(id));
+		});
+	}
+
 	set {
 		arg id,key,val,valLag;
 		if (bufs.at(id).notNil,{
-			var makeSynth=false;
 			var isRunning=false;
-			var doUpdateParams=true;
 			if (syns.at(id).notNil,{
 				if (syns.at(id).isRunning,{
 					isRunning=true;
-				},{
-					makeSynth=true;	
-				});
-			},{
-				makeSynth=true;
-			});
-			[key,makeSynth].postln;
-			// never make a synth if its not an amp
-			if (key.asString!="amp",{
-				makeSynth=false;
-			},{
-				if (val==0,{
-					// don't update the params if its 0
-					doUpdateParams=false;
 				});
 			});
-			[key,makeSynth,isRunning].postln;
-			if (makeSynth,{
-				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\fadeInTime,valLag,key,val,key++"Lag",valLag];
-				// put all the current parameters into it
-				params.at(id).keysValuesDo({ arg pk,pv; 
-					pars=pars++[pk,pv];
-				});
-				pars.postln;
-				"making synth".postln;
-				syns.put(id,Synth.after(syns.at("phasor"),
-					"defPlay"++bufs.at(id).numChannels,pars,
-				).onFree({["freed"+id].postln}));
-				NodeWatcher.register(syns.at(id));
-			},{
-				if (doUpdateParams,{
-					params.at(id).put(key,val);
-				});
-				if (isRunning,{
-					syns.at(id).set(key,val,key++"Lag",valLag);
-				});
+			params.at(id).put(key,val);
+			if (isRunning,{
+				syns.at(id).set(key,val,key++"Lag",valLag);
 			});
 		});
 	}

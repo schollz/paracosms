@@ -33,7 +33,7 @@ function Turntable:init()
   params:add_group(filename:sub(1,18),4+#params_menu)
   params:add_option(id.."play","play",{"stopped","playing"},1)
   params:set_action(id.."play",function(v)
-    engine.set(id,"amp",v==2 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
+    engine[v==1 and "stop" or "play"](id)
   end)
   -- params:add{type='binary',name='play',id=id..'play',behavior='toggle',action=function(v)
   --   engine.set(id,"amp",v==1 and params:get(id.."amp") or 0,params:get(id.."fadetime"))
@@ -67,6 +67,9 @@ function Turntable:init()
 
   end
   params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
+  params:set_action(id.."fadetime",function(v)
+    engine.set(id,"amp",params:get(id.."amp"),v)
+  end)
 
   -- initialize with path
   self.cache=self.cache or _path.data.."paracosms/cache/"
