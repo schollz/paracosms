@@ -38,7 +38,7 @@ function Turntable:init()
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
   }
-  params:add_group("sample "..self.id,5+#params_menu)
+  params:add_group("sample "..self.id,9+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -82,6 +82,9 @@ function Turntable:init()
   params:set_action(id.."fadetime",function(v)
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
+  params:add_option(id.."type","type",{"melodic","drums"},1)
+  params_add_number(id.."tune","tune",-24,24,0,"semitones")
+  params_add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo(),0,"semitones")
 
 end
 
@@ -109,6 +112,9 @@ function Turntable:load_file(path)
     self.path=newpath
   end
   engine.add(self.id,self.path)
+  if string.find(string.lower(self.path),"drum") then
+    params:set(self.id.."type",2)
+  end
 end
 
 function Turntable:is_playing()

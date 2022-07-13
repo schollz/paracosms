@@ -48,7 +48,6 @@ Paracosms {
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts)));
 				var manuTrig=Trig.ar(t_manu);
 				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
-				//engine.set(4,"t_manu",0.000001,0)
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
@@ -144,13 +143,15 @@ Paracosms {
 
 	add {
 		arg id,fname;
-		if (bufs.at(id).notNil,{
-			bufs.at(id).free;
-		});
-		if (syns.at(id).notNil,{
-			syns.at(id).free;
-		});
 		Buffer.read(server,fname,action:{arg buf;
+			if (syns.at(id).notNil,{
+				if (syns.at(id).isRunning,{
+					syns.at(id).set(\bufnum,buf.bufnum);
+				});
+			});
+			if (bufs.at(id).notNil,{
+				bufs.at(id).free;
+			});
 			bufs.put(id,buf);
 			params.put(id,Dictionary.new());
 			("loaded"+PathName(fname).fileName).postln;
