@@ -11,6 +11,14 @@
 
 ## Documentation
 
+### Todo
+
+-  add options in for semitone change
+-  add options in for speed change
+-  add option to declare whether it is “drum” or “melodic”
+-  add option for number of beats to record
+-  grid (toggler, record number of beats)
+-  ~~when adding buf, check to see if syn is running with that id and replace its bufnum~~
 
 
 ## Install
