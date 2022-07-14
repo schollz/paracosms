@@ -85,36 +85,59 @@ function Turntable:init()
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params_add_number(id.."tune","tune",-24,24,0,"semitones")
   params_add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo(),0,"semitones")
-
+  for _,pram in ipairs({"type","tune","source_bpm"}) do
+    params:set_action(id..pram,function(v)
+      debounce_fn[id.."updatesource"]={
+        3,function()
+          self:retune()
+        end,
+      }
+    end)
+  end
 end
 
 function Turntable:load_file(path)
+  self.path_original=path
   self.path=path
-  local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+  local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
   local bpm=clock.get_tempo()
   for word in string.gmatch(self.path,'([^_]+)') do
     if string.find(word,"bpm") then
       bpm=tonumber(word:match("%d+"))
     end
   end
+  params:set(self.id.."source_bpm",bpm,true)
+  params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
+  -- self:retune() -- I think unneeded because everything will be banged
+end
+
+function Turntable:retune()
   -- convert the file
-  if bpm~=nil and bpm~=clock.get_tempo() and bpm>0.0 then
-    local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-    local newpath=string.format("%s%s_bpm%d.flac",self.cache,filename,clock.get_tempo())
+  local bpm=params:get(self.id.."source_bpm")
+  local tune=params:get(self.id.."tune")
+  local clock_tempo=clock.get_tempo()
+  if bpm~=clock_tempo or tune~=0 then
+    local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+    local newpath=string.format("%s%s_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."tune"),params:get(self.id.."source_bpm"),clock.get_tempo())
     if not util.file_exists(newpath) then
-      local cmd=string.format("sox %s %s tempo -m %2.6f rate -v 48k",self.path,newpath,clock.get_tempo()/bpm)
-      if string.find(self.path,"drum") then
-        cmd=string.format("sox %s %s speed %2.6f rate -v 48k",self.path,newpath,clock.get_tempo()/bpm)
+      local cmd=string.format("sox %s %s ",self.path,newpath)
+      if bpm~=clock_tempo then
+        if params:get(self.id.."type")==2 then
+          cmd=string.format("%s speed %2.6f ",cmd,clock_tempo/bpm)
+        else
+          cmd=string.format("%s tempo -m %2.6f",cmd,clock_tempo/bpm)
+        end
       end
+      if tune~=0 then
+        cmd=string.format("%s pitch %d",cmd,tune*100)
+      end
+      cmd=cmd.."rate -v 48k"
       print(cmd)
       os.execute(cmd)
     end
     self.path=newpath
   end
   engine.add(self.id,self.path)
-  if string.find(string.lower(self.path),"drum") then
-    params:set(self.id.."type",2)
-  end
 end
 
 function Turntable:is_playing()
