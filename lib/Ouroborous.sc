@@ -63,8 +63,8 @@ Ouroborus {
 		};
 	}
 
-	recPrime {
-		arg argSeconds, argCrossfade,action;
+	record {
+		arg argSeconds, argCrossfade, argThreshold, action;
 	    var valStartTime=0;
     	var valTriggerTime=0;
 		var preDelay=0.03;
@@ -96,16 +96,13 @@ Ouroborus {
 									action.value(buf4);
 								});
 							});
-					});
+						}
+					);
 				});
-
-				/*				fnXFader.value(buf1,valTriggerTime-valStartTime-preDelay,argCrossfade,argSeconds,-2,action:{
-				arg buf2;
-				("recStart done with buffer"+buf1+"and made"+buf2).postln;
-				});*/
 			});
+
 			// start the recording trigger
-			Synth.new("defRecordTrigger").onFree({arg v;
+			Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
 				valTriggerTime=SystemClock.seconds;
 				// start the timer to release the recording buffer
 				Routine {
