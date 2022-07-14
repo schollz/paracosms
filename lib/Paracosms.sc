@@ -199,6 +199,7 @@ Paracosms {
 				});
 			});
 			params.at(id).put(key,val);
+			params.at(id).put(key++"Lag",valLag);
 			if (isRunning,{
 				syns.at(id).set(key,val,key++"Lag",valLag);
 			});

@@ -27,6 +27,7 @@ function Turntable:init()
   self.cache=self.cache or _path.data.."paracosms/cache/"
   -- not ready until file is loaded
   self.ready=false
+  self.last_tune=0
 
   -- setup params
   local id=self.id
@@ -83,7 +84,7 @@ function Turntable:init()
   end)
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
-  params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo(),0)
+  params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo())
   for _,pram in ipairs({"type","tune","source_bpm"}) do
     params:set_action(id..pram,function(v)
       debounce_fn[id.."updatesource"]={
@@ -119,7 +120,8 @@ function Turntable:retune()
   local bpm=params:get(self.id.."source_bpm")
   local tune=params:get(self.id.."tune")
   local clock_tempo=clock.get_tempo()
-  if bpm~=clock_tempo or tune~=0 then
+  self.path=self.path_original
+  if bpm~=clock_tempo or tune~=self.last_tune then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
     local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),clock.get_tempo())
     if not util.file_exists(newpath) then
@@ -143,6 +145,7 @@ function Turntable:retune()
     end
     self.path=newpath
   end
+  self.last_tune=tune
   print(string.format("turntable%d: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path)
 end
