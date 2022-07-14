@@ -145,7 +145,7 @@ Paracosms {
 		arg id,fname;
 		Buffer.read(server,fname,action:{arg buf;
 			var fadeIn=false;
-			var oldBuf=-1;
+			var oldBuf=nil;
 			if (bufs.at(id).notNil,{
 				oldBuf=bufs.at(id);
 			});
@@ -163,8 +163,8 @@ Paracosms {
 
 			// fade in the synth
 			if (fadeIn,{ play(id); });
-			// free the old buf
-			if (oldBuf>0,{
+			// free the old buf after some time (in case it is playing and fading out)
+			if (oldBuf.notNil,{
 				Routine{
 					5.sleep;
 					oldBuf.free;
