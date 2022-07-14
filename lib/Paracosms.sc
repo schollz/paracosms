@@ -144,18 +144,32 @@ Paracosms {
 	add {
 		arg id,fname;
 		Buffer.read(server,fname,action:{arg buf;
+			var fadeIn=false;
+			var oldBuf=-1;
+			if (bufs.at(id).notNil,{
+				oldBuf=bufs.at(id);
+			});
 			if (syns.at(id).notNil,{
 				if (syns.at(id).isRunning,{
-					syns.at(id).set(\bufnum,buf.bufnum);
+					stop(id);
+					fadeIn=true;
 				});
 			});
-			if (bufs.at(id).notNil,{
-				bufs.at(id).free;
-			});
+
 			bufs.put(id,buf);
 			params.put(id,Dictionary.new());
 			("loaded"+PathName(fname).fileName).postln;
 			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
+
+			// fade in the synth
+			if (fadeIn,{ play(id); });
+			// free the old buf
+			if (oldBuf>0,{
+				Routine{
+					5.sleep;
+					oldBuf.free;
+				}.play;
+			});
 		});
 	}
 
