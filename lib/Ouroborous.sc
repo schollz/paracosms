@@ -64,7 +64,7 @@ Ouroborus {
 	}
 
 	record {
-		arg argSeconds, argCrossfade, argThreshold, action;
+		arg argSeconds, argCrossfade, argThreshold, actionStart, action;
 	    var valStartTime=0;
     	var valTriggerTime=0;
 		var preDelay=0.03;
@@ -107,6 +107,7 @@ Ouroborus {
 				// start the timer to release the recording buffer
 				Routine {
 					[argSeconds,preDelay,argCrossfade].postln;
+					actionStart.value();
 					("ouroborous: recording for"+(argSeconds-preDelay+argCrossfade)+"seconds").postln;
 					(argSeconds-preDelay+argCrossfade).wait;
 					synRecord.free;

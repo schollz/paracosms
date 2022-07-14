@@ -117,27 +117,43 @@ function init()
   g_=grid_:new()
 
   -- osc
-  osc.event=function(path,args,from)
-    if args[1]==0 then
-      do return end
-    end
-    local id=args[1]
-    local datatype="cursor"
-    if id>200 then
-      id=id-200
-      datatype="amplitude"
-      local val=util.round(util.clamp(util.linlin(0,0.25,0,16,args[2]),2,15))
-      if dat~=nil and dat.tt[id]~=nil and dat.tt[id].ready then
-        g_:light_up(id,val)
+  osc_fun={
+    recording=function(args)
+      local id=tonubmer(args[1])
+      if id~=nil then show_message("recording track "..id) end
+    end,
+    recorded=function(args)
+      local id=tonumber(args[1])
+      local filename=args[2] 
+      if id~=nil and filename~=nil then 
+        show_message("recorded track "..id)
+        params:set(id.."file",filename)
       end
-      do return end
+    end,
+    data=function(args) -- data from the synth
+      local id=args[1]
+      local datatype="cursor"
+      if id>200 then
+        id=id-200
+        datatype="amplitude"
+        local val=util.round(util.clamp(util.linlin(0,0.25,0,16,args[2]),2,15))
+        if dat~=nil and dat.tt[id]~=nil and dat.tt[id].ready then
+          g_:light_up(id,val)
+        end
+        do return end
+      end
+      if path=="ready" then
+        datatype=path
+      end
+      if dat~=nil and dat.tt[id]~=nil then
+        dat.tt[id]:oscdata(datatype,args[2])
+      end
     end
-    if path=="ready" then
-      datatype=path
-    end
-    if dat~=nil and dat.tt[id]~=nil then
-      dat.tt[id]:oscdata(datatype,args[2])
-    end
+  }
+  osc.event=function(path,args,from)
+    if osc_fun[path]~=nil then osc_fun[path]() else
+      print("osc.event: "..path.."?")
+    end 
   end
 
   clock.run(function()
