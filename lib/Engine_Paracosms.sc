@@ -45,11 +45,19 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("resetPhase","", { arg msg;
             paracosms.resetPhase();
         });
-        this.addCommand("record","sfff", { arg msg;
-            ouroborous.record(msg[2],msg[3],msg[4],{ arg buf;
+        this.addCommand("record","isfff", { arg msg;
+            var id=msg[1];
+            var filename=msg[2];
+            var seconds=msg[3];
+            var crossfade=msg[4];
+            var threshold=msg[5];
+            ouroborous.record(seconds,crossfade,threshold,{
+              NetAddr("127.0.0.1", 10111).sendMsg("recording",id,filename);
+            },{ arg buf;
                 buf.write(msg[1],headerFormat: "wav", sampleFormat: "int16", completionMessage:{
                     arg buf2;
                     ["wrote",buf2].postln;
+                    NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
                 });
             });
         });	
