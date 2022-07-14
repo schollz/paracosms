@@ -38,11 +38,10 @@ function Turntable:init()
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
   }
-  params:add_group("sample "..self.id,9+#params_menu)
+  params:add_group("sample "..self.id,8+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
-      print("loading",x)
       self:load_file(x)
     end
   end)
@@ -83,12 +82,12 @@ function Turntable:init()
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
   params:add_option(id.."type","type",{"melodic","drums"},1)
-  params_add_number(id.."tune","tune",-24,24,0,"semitones")
-  params_add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo(),0,"semitones")
+  params:add_number(id.."tune","tune (notes)",-24,24,0)
+  params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo(),0)
   for _,pram in ipairs({"type","tune","source_bpm"}) do
     params:set_action(id..pram,function(v)
       debounce_fn[id.."updatesource"]={
-        3,function()
+        10,function()
           self:retune()
         end,
       }
@@ -97,6 +96,7 @@ function Turntable:init()
 end
 
 function Turntable:load_file(path)
+  print(string.format("turntable%d: loading %s",self.id,path))
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -108,18 +108,22 @@ function Turntable:load_file(path)
   end
   params:set(self.id.."source_bpm",bpm,true)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
-  -- self:retune() -- I think unneeded because everything will be banged
+  self:retune()
 end
 
 function Turntable:retune()
+  if self.path_original==nil then
+    do return end
+  end
   -- convert the file
   local bpm=params:get(self.id.."source_bpm")
   local tune=params:get(self.id.."tune")
   local clock_tempo=clock.get_tempo()
   if bpm~=clock_tempo or tune~=0 then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-    local newpath=string.format("%s%s_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."tune"),params:get(self.id.."source_bpm"),clock.get_tempo())
+    local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),clock.get_tempo())
     if not util.file_exists(newpath) then
+      print(string.format("turntable%d: retuning %s",self.id,self.path_original))
       local cmd=string.format("sox %s %s ",self.path,newpath)
       if bpm~=clock_tempo then
         if params:get(self.id.."type")==2 then
@@ -131,12 +135,15 @@ function Turntable:retune()
       if tune~=0 then
         cmd=string.format("%s pitch %d",cmd,tune*100)
       end
-      cmd=cmd.."rate -v 48k"
+      cmd=cmd.." rate -v 48k"
       print(cmd)
       os.execute(cmd)
+    else
+      print(string.format("turntable%d: using cached retuned",self.id))
     end
     self.path=newpath
   end
+  print(string.format("turntable%d: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path)
 end
 
