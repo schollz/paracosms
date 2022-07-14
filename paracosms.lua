@@ -91,6 +91,17 @@ function init()
   -- make sure cache directory exists
   os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
 
+  -- setup parameters
+  params:add_separator("PARACOSMS")
+  params:add_separator("recording")
+  params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
+  params:add_number("record_threshold","recording threshold (dB)",-96,0,-50)
+  params:add_binary("record_on","record on","trigger")
+  params:set_action("record_on",function(x)
+    print("record_on",x)
+  end)
+  params:add_separator("samples")
+
   -- collect which files
   for row,folder in ipairs(dat.rows) do
     local possible_files=find_files(folder)

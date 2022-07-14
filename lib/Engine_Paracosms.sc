@@ -5,6 +5,7 @@ Engine_Paracosms : CroneEngine {
 
     // Paracosms specific v0.1.0
     var paracosms;
+    var ouroborous;
     var fnOSC;
     // Paracosms ^
 
@@ -23,6 +24,7 @@ Engine_Paracosms : CroneEngine {
         },'/tr', context.server.addr);
         context.server.sync;
         paracosms=Paracosms.new(context.server,0,"/home/we/dust/data/paracosms/cache");
+        ouroborous=Ouroborous.new(context.server,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
@@ -43,7 +45,15 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("resetPhase","", { arg msg;
             paracosms.resetPhase();
         });
-	
+        this.addCommand("record","sfff", { arg msg;
+            ouroborous.record(msg[2],msg[3],msg[4],{ arg buf;
+                buf.write(msg[1],headerFormat: "wav", sampleFormat: "int16", completionMessage:{
+                    arg buf2;
+                    ["wrote",buf2].postln;
+                });
+            });
+        });	
+
 
         // ^ Paracosms specific
 
