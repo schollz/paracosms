@@ -39,7 +39,7 @@ function Turntable:init()
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
   }
-  params:add_group("sample "..self.id,8+#params_menu)
+  params:add_group("sample "..self.id,11+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -76,7 +76,6 @@ function Turntable:init()
         end,
       }
     end)
-
   end
   params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
   params:set_action(id.."fadetime",function(v)
@@ -94,6 +93,16 @@ function Turntable:init()
       }
     end)
   end
+
+  params:add_separator("recording")
+  params:add_control(id.."record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
+  params:add_binary(id.."record_on","record on","trigger")
+  params:set_action(id.."record_on",function(x)
+    print("record_on",id)
+    engine.record(id,_path.audio.."paracosms/recordings/something.wav",
+      params:get(id.."record_beats"),params:get("record_crossfade"),params:get("record_threshold"))
+  end)
+
 end
 
 function Turntable:load_file(path)
