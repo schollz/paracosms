@@ -1,16 +1,23 @@
 -- paracosms
 --
--- K2/K3 - switch between playing samples
--- E1 switch sample
--- E2 ?
--- E3 volume
+-- E1 select sample
+-- K1+E1 select running sample
+--
+-- K2 selects parameters
+-- E2/E3 modulate parameter
+-- K1+E2/E3 modulate more
+--
+-- K3 start/stops sample
+-- (hold length = fade)
+-- K1+K3 primes recording
+-- (when primed, starts)
 
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
 
 engine.name="Paracosms"
-dat={percent_loaded=0,tt={},files_to_load={}}
+dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false}
 dat.rows={
   "/home/we/dust/audio/paracosms/row1",
   "/home/we/dust/audio/paracosms/row2",
@@ -109,10 +116,13 @@ function init()
   -- osc
   osc_fun={
     recording=function(args)
+      dat.recording=true
       local id=tonumber(args[1])
       if id~=nil then show_message("recording track "..id) end
     end,
     recorded=function(args)
+      dat.recording=false
+      dat.recording_primed=false
       local id=tonumber(args[1])
       local filename=args[2]
       if id~=nil and filename~=nil then
@@ -281,7 +291,7 @@ function key(k,z)
     delta_page(1)
   elseif shift and k==3 then
     if z==1 then
-      params:set(dat.ti.."record_on",1)
+      params:delta(dat.ti.."record_on",1)
     end
   elseif k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
@@ -316,7 +326,7 @@ function show_message(message,seconds)
   show_message_clock=clock.run(function()
     show_message_text=message
     redraw()
-    clock.sleep(seconds or 1.0)
+    clock.sleep(seconds or 2.0)
     show_message_text=""
     show_message_progress=0
     redraw()

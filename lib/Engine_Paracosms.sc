@@ -57,6 +57,9 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("resetPhase","", { arg msg;
             paracosms.resetPhase();
         });
+        this.addCommand("record_start","",{ arg msg;
+            ouroboros.recordStart();
+        });
         this.addCommand("record","isfff", { arg msg;
             var id=msg[1];
             var filename=msg[2];
