@@ -12,9 +12,10 @@ grid_=include("lib/ggrid")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 dat.rows={
-  "/home/we/dust/audio/seamlessloops/test",
+  "/home/we/dust/audio/paracosms/row1",
 }
 
+global_startup=false
 debounce_fn={}
 local shift=false
 local ui_page=1
@@ -91,7 +92,9 @@ function init()
   -- make sure cache directory exists
   os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
   os.execute("mkdir -p /home/we/dust/audio/paracosms/recordings")
-
+  for i=1,8 do
+    os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
+  end
   -- setup parameters
   params:add_separator("globals")
   params:add_number("record_threshold","recording threshold (dB)",-96,0,-50)
@@ -120,10 +123,16 @@ function init()
     end,
     recorded=function(args)
       local id=tonumber(args[1])
-      local filename=args[2] 
-      if id~=nil and filename~=nil then 
+      local filename=args[2]
+      if id~=nil and filename~=nil then
         show_message("recorded track "..id)
         params:set(id.."file",filename)
+      end
+    end,
+    ready=function(args)
+      local id=args[1]
+      if dat~=nil and dat.tt[id]~=nil then
+        dat.tt[id]:oscdata("ready",args[2])
       end
     end,
     data=function(args) -- data from the synth
@@ -147,9 +156,9 @@ function init()
     end
   }
   osc.event=function(path,args,from)
-    if osc_fun[path]~=nil then osc_fun[path]() else
+    if osc_fun[path]~=nil then osc_fun[path](args) else
       print("osc.event: "..path.."?")
-    end 
+    end
   end
 
   clock.run(function()
@@ -192,16 +201,10 @@ function init()
       shuffle(possible_files)
       for col,file in ipairs(possible_files) do
         local id=(row-1)*16+col
-        params:set(id.."file",file)
-        for j=1,80 do
-          clock.sleep(0.05)
-          if dat.tt[id].ready then
-            break
-          end
-        end
+        params:set(id.."file",file,true)
       end
     end
-
+    clock.sleep(1)
     params:bang()
   end)
 

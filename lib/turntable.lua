@@ -43,6 +43,7 @@ function Turntable:init()
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
+      print("loading files "..x)
       self:load_file(x)
     end
   end)
@@ -100,13 +101,13 @@ function Turntable:init()
   params:set_action(id.."record_on",function(x)
     print("record_on",id)
     engine.record(id,_path.audio.."paracosms/recordings/something.wav",
-      params:get(id.."record_beats"),params:get("record_crossfade"),params:get("record_threshold"))
+    params:get(id.."record_beats"),params:get("record_crossfade"),params:get("record_threshold"))
   end)
 
 end
 
 function Turntable:load_file(path)
-  print(string.format("turntable%d: loading %s",self.id,path))
+  print(string.format("[%d] turntable: loading %s",self.id,path))
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -118,13 +119,13 @@ function Turntable:load_file(path)
   end
   params:set(self.id.."source_bpm",bpm,true)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
-  self:retune()
 end
 
 function Turntable:retune()
   if self.path_original==nil then
     do return end
   end
+  print(string.format("[%d] turntable: retune",self.id))
   -- convert the file
   local bpm=params:get(self.id.."source_bpm")
   local tune=params:get(self.id.."tune")
@@ -155,7 +156,7 @@ function Turntable:retune()
     self.path=newpath
   end
   self.last_tune=tune
-  print(string.format("turntable%d: adding to engine %s",self.id,self.path))
+  print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path)
 end
 
