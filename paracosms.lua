@@ -191,7 +191,7 @@ function init()
   clock.run(function()
     for row,folder in ipairs(dat.rows) do
       local possible_files=find_files(folder)
-      shuffle(possible_files)
+      -- shuffle(possible_files)
       for col,file in ipairs(possible_files) do
         local id=(row-1)*16+col
         params:set(id.."file",file,true)
