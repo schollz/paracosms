@@ -15,7 +15,9 @@
 
 ### Todo
 
-- add pattern recorders to the grid
+- add pattern recorders to the grid (each is its own synth mod X beats)
+- add global sync (syncs all synths and resets the main phasor)
+- add midi transports (for syncing)
 - add pan
 - ~~add recording~~
 - ~~make the first sample a metronome sample (store metronome)~~
