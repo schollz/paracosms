@@ -88,8 +88,8 @@ function init()
   end
   -- setup parameters
   params:add_separator("globals")
-  params:add_number("record_threshold","recording threshold (dB)",-96,0,-50)
-  params:add_number("record_crossfade","1/16th beat",1,64,16)
+  params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
+  params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_separator("samples")
 
   -- collect which files
@@ -156,12 +156,12 @@ function init()
   clock.run(function()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<100 then
-        show_message("loading...")
         local inc=100.0/#dat.files_to_load
         dat.percent_loaded=0
         for _,v in ipairs(dat.tt) do
           dat.percent_loaded=dat.percent_loaded+(v.ready and inc or 0)
         end
+        show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded))
       end
       clock.sleep(1/10)
       redraw()
@@ -356,7 +356,6 @@ function redraw()
   screen.level(7)
   screen.move(1,7)
   if dat.percent_loaded<99.0 then
-    screen.text(string.format("loaded %2.1f%%",dat.percent_loaded))
   elseif topleft~=nil then
     screen.text(topleft:sub(1,24))
   end

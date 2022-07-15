@@ -18,7 +18,7 @@ Engine_Paracosms : CroneEngine {
     alloc {
         // Paracosms specific v0.0.1
         startup=0;
-        startupNum=0.0;
+        startupNum=1.0.neg;
         fnOSC= OSCFunc({
             arg msg, time;
             if (msg[2]>0,{
@@ -75,7 +75,7 @@ Engine_Paracosms : CroneEngine {
         });	
         this.addCommand("startup","i",{arg msg;
             startup=msg[1];
-            startupNum=0;
+            startupNum=1.0.neg;
         })
 
 
