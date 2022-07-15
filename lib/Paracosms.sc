@@ -36,6 +36,7 @@ Paracosms {
 				t_sync=1,t_syncLag=0.0,
 				t_manu=0,t_manuLag=0.0,
 				oneshot=0,oneshotLag=0.0,
+				pan=0,panLag=0.0,
 				sampleStart=0,sampleStartLag=0.0,
 				sampleEnd=1.0,sampleEndLag=0.0,
 				ts=0,tsLag=0.0,
@@ -73,12 +74,16 @@ Paracosms {
 					resetPos:pos,
 				);
 				snd=BufRd.ar(ch,bufnum,pos,interpolation:2);
-				snd=Pan2.ar(snd);
 				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
 					tsWindow,
 					loop:1,
 					interpolation:1
 				));
+
+				// balance the two channels
+				snd=Pan2.ar(snd,0.0);
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 
@@ -163,20 +168,22 @@ Paracosms {
 		stop(id);
 		["play",id].postln;
 		if (params.at(id).notNil,{
-			var ampLag=0;
-			var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
-			if (params.at(id).at("ampLag").notNil,{
-				ampLag=params.at(id).at("ampLag");
+			if (bufs.at(id).notNil,{
+				var ampLag=0;
+				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+				if (params.at(id).at("ampLag").notNil,{
+					ampLag=params.at(id).at("ampLag");
+				});
+				pars=pars++[\fadeInTime,ampLag];
+				params.at(id).keysValuesDo({ arg pk,pv; 
+					pars=pars++[pk,pv];
+				});
+				("making synth"+id).postln;
+				syns.put(id,Synth.after(syns.at("phasor"),
+					"defPlay"++bufs.at(id).numChannels,pars,
+				).onFree({["freed"+id].postln}));
+				NodeWatcher.register(syns.at(id));
 			});
-			pars=pars++[\fadeInTime,ampLag];
-			params.at(id).keysValuesDo({ arg pk,pv; 
-				pars=pars++[pk,pv];
-			});
-			("making synth"+id).postln;
-			syns.put(id,Synth.after(syns.at("phasor"),
-				"defPlay"++bufs.at(id).numChannels,pars,
-			).onFree({["freed"+id].postln}));
-			NodeWatcher.register(syns.at(id));
 		});
 	}
 
