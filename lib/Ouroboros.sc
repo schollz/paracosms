@@ -27,7 +27,7 @@ Ouroboros {
 			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1;
 			var input;
 			RecordBuf.ar(
-				inputArray: SoundIn.ar([0,1]),
+				inputArray: SoundIn.ar([0,1])*2,
 				bufnum:bufnum,
 				recLevel:recLevel,
 				preLevel:preLevel,

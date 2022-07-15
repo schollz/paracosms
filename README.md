@@ -11,6 +11,8 @@
 
 ## Documentation
 
+- stem player
+
 ### Todo
 
 - add recording
