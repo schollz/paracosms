@@ -103,8 +103,13 @@ function Turntable:init()
   params:add_binary(id.."record_on","record on","trigger")
   params:set_action(id.."record_on",function(x)
     print("record_on",id)
-    engine.record(id,_path.audio.."paracosms/recordings/"..math.random(1,10000000)..".wav",
-    params:get(id.."record_beats")*clock.get_beat_sec(),params:get("record_crossfade")/16*clock.get_beat_sec(),params:get("record_threshold"))
+    show_message("ready to record "..id)
+    local datetime=util.os_capture("date +%Y%m%d%H%m%S")
+    local filename=string.format("%s_bpm%d.wav",datetime,clock.get_tempo())
+    filename=_path.audio.."paracosms/recordings/"..filename
+    local seconds=params:get(id.."record_beats")*clock.get_beat_sec()
+    local crossfade=params:get("record_crossfade")/16*clock.get_beat_sec()
+    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"))
   end)
 
 end

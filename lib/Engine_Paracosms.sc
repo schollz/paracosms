@@ -7,6 +7,8 @@ Engine_Paracosms : CroneEngine {
     var paracosms;
     var ouroboros;
     var fnOSC;
+    var startup;
+    var startupNum;
     // Paracosms ^
 
     *new { arg context, doneCallback;
@@ -15,6 +17,8 @@ Engine_Paracosms : CroneEngine {
 
     alloc {
         // Paracosms specific v0.0.1
+        startup=0;
+        startupNum=0.0;
         fnOSC= OSCFunc({
             arg msg, time;
             if (msg[2]>0,{
@@ -28,7 +32,15 @@ Engine_Paracosms : CroneEngine {
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
-            paracosms.add(msg[1],msg[2].asString);
+            if (startup>0,{
+                startupNum=startupNum+1.0;
+                Routine {
+                    (startupNum/10.0).wait;
+                    paracosms.add(msg[1],msg[2].asString);
+                }.play;
+            },{
+                paracosms.add(msg[1],msg[2].asString);
+            });
         });
         this.addCommand("watch","i", { arg msg;
             paracosms.watch(msg[1]);
@@ -61,6 +73,10 @@ Engine_Paracosms : CroneEngine {
                 });
             });
         });	
+        this.addCommand("startup","i",{arg msg;
+            startup=msg[1];
+            startupNum=0;
+        })
 
 
         // ^ Paracosms specific

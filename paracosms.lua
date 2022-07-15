@@ -53,24 +53,6 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
   {function(d) end},
 })
--- -- page 2
--- table.insert(enc_func,{
---   function(d) delta_ti(d) end,
---   function(d) params:delta(dat.ti.."tsSlow",d) end,
---   function(d) params:delta(dat.ti.."tsSeconds",d) end,
---   function(d) delta_ti(d,true) end,
---   function(d) end,
---   function(d) params:delta(dat.ti.."ts",d) end,
--- })
--- -- page 3
--- table.insert(enc_func,{
---   function(d) delta_ti(d) end,
---   function(d) params:delta(dat.ti.."sampleStart",d) end,
---   function(d) params:delta(dat.ti.."sampleEnd",d) end,
---   function(d) delta_ti(d,true) end,
---   function(d) end,
---   function(d) end,
--- })
 
 function find_files(folder)
   os.execute("find "..folder.."* -print -type f -name '*.flac' | grep 'wav\\|flac' > /tmp/foo")
@@ -136,6 +118,7 @@ function init()
       if id~=nil and filename~=nil then
         show_message("recorded track "..id)
         params:set(id.."file",filename)
+        dat.ti=id
       end
     end,
     ready=function(args)
@@ -173,6 +156,7 @@ function init()
   clock.run(function()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<100 then
+        show_message("loading...")
         local inc=100.0/#dat.files_to_load
         dat.percent_loaded=0
         for _,v in ipairs(dat.tt) do
@@ -214,11 +198,16 @@ function init()
       end
     end
     clock.sleep(1)
-    global_startup=true
+    startup(true)
     params:bang()
-    global_startup=false
+    startup(false)
   end)
 
+end
+
+function startup(on)
+  engine.startup(on and 1 or 0)
+  global_startup=on
 end
 
 function switch_view(id)
@@ -290,6 +279,10 @@ function key(k,z)
     shift=z==1
   elseif k==2 and z==1 then
     delta_page(1)
+  elseif shift and k==3 then
+    if z==1 then
+      params:set(dat.ti.."record_on",1)
+    end
   elseif k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
       params:set(dat.ti.."fadetime",0.001)
