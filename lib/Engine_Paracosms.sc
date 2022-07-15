@@ -54,9 +54,9 @@ Engine_Paracosms : CroneEngine {
             ouroboros.record(seconds,crossfade,threshold,{
               NetAddr("127.0.0.1", 10111).sendMsg("recording",id,filename);
             },{ arg buf;
-                buf.write(msg[1],headerFormat: "wav", sampleFormat: "int16", completionMessage:{
-                    arg buf2;
-                    ["wrote",buf2].postln;
+                ["done",buf,"writing",filename].postln;
+                buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
+                    ["wrote",buf].postln;
                     NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
                 });
             });

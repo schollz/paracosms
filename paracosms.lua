@@ -127,7 +127,7 @@ function init()
   -- osc
   osc_fun={
     recording=function(args)
-      local id=tonubmer(args[1])
+      local id=tonumber(args[1])
       if id~=nil then show_message("recording track "..id) end
     end,
     recorded=function(args)

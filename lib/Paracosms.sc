@@ -205,7 +205,7 @@ Paracosms {
 			});
 			// fade in the synth
 			fadeIn.postln;
-			if (fadeIn==true,{ this.play(id); });
+			if (fadeIn==true,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
 		});
 	}
 
