@@ -33,13 +33,14 @@ function Turntable:init()
   local id=self.id
   local params_menu={
     {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz"},
-    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0},
+    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,formatter=function(param) return param:get()==1 and "on" or "off" end},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,unit="x"},
     {id="tsSeconds",name="timestretch window",min=clock.get_beat_sec()/64,max=20,exp=false,div=clock.get_beat_sec()/64,default=clock.get_beat_sec()/8,unit="s"},
-    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0},
-    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1},
+    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
+    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
+    {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,formatter=function(param) return string.format("%d ms",param:get()*1000) end},
   }
-  params:add_group("sample "..self.id,11+#params_menu)
+  params:add_group("sample "..self.id,12+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -68,8 +69,13 @@ function Turntable:init()
     }
   end)
   for _,pram in ipairs(params_menu) do
-    params:add_control(id..pram.id,pram.name,controlspec.new(pram.min,pram.max,
-    pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)))
+    params:add{
+      type="control",
+      id=id..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
     params:set_action(id..pram.id,function(v)
       debounce_fn[id..pram.id]={
         3,function()
@@ -82,6 +88,7 @@ function Turntable:init()
   params:set_action(id.."fadetime",function(v)
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
+  params:add_separator("modify")
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
   params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo())
@@ -112,6 +119,14 @@ function Turntable:init()
     engine.record(id,filename,seconds,crossfade,params:get("record_threshold"))
   end)
 
+end
+
+function Turntable:duration()
+  local duration=1
+  if self.vw~=nil and self.vw.duration~=nil then
+    duration=self.vw.duration
+  end
+  return duration
 end
 
 function Turntable:load_file(path)
