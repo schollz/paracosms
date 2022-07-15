@@ -16,6 +16,7 @@
 ### Todo
 
 - add pattern recorders to the grid
+- add pan
 - ~~add recording~~
 - ~~make the first sample a metronome sample (store metronome)~~
 - ~~redo grid~~
