@@ -60,17 +60,19 @@ function GGrid:key_press(row,col,on)
     hold_time=ct-self.pressed_buttons[row..","..col]
     self.pressed_buttons[row..","..col]=nil
   end
-  print(row,col,hold_time)
   local id=(row-1)*16+col
   if on then
     switch_view(id)
   end
-  if hold_time>0.25 then
-    params:set(id.."fadetime",hold_time*3)
-    if params:get(id.."amp")==0 and params:get(id.."play")==0 then
-      params:set(id.."amp",1,true)
+  if params:get(id.."oneshot")==2 then
+    if on then
+      print("oneshot")
+      dat.tt[id]:play()
     end
-    params:set(id.."play",1-params:get(id.."play"))
+  elseif hold_time>0.25 then
+    print("loop")
+    params:set(id.."fadetime",hold_time*3)
+    params:set(id.."play",3-params:get(id.."play"))
   end
 end
 

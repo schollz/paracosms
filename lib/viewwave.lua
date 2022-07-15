@@ -42,7 +42,7 @@ function ViewWave:init()
   self.height=60
 
   if not util.file_exists(self.png_file) then
-    local resolution=120
+    local resolution=2
     os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -z %d -b 8",self.path,self.dat_file,resolution))
     os.execute(string.format("/home/we/dust/code/paracosms/lib/audiowaveform -q -i %s -o %s -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.dat_file,self.png_file,0,self.duration,self.width,self.height))
     os.execute("rm "..self.dat_file)
