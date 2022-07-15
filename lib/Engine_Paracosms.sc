@@ -21,9 +21,13 @@ Engine_Paracosms : CroneEngine {
         startupNum=1.0.neg;
         fnOSC= OSCFunc({
             arg msg, time;
-            if (msg[2]>0,{
-                // cursor ID, POSITION
-                NetAddr("127.0.0.1", 10111).sendMsg("data",msg[2],msg[3]);
+            if (msg[2]==444,{
+                NetAddr("127.0.0.1", 10111).sendMsg("trigger",msg[3],msg[3]);
+            },{
+                if (msg[2]>0,{
+                    // cursor ID, POSITION
+                    NetAddr("127.0.0.1", 10111).sendMsg("data",msg[2],msg[3]);
+                });
             });
         },'/tr', context.server.addr);
         context.server.sync;
