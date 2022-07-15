@@ -5,7 +5,7 @@ Engine_Paracosms : CroneEngine {
 
     // Paracosms specific v0.1.0
     var paracosms;
-    var ouroborous;
+    var ouroboros;
     var fnOSC;
     // Paracosms ^
 
@@ -24,7 +24,7 @@ Engine_Paracosms : CroneEngine {
         },'/tr', context.server.addr);
         context.server.sync;
         paracosms=Paracosms.new(context.server,0,"/home/we/dust/data/paracosms/cache");
-        ouroborous=Ouroborous.new(context.server,0);
+        ouroboros=Ouroboros.new(context.server,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
@@ -51,7 +51,7 @@ Engine_Paracosms : CroneEngine {
             var seconds=msg[3];
             var crossfade=msg[4];
             var threshold=msg[5];
-            ouroborous.record(seconds,crossfade,threshold,{
+            ouroboros.record(seconds,crossfade,threshold,{
               NetAddr("127.0.0.1", 10111).sendMsg("recording",id,filename);
             },{ arg buf;
                 buf.write(msg[1],headerFormat: "wav", sampleFormat: "int16", completionMessage:{
