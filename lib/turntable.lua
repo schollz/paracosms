@@ -109,6 +109,14 @@ function Turntable:init()
   params:add_control(id.."record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
   params:add_binary(id.."record_on","record on","trigger")
   params:set_action(id.."record_on",function(x)
+    if dat.recording then
+      do return end
+    end
+    if dat.recording_primed then
+      engine.record_start()
+      do return end
+    end
+    dat.recording_primed=true
     print("record_on",id)
     show_message("ready to record "..id)
     local datetime=util.os_capture("date +%Y%m%d%H%m%S")

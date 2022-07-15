@@ -2,6 +2,7 @@ Ouroboros {
 	var server;
 	var busOut;
 	var synRecord;
+	var synRecordTrigger;
 	var fnXFader;
 
 	*new {
@@ -63,6 +64,14 @@ Ouroboros {
 		};
 	}
 
+	recordStart {
+		if (synRecordTrigger.notNil,{
+			if (synRecordTrigger.isRunning,{
+				synRecordTrigger.free;
+			});
+		});
+	}
+
 	record {
 		arg argSeconds, argCrossfade, argThreshold, actionStart, action;
 	    var valStartTime=0;
@@ -102,7 +111,7 @@ Ouroboros {
 			});
 
 			// start the recording trigger
-			Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
+			synRecordTrigger=Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
 				valTriggerTime=SystemClock.seconds;
 				// start the timer to release the recording buffer
 				Routine {
