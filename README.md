@@ -15,9 +15,10 @@
 
 ### Todo
 
-- add recording
+- add pattern recorders to the grid
+- ~~add recording~~
 - ~~make the first sample a metronome sample (store metronome)~~
-- redo grid
+- ~~redo grid~~
 - ~~add option for number of beats to record~~
 - ~~add options in for semitone change~~
 - ~~add options in for speed change~~

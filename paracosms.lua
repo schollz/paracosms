@@ -221,7 +221,7 @@ function startup(on)
 end
 
 function switch_view(id)
-  if id>#dat.tt then
+  if id>#dat.tt or id==dat.ti then
     do return end
   end
   dat.ti=id
@@ -295,8 +295,7 @@ function key(k,z)
     end
   elseif k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
-      params:set(dat.ti.."fadetime",0.001)
-      params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
+      dat.tt[dat.ti]:play()
     else
       hold_beats=clock.get_beats()
     end

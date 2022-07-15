@@ -129,6 +129,14 @@ function Turntable:init()
 
 end
 
+function Turntable:play()
+  engine.set(self.id,"oneshot",params:get(self.id.."oneshot")-1,0)
+  if params:get(self.id.."oneshot")==2 then
+    engine.set(self.id,"amp",params:get(self.id.."amp"),0)
+  end
+  engine.play(self.id)
+end
+
 function Turntable:duration()
   local duration=1
   if self.vw~=nil and self.vw.duration~=nil then
@@ -150,6 +158,7 @@ function Turntable:load_file(path)
   end
   params:set(self.id.."source_bpm",bpm,true)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
+  params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
 end
 

@@ -52,9 +52,9 @@ Paracosms {
 				// var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Latch.ar(t_manu*frames,t_manu);
 				var resetPos=syncPos+manuPos;
 				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
-				fadeInTime=Select.kr(oneshot,[fadeInTime,0]); // if one-shot then don't fade in
+				fadeInTime=fadeInTime*(1-oneshot); // if one-shot then don't fade in
 
-				amp=VarLag.kr(amp,ampLag,warp:\sine);
+				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,ampLag,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 
 				pos=Phasor.ar(
@@ -73,6 +73,7 @@ Paracosms {
 					resetPos:pos,
 				);
 				snd=BufRd.ar(ch,bufnum,pos,interpolation:2);
+				snd=Pan2.ar(snd);
 				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
 					tsWindow,
 					loop:1,
@@ -107,7 +108,9 @@ Paracosms {
 		arg id;
 		if (syns.at(id).notNil,{
 			if (watching>0,{
-				syns.at(watching).set(\dataout,0);
+				if (syns.at(watching).isRunning,{
+					syns.at(watching).set(\dataout,0);
+				});
 			});
 			watching=id;
 			syns.at(watching).set(\dataout,1);
@@ -144,12 +147,15 @@ Paracosms {
 
 	stop {
 		arg id;
-		if (syns.at(id).notNil,{
-			if (syns.at(id).isRunning,{
-				["stop",id].postln;
-				syns.at(id).set("amp",0);
+		Routine {
+			0.1.wait;
+			if (syns.at(id).notNil,{
+				if (syns.at(id).isRunning,{
+					["stop",id].postln;
+					syns.at(id).set("amp",0);
+				});
 			});
-		});
+		}.play;
 	}
 
 	play {
