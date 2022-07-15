@@ -87,6 +87,9 @@ function Turntable:init()
   params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo())
   for _,pram in ipairs({"type","tune","source_bpm"}) do
     params:set_action(id..pram,function(v)
+      if global_startup then
+        do return end
+      end
       debounce_fn[id.."updatesource"]={
         10,function()
           self:retune()
@@ -119,6 +122,7 @@ function Turntable:load_file(path)
   end
   params:set(self.id.."source_bpm",bpm,true)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
+  self:retune()
 end
 
 function Turntable:retune()

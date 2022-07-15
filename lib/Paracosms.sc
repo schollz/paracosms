@@ -141,42 +141,12 @@ Paracosms {
 		});
 	}
 
-	add {
-		arg id,fname;
-		Buffer.read(server,fname,action:{arg buf;
-			var fadeIn=false;
-			var oldBuf=nil;
-			if (bufs.at(id).notNil,{
-				oldBuf=bufs.at(id);
-			});
-			if (syns.at(id).notNil,{
-				if (syns.at(id).isRunning,{
-					stop(id);
-					fadeIn=true;
-				});
-			});
-
-			bufs.put(id,buf);
-			params.put(id,Dictionary.new());
-			("loaded"+PathName(fname).fileName).postln;
-			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
-
-			// fade in the synth
-			if (fadeIn,{ play(id); });
-			// free the old buf after some time (in case it is playing and fading out)
-			if (oldBuf.notNil,{
-				Routine{
-					5.sleep;
-					oldBuf.free;
-				}.play;
-			});
-		});
-	}
 
 	stop {
 		arg id;
 		if (syns.at(id).notNil,{
 			if (syns.at(id).isRunning,{
+				["stop",id].postln;
 				syns.at(id).set("amp",0);
 			});
 		});
@@ -185,6 +155,7 @@ Paracosms {
 	play {
 		arg id;
 		stop(id);
+		["play",id].postln;
 		if (params.at(id).notNil,{
 			var ampLag=0;
 			var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
@@ -203,19 +174,52 @@ Paracosms {
 		});
 	}
 
-	set {
-		arg id,key,val,valLag;
-		if (bufs.at(id).notNil,{
-			var isRunning=false;
+	add {
+		arg id,fname;
+		Buffer.read(server,fname,action:{arg buf;
+			var fadeIn=false;
+			var oldBuf=nil;
+			if (bufs.at(id).notNil,{
+				oldBuf=bufs.at(id);
+			});
 			if (syns.at(id).notNil,{
 				if (syns.at(id).isRunning,{
-					isRunning=true;
+					syns.at(id).set(\dataout,0);
+					stop(id);
+					fadeIn=true;
 				});
 			});
-			params.at(id).put(key,val);
-			params.at(id).put(key++"Lag",valLag);
-			if (isRunning,{
-				syns.at(id).set(key,val,key++"Lag",valLag);
+
+			bufs.put(id,buf);
+			("loaded"+PathName(fname).fileName).postln;
+			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
+
+			// free the old buf after some time (in case it is playing and fading out)
+			if (oldBuf.notNil,{
+				Routine{
+					5.sleep;
+					oldBuf.free;
+				}.play;
+			},{
+				params.put(id,Dictionary.new());
+			});
+			// fade in the synth
+			fadeIn.postln;
+			if (fadeIn==true,{ this.play(id); });
+		});
+	}
+
+
+	set {
+		arg id,key,val,valLag;
+		if (params.at(id).isNil,{
+			params.put(id,Dictionary.new());
+		});
+		params.at(id).put(key,val);
+		params.at(id).put(key++"Lag",valLag);
+		if (syns.at(id).notNil,{
+			if (syns.at(id).isRunning,{
+				syns.at(id).set(key,val,key++"Lag",valLag)
 			});
 		});
 	}

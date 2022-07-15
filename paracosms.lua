@@ -13,6 +13,12 @@ engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={}}
 dat.rows={
   "/home/we/dust/audio/paracosms/row1",
+  "/home/we/dust/audio/paracosms/row2",
+  "/home/we/dust/audio/paracosms/row3",
+  "/home/we/dust/audio/paracosms/row4",
+  "/home/we/dust/audio/paracosms/row5",
+  "/home/we/dust/audio/paracosms/row6",
+  "/home/we/dust/audio/paracosms/row7",
 }
 
 global_startup=false
@@ -67,7 +73,9 @@ table.insert(enc_func,{
 -- })
 
 function find_files(folder)
-  local lines=util.os_capture("find "..folder.."* -print -type f -name '*.flac' -o -name '*.wav' | grep 'wav\\|flac' > /tmp/files")
+  os.execute("find "..folder.."* -print -type f -name '*.flac' | grep 'wav\\|flac' > /tmp/foo")
+  os.execute("find "..folder.."* -print -type f -name '*.wav' | grep 'wav\\|flac' >> /tmp/foo")
+  os.execute("cat /tmp/foo | sort | uniq > /tmp/files")
   return lines_from("/tmp/files")
 end
 
@@ -78,6 +86,7 @@ function lines_from(file)
     lines[#lines+1]=line
   end
   table.sort(lines)
+  tab.print(lines)
   return lines
 end
 
@@ -205,7 +214,9 @@ function init()
       end
     end
     clock.sleep(1)
+    global_startup=true
     params:bang()
+    global_startup=false
   end)
 
 end
