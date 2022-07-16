@@ -92,6 +92,13 @@ Paracosms {
 				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart))-0.01,0.005]),doneAction:oneshot*2);
 
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
+
+				// // clouds 
+				// snd=MiClouds.ar(snd,
+				// 	pos:LFNoise2.kr(0.4,0.5,0.5),
+				// 	size:LFNoise1.kr(0.3,0.5,0.5), 
+				// 	dens:LFNoise1.kr(0.3).range(0.3, 0.45),
+				// 	drywet: 1, mode: 0);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				FreeSelf.kr(TDelay.kr(t_free,ampLag));

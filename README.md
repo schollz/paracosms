@@ -15,9 +15,13 @@
 
 ### Todo
 
-- add pattern recorders to the grid (each is its own synth mod X beats)
-- add global sync (syncs all synths and resets the main phasor)
 - add midi transports (for syncing)
+- add pattern recorded
+- logarithm hold length?
+- load in the 808 kit by default as oneshot into the last row
+- add miclouds granulator
+- ~~add euclideans~~
+- ~~add global sync (syncs all synths and resets the main phasor)~~
 - ~~add pan~~
 - ~~add recording~~
 - ~~make the first sample a metronome sample (store metronome)~~

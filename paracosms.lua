@@ -16,6 +16,7 @@ viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
 lattice_=require("lattice")
+er=require("er")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false}
@@ -52,14 +53,23 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."ts",d) end,function() return "timestretch "..(params:get(dat.ti.."ts")>0 and "on" or "off") end},
   {function(d) end},
 })
--- page 1
+-- page 3
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return "start: "..params:string(dat.ti.."sampleStart") end},
   {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
   {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
-  {function(d) end},
+})
+-- page 4
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."n",d) end,function() return "n: "..params:string(dat.ti.."n") end},
+  {function(d) params:delta(dat.ti.."k",d) end,function() return "k: "..params:string(dat.ti.."k") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."sequencer",d) end,function() return "sequencer: "..params:string(dat.ti.."sequencer") end},
+  {function(d) params:delta(dat.ti.."w",d) end,function() return "k: "..params:string(dat.ti.."w") end},
 })
 
 function find_files(folder)
@@ -235,8 +245,11 @@ function init()
   pattern_qn=lattice:new_pattern{
     action=function(v)
       beat=beat+1
+      for _,v in ipairs(dat.tt) do
+        v:emit(beat)
+      end
     end,
-    division=1/4,
+    division=1/8,
   }
   lattice:start()
   reset()
