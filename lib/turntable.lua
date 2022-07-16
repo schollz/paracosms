@@ -42,7 +42,7 @@ function Turntable:init()
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
     {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,response=1,formatter=function(param) return string.format("%2.0f ms",param:get()*1000) end},
   }
-  params:add_group("sample "..self.id,12+#params_menu)
+  params:add_group("sample "..self.id,17+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -90,6 +90,18 @@ function Turntable:init()
   params:set_action(id.."fadetime",function(v)
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
+
+  params:add_separator("sequencer")
+  params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
+  params:add_number(id.."n","n",1,128,16)
+  params:add_number(id.."k","k",0,128,math.random(1,4))
+  params:add_number(id.."w","w",0,128,0)
+  for _,pram in ipairs({"sequencer","n","k","w"}) do
+    params:set_action(self.id..pram,function(v)
+      self.sequence=er.gen(params:get(self.id.."k"),params:get(self.id.."n"),params:get(self.id.."w"))
+    end)
+  end
+
   params:add_separator("modify")
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
@@ -203,6 +215,16 @@ function Turntable:retune()
   self.retuned=true
   print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path)
+end
+
+function Turntable:emit(beat)
+  if params:get(self.id.."oneshot")==1 or params:get(self.id.."sequencer")==1 or self.sequence==nil or (not self.ready) then
+    do return end
+  end
+  local i=((beat-1)%#self.sequence)+1
+  if self.sequence[i] then
+    self:play()
+  end
 end
 
 function Turntable:is_playing()
