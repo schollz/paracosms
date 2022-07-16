@@ -22,6 +22,7 @@ Engine_Paracosms : CroneEngine {
         fnOSC= OSCFunc({
             arg msg, time;
             if (msg[2]==444,{
+                ["trigger",msg[3]].postln;
                 NetAddr("127.0.0.1", 10111).sendMsg("trigger",msg[3],msg[3]);
             },{
                 if (msg[2]==777,{
@@ -64,6 +65,9 @@ Engine_Paracosms : CroneEngine {
         });
         this.addCommand("resetPhase","", { arg msg;
             paracosms.resetPhase();
+        });
+        this.addCommand("pattern","if", { arg msg;
+            paracosms.pattern(msg[1],msg[2].asFloat);
         });
         this.addCommand("record_start","",{ arg msg;
             ouroboros.recordStart();

@@ -28,7 +28,7 @@ Ouroboros {
 			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,
 			recordingTime=0;
 			var imp=Impulse.kr(5)*(recordingTime>0);
-			SendTrig.kr(imp,777,(recordingTime>0)*Stepper.kr(trig:imp,max:recordingTime,step:0.2)/recordingTime*100.0);
+			SendTrig.kr(imp,777,(recordingTime>0)*Stepper.kr(trig:imp,max:1000000,step:1,reset:Trig.kr(Changed.kr(recordingTime)))/recordingTime/5.0*100.0);
 			RecordBuf.ar(
 				inputArray: SoundIn.ar([0,1])*2,
 				bufnum:bufnum,
@@ -39,6 +39,7 @@ Ouroboros {
 				loop:loop,
 				doneAction:2,
 			);
+			FreeSelf.kr(TDelay.kr(Changed.kr(recordingTime),recordingTime));
 
 		}).send(server);
 
@@ -117,13 +118,10 @@ Ouroboros {
 			synRecordTrigger=Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
 				valTriggerTime=SystemClock.seconds;
 				// start the timer to release the recording buffer
-				Routine {
-					[argSeconds,preDelay,argCrossfade].postln;
-					actionStart.value();
-					("ouroborous: recording for"+(argSeconds-preDelay+argCrossfade)+"seconds").postln;
-					(argSeconds-preDelay+argCrossfade).wait;
-					synRecord.free;
-				}.play;
+				[argSeconds,preDelay,argCrossfade].postln;
+				actionStart.value();
+				synRecord.set(\recordingTime,argSeconds-preDelay+argCrossfade);
+				("ouroborous: recording for"+(argSeconds-preDelay+argCrossfade)+"seconds").postln;
 			});
 
 		});
