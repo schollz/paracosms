@@ -15,6 +15,7 @@
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
+lattice_=require("lattice")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false}
@@ -54,11 +55,11 @@ table.insert(enc_func,{
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return params:string(dat.ti.."sampleStart") end},
-  {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return params:string(dat.ti.."sampleEnd") end},
+  {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return "start: "..params:string(dat.ti.."sampleStart") end},
+  {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
-  {function(d) end},
+  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset: "..params:string(dat.ti.."offset") end},
 })
 
 function find_files(folder)
@@ -114,13 +115,18 @@ function init()
   g_=grid_:new()
 
   -- osc
+  local recording_id=0
   osc_fun={
+    trigger=function(args)
+      print("triggered "..args[1])
+    end,
     recording=function(args)
       dat.recording=true
-      local id=tonumber(args[1])
-      if id~=nil then show_message("recording track "..id) end
+      local recording_id=tonumber(args[1])
+      if recording_id~=nil then show_message("recording track "..recording_id) end
     end,
     progress=function(args)
+      show_message(string.format("recording track %d: %2.0f%%",recording_id,tonumber(args[1])))
       show_progress(tonumber(args[1]))
     end,
     recorded=function(args)
@@ -129,6 +135,7 @@ function init()
       local id=tonumber(args[1])
       local filename=args[2]
       if id~=nil and filename~=nil then
+        show_progress(100)
         show_message("recorded track "..id)
         params:set(id.."file",filename)
         dat.ti=id
@@ -216,6 +223,24 @@ function init()
     startup(false)
   end)
 
+  -- initialize lattice
+  lattice=lattice_:new()
+  local beat=0
+  pattern_qn=lattice:new_pattern{
+    action=function(v)
+      beat=beat+1
+      dat.tt[2]:play()
+      print("qn",(beat-1)%4+1)
+    end,
+    division=1/4,
+  }
+  lattice:start()
+  reset()
+end
+
+function reset()
+  engine.resetPhase()
+  lattice:hard_restart()
 end
 
 function startup(on)

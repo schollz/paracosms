@@ -27,7 +27,7 @@ Paracosms {
 		params=Dictionary.new();
 
 		watching=0;
-		busPhasor=Bus.control(server,1);
+		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
 			SynthDef("defPlay"++ch,{
 				arg amp=0.01,ampLag=0.2,
@@ -46,10 +46,11 @@ Paracosms {
 				var snd,pos,seconds,tsWindow;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
-				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr(offset));
+				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
+					(offset));
 				var manuTrig=Trig.ar(t_manu);
-				var syncPos=SetResetFF.kr(syncTrig,manuTrig)*Latch.kr((In.kr(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
-				var manuPos=SetResetFF.kr(manuTrig,syncTrig)*Wrap.kr(syncPos+Latch.kr(t_manu*frames,t_manu),0,frames);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
+				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
 				fadeInTime=fadeInTime*(1-oneshot); // if one-shot then don't fade in
@@ -98,14 +99,19 @@ Paracosms {
 		});
 
 		SynthDef("defPhasor",{
-			arg out,rate=1,rateLag=0.2,t_sync=0;
-			Out.kr(out,Phasor.kr(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
+			arg out,rate=1.0,rateLag=0.2,t_sync=0;
+			Out.ar(out,Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
 		}).send(server);
 
 		SynthDef("defPattern",{
-			arg offset=0,duration=8,id=0;
-			var syncPos=(In.kr(busPhase)+offset).mod(duration);
-			SendTrig.kr(Trig.kr(DC.kr(syncPos)>syncPos),444,id);
+			arg offset=0.0,duration=8,id=0,busPhase,phaseStart=0.0;
+			var phase=In.ar(busPhase);
+			var syncPos=(phase+offset).mod(duration);
+			var pos=(DC.ar(phase)+offset).mod(duration);
+			// SendTrig.kr(Impulse.kr(0.5),444,pos);
+			// SendTrig.kr(TDelay.kr(Impulse.kr(0.5),0.5),444,syncPos);
+			// SendTrig.kr(TDelay.kr(Impulse.kr(0.5),1.0),444,pos);
+			SendTrig.ar(Changed.ar(pos>syncPos)*(pos>syncPos),444,pos);
 		}).send(server);
 
 
@@ -113,6 +119,11 @@ Paracosms {
 
 		syns.put("phasor",Synth.head(server,"defPhasor",[\out,busPhasor]));
 
+	}
+
+	pattern {
+		arg id,duration;
+		Synth.after(syns.at("phasor"),"defPattern",[\duration,duration,\id,id,\busPhase,busPhasor]);
 	}
 
 	watch {
@@ -249,8 +260,10 @@ Paracosms {
 	}
 
 	resetPhase {
-		syns.at("phasor").set(\t_sync,1);
-		// TODO: update all current synths
+		syns.at("phasor").set(\t_sync,1);		
+		syns.keysValuesDo({ arg note, val;
+			val.set(\t_sync,1);
+		});
 	}
 
 	free {

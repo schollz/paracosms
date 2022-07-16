@@ -32,13 +32,14 @@ function Turntable:init()
   -- setup params
   local id=self.id
   local params_menu={
-    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz"},
-    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,formatter=function(param) return param:get()==1 and "on" or "off" end},
-    {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,unit="x"},
-    {id="tsSeconds",name="timestretch window",min=clock.get_beat_sec()/64,max=20,exp=false,div=clock.get_beat_sec()/64,default=clock.get_beat_sec()/8,unit="s"},
-    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
-    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
-    {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,formatter=function(param) return string.format("%d ms",param:get()*1000) end},
+    {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
+    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
+    {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,response=1,formatter=function(param) return param:get()==1 and "on" or "off" end},
+    {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,response=1,unit="x"},
+    {id="tsSeconds",name="timestretch window",min=clock.get_beat_sec()/64,max=20,exp=false,response=1,div=clock.get_beat_sec()/64,default=clock.get_beat_sec()/8,unit="s"},
+    {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
+    {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
+    {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,response=1,formatter=function(param) return string.format("%2.0f ms",param:get()*1000) end},
   }
   params:add_group("sample "..self.id,12+#params_menu)
   params:add_file(id.."file","file",_path.audio)
@@ -78,7 +79,7 @@ function Turntable:init()
     }
     params:set_action(id..pram.id,function(v)
       debounce_fn[id..pram.id]={
-        3,function()
+        pram.response or 3,function()
           engine.set(id,pram.id,params:get(id..pram.id),0.2)
         end,
       }
