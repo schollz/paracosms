@@ -24,9 +24,13 @@ Engine_Paracosms : CroneEngine {
             if (msg[2]==444,{
                 NetAddr("127.0.0.1", 10111).sendMsg("trigger",msg[3],msg[3]);
             },{
-                if (msg[2]>0,{
-                    // cursor ID, POSITION
-                    NetAddr("127.0.0.1", 10111).sendMsg("data",msg[2],msg[3]);
+                if (msg[2]==777,{
+                    NetAddr("127.0.0.1", 10111).sendMsg("progress",msg[3],msg[3]);
+                },{
+                    if (msg[2]>0,{
+                        // cursor ID, POSITION
+                        NetAddr("127.0.0.1", 10111).sendMsg("data",msg[2],msg[3]);
+                    });
                 });
             });
         },'/tr', context.server.addr);
@@ -71,7 +75,7 @@ Engine_Paracosms : CroneEngine {
             var crossfade=msg[4];
             var threshold=msg[5];
             ouroboros.record(seconds,crossfade,threshold,{
-              NetAddr("127.0.0.1", 10111).sendMsg("recording",id,filename);
+              //NetAddr("127.0.0.1", 10111).sendMsg("recording",id,filename);
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{

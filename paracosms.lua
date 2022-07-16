@@ -120,6 +120,9 @@ function init()
       local id=tonumber(args[1])
       if id~=nil then show_message("recording track "..id) end
     end,
+    progress=function(args)
+      show_progress(tonumber(args[1]))
+    end,
     recorded=function(args)
       dat.recording=false
       dat.recording_primed=false
