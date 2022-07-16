@@ -37,11 +37,11 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."lpf",d) end,function() return params:string(dat.ti.."lpf") end},
+  {function(d) params:delta(dat.ti.."rate",d) end,function() return "rate: "..params:string(dat.ti.."rate") end},
   {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) end},
-  {function(d) end},
+  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
+  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
 })
 -- page 2
 table.insert(enc_func,{
@@ -59,7 +59,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
-  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset: "..params:string(dat.ti.."offset") end},
+  {function(d) end},
 })
 
 function find_files(folder)
@@ -175,13 +175,18 @@ function init()
 
   clock.run(function()
     while true do
-      if #dat.files_to_load>1 and dat.percent_loaded<100 then
-        local inc=100.0/#dat.files_to_load
+      if #dat.files_to_load>1 and dat.percent_loaded<99.9 then
+        local inc=100.0/(#dat.files_to_load*2)
         dat.percent_loaded=0
-        for _,v in ipairs(dat.tt) do
-          dat.percent_loaded=dat.percent_loaded+(v.ready and inc or 0)
+        for i=1,112 do
+          v=dat.tt[i]
+          if v~=nil then
+            dat.percent_loaded=dat.percent_loaded+((v.loaded_file and v.retuned) and inc or 0)
+            dat.percent_loaded=dat.percent_loaded+((v.loaded_file and v.retuned and v.ready) and inc or 0)
+          end
         end
-        show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded))
+        show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded),0.5)
+        show_progress(dat.percent_loaded)
       end
       clock.sleep(1/10)
       redraw()
@@ -214,7 +219,8 @@ function init()
       -- shuffle(possible_files)
       for col,file in ipairs(possible_files) do
         local id=(row-1)*16+col
-        params:set(id.."file",file,true)
+        params:set(id.."file",file)
+        clock.sleep(0.05)
       end
     end
     clock.sleep(1)
@@ -229,8 +235,6 @@ function init()
   pattern_qn=lattice:new_pattern{
     action=function(v)
       beat=beat+1
-      dat.tt[2]:play()
-      print("qn",(beat-1)%4+1)
     end,
     division=1/4,
   }
