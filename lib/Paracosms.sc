@@ -36,18 +36,19 @@ Paracosms {
 				t_sync=1,t_syncLag=0.0,
 				t_manu=0,t_manuLag=0.0,
 				oneshot=0,oneshotLag=0.0,
+				rate=1.0,rateLag=0.0,
 				pan=0,panLag=0.0,
 				sampleStart=0,sampleStartLag=0.0,
 				sampleEnd=1.0,sampleEndLag=0.0,
 				ts=0,tsLag=0.0,
 				tsSeconds=0.25,tsSecondsLag=0.0,
 				tsSlow=1,tsSlowLag=0.0,
-				id=0,dataout=0,fadeInTime=0.1,bufnum,busPhase,out;
+				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,out;
 				var snd,pos,seconds,tsWindow;
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
-					(offset));
+					(offset)+Changed.kr(rate));
 				var manuTrig=Trig.ar(t_manu);
 				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
@@ -60,7 +61,7 @@ Paracosms {
 
 				pos=Phasor.ar(
 					trig:syncTrig+t_manu,
-					rate:1.0*BufRateScale.ir(bufnum)/tsSlow,
+					rate:rate*BufRateScale.ir(bufnum)/tsSlow,
 					start:sampleStart*frames,
 					end:sampleEnd*frames,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
@@ -68,7 +69,7 @@ Paracosms {
 
 				tsWindow=Phasor.ar(
 					trig:manuTrig+t_manu,
-					rate:1.0*BufRateScale.ir(bufnum),
+					rate:rate*BufRateScale.ir(bufnum),
 					start:pos,
 					end:pos+(tsSeconds/duration*frames),
 					resetPos:pos,
@@ -93,7 +94,7 @@ Paracosms {
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				FreeSelf.kr(Trig.kr(amp<0.01));
+				FreeSelf.kr(TDelay.kr(t_free,ampLag));
 				Out.ar(out,snd/10);
 			}).send(server);
 		});
@@ -174,7 +175,7 @@ Paracosms {
 			if (syns.at(id).notNil,{
 				if (syns.at(id).isRunning,{
 					["stop",id].postln;
-					syns.at(id).set("amp",0);
+					syns.at(id).set(\amp,0,\t_free,1);
 				});
 			});
 		}.play;
@@ -206,36 +207,45 @@ Paracosms {
 
 	add {
 		arg id,fname;
-		Buffer.read(server,fname,action:{arg buf;
-			var fadeIn=false;
-			var oldBuf=nil;
-			if (bufs.at(id).notNil,{
-				oldBuf=bufs.at(id);
+		var doRead=true;
+		if (bufs.at(id).notNil,{
+			if (bufs.at(id).path==fname,{
+				doRead=false;
+				["already loaded ",id,fname].postln;
 			});
-			if (syns.at(id).notNil,{
-				if (syns.at(id).isRunning,{
-					syns.at(id).set(\dataout,0);
-					stop(id);
-					fadeIn=true;
+		});
+		if (doRead,{
+			Buffer.read(server,fname,action:{arg buf;
+				var fadeIn=false;
+				var oldBuf=nil;
+				if (bufs.at(id).notNil,{
+					oldBuf=bufs.at(id);
 				});
-			});
+				if (syns.at(id).notNil,{
+					if (syns.at(id).isRunning,{
+						syns.at(id).set(\dataout,0);
+						stop(id);
+						fadeIn=true;
+					});
+				});
 
-			bufs.put(id,buf);
-			("loaded"+PathName(fname).fileName).postln;
-			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
+				bufs.put(id,buf);
+				("loaded"+PathName(fname).fileName).postln;
+				NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
 
-			// free the old buf after some time (in case it is playing and fading out)
-			if (oldBuf.notNil,{
-				Routine{
-					5.sleep;
-					oldBuf.free;
-				}.play;
-			},{
-				params.put(id,Dictionary.new());
+				// free the old buf after some time (in case it is playing and fading out)
+				if (oldBuf.notNil,{
+					Routine{
+						5.sleep;
+						oldBuf.free;
+					}.play;
+				},{
+					params.put(id,Dictionary.new());
+				});
+				// fade in the synth
+				fadeIn.postln;
+				if (fadeIn==true,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
 			});
-			// fade in the synth
-			fadeIn.postln;
-			if (fadeIn==true,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
 		});
 	}
 

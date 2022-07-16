@@ -33,6 +33,7 @@ function Turntable:init()
   local id=self.id
   local params_menu={
     {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
+    {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=3,formatter=function(param) return param:get().."x" end},
     {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,response=1,formatter=function(param) return param:get()==1 and "on" or "off" end},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,response=1,unit="x"},
@@ -161,6 +162,7 @@ function Turntable:load_file(path)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
+  self.loaded_file=true
 end
 
 function Turntable:retune()
@@ -198,6 +200,7 @@ function Turntable:retune()
     self.path=newpath
   end
   self.last_tune=tune
+  self.retuned=true
   print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path)
 end
