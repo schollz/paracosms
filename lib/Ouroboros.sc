@@ -25,8 +25,10 @@ Ouroboros {
 
 
 		SynthDef("defRecordLoop",{
-			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1;
-			var input;
+			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,
+			recordingTime=0;
+			var imp=Impulse.kr(5)*(recordingTime>0);
+			SendTrig.kr(imp,777,(recordingTime>0)*Stepper.kr(trig:imp,max:recordingTime,step:0.2)/recordingTime*100.0);
 			RecordBuf.ar(
 				inputArray: SoundIn.ar([0,1])*2,
 				bufnum:bufnum,
@@ -37,6 +39,7 @@ Ouroboros {
 				loop:loop,
 				doneAction:2,
 			);
+
 		}).send(server);
 
 
