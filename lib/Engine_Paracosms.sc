@@ -7,6 +7,7 @@ Engine_Paracosms : CroneEngine {
     var paracosms;
     var ouroboros;
     var tapedeck;
+    var clouds;
     var fnOSC;
     var startup;
     var startupNum;
@@ -52,7 +53,8 @@ Engine_Paracosms : CroneEngine {
         context.server.sync;
         paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,0);
-        tapedeck=Tapedeck.new(context.server,groupEffects,busTapedeck,0);
+        tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
+        clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
