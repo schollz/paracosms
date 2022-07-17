@@ -17,11 +17,12 @@
 
 https://vimeo.com/730684724
 
-<details><summary><strong>why?</strong></summary>
+<details><summary><strong>why?</strong></summary><br>
 
-in about April 2022 I put away all my instruments (except the norns) and took a "sampling sabbatical". basically I decided to pretty much just use SuperCollider+sox and make non-realtime music with samples. after [developing an album][DevelopingAnAlbum] through this effort (more on that [here][]) I started thinking about whether I could make this approach more *real-time*. so I put together a SuperCollider class I called "[paracosms][]". 
+in april 2022 I put away all my instruments (except the norns) and took a "sample sabbatical". basically I decided to pretty much just use samples with SuperCollider+sox to make non-realtime music. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]). samples are inherently pre-recorded and easy to manipulate in non-realtime ways, but I started thinking about whether I could an approach to using samples in *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables. 
 
-initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. during this self-imposed sabbatical I also played around with making a SuperCollider class to make a multi-head playback/recorder that can do crossfading recordings (like softcut). this became "[ouroborus][]". without intending, I realized that I could combine ourborous with paracosms into a great sampler/looper thing. norns became the glue for that - and it is this *paracosms* script.
+initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. during this self-imposed sabbatical I also played around with making a SuperCollider class to make a multi-head playback/recorder that can do crossfading recordings (like softcut). this became "[ouroborus][]". without intending, I realized that I could combine ourborous with paracosms into a great sampler/looper thing. norns became the glue for that - and it is now this *paracosms* script.
+
 
 </details>
 <br>
@@ -39,23 +40,23 @@ initially I took a bunch of samples I collected and threw them into the grid wit
 
 ### playing
 
-E1 will select sample. K1+E1 will select sample *that is playing*.
+**E1 will select sample. K1+E1 will select sample *that is playing*.**
 
-K3 will play a sample. 
+**K3 will play a sample.** 
 
 if it is a looping sample then the longer you hold K3 will increase the fade time for toggling the sample. if it is a one-shot sample it plays once.
 
 ### recording
 
-K1+K3 will record a sample. 
+**K1+K3 will record a sample.** 
 
 by default it will wait until audio crosses a threshold to start recording. you can start recording immedietly by pressing K1+K3 again. you can change the threshold for recording, the amount of crossfading, and the amount of latency (when automatically detecting) in the params.
 
 ### parameters on the go
 
-K2 will cycle through parameters. 
+**K2 will cycle through parameters.** 
 
-E2/E3 or K1+(E2/E3) will modulate the current parameters.
+**E2/E3 or K1+(E2/E3) will modulate the current parameters.**
 
 there are tons of sample-specific parameters in the parameters menu. some of these are broken out into the main UI to make it easier to access and manipulate them on the fly.
 
@@ -77,9 +78,9 @@ you can change the warping at any time by going to the sample and editing the wa
 
 **imported samples:** imported samples are assumed to already have been processed for gapless playback. read the tutorial below to edit your samples for gapless playback:
 
-<details><summary>a tutorial on making audio with gapless playback.</summary>
+<details><summary>a tutorial on making audio with gapless playback.</summary><br>
 
-to aid this, I created [a tool to automatically make seamless loops][AToolToAutomaticallyMakeSeamless] out of audio. to use this tool simply rename your file to include `bpmX` in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". then install `seamlessloop` by running this in maiden:
+I created [a tool to automatically make seamless loops][AToolToAutomaticallyMakeSeamless] out of audio. to use this tool simply rename your file to include `bpmX` in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". then install `seamlessloop` by running this in maiden:
 
 ```
 os.execute("wget -P /tmp/ https://github.com/schollz/seamlessloop/releases/download/v0.1.1/seamlessloop_0.1.1_Linux-RaspberryPi.deb && sudo dpkg --install /tmp/seamlessloop*.deb && seamlessloop --version")
