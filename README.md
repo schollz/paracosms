@@ -123,7 +123,7 @@ first install the 3rd-party engines:
 ;install https://github.com/schollz/supercollider-plugins
 ```
 
-**very important**: it is very important that you now open the supercollider-plugins script and click to install to finish installation.*
+**very important**: it is very important that you now open the supercollider-plugins script and click to install to finish installation.
 
 now install
 
