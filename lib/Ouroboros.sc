@@ -77,10 +77,10 @@ Ouroboros {
 	}
 
 	record {
-		arg argSeconds, argCrossfade, argThreshold, actionStart, action;
+		arg argSeconds, argCrossfade, argThreshold, argPreDelay, actionStart, action;
 	    var valStartTime=0;
     	var valTriggerTime=0;
-		var preDelay=0.03;
+		var preDelay=argPreDelay;
 		// first allocate buffer
 		Buffer.alloc(server,server.sampleRate*180,2,{
 			arg buf1;

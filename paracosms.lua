@@ -113,6 +113,7 @@ function init()
   params:add_separator("globals")
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
+  params:add_number("record_predelay","rec latency (ms)",0,300,120)
   params:add_separator("samples")
 
   -- collect which files
@@ -138,7 +139,7 @@ function init()
     end,
     recording=function(args)
       dat.recording=true
-      local recording_id=tonumber(args[1])
+      recording_id=tonumber(args[1])
       if recording_id~=nil then show_message("recording track "..recording_id) end
     end,
     progress=function(args)
@@ -267,6 +268,7 @@ function init()
     end
     clock.sleep(1)
     startup(true)
+    -- params:default()
     params:bang()
     startup(false)
 
