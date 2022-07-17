@@ -4,6 +4,7 @@ Ouroboros {
 	var synRecord;
 	var synRecordTrigger;
 	var fnXFader;
+	var preDelay;
 
 	*new {
 		arg argServer,argBusOut;
@@ -14,6 +15,7 @@ Ouroboros {
 		arg argServer,argBusOut;
 		server=argServer;
 		busOut=argBusOut;
+		preDelay=0;
 
 		SynthDef("defRecordTrigger",{
 			arg threshold=(-60), volume=0.0, id=0;
@@ -71,6 +73,8 @@ Ouroboros {
 	recordStart {
 		if (synRecordTrigger.notNil,{
 			if (synRecordTrigger.isRunning,{
+				// force recording and set predelay to 0
+				preDelay=0;
 				synRecordTrigger.free;
 			});
 		});
@@ -80,7 +84,7 @@ Ouroboros {
 		arg argSeconds, argCrossfade, argThreshold, argPreDelay, actionStart, action;
 	    var valStartTime=0;
     	var valTriggerTime=0;
-		var preDelay=argPreDelay;
+		preDelay=argPreDelay;
 		// first allocate buffer
 		Buffer.alloc(server,server.sampleRate*180,2,{
 			arg buf1;
