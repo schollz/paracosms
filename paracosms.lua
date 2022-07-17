@@ -279,6 +279,15 @@ function init()
   }
   lattice:start()
   reset()
+
+  -- TEST STUFF
+  clock.run(function()
+    clock.sleep(3)
+    print("STARTING TEST")
+    engine.tapedeck_toggle(1)
+    engine.set(1,"send1",0,0)
+    engine.set(1,"send2",1,0)
+  end)
 end
 
 local ignore_transport=false

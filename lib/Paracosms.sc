@@ -2,7 +2,9 @@ Paracosms {
 
 	var server;
 	var dirCache;
-	var busOut;
+	var busOut1;
+	var busOut2;
+	var busOut3;
 	var busPhasor;
 	var syns;
 	var bufs;
@@ -10,16 +12,18 @@ Paracosms {
 	var watching;
 
 	*new {
-		arg serverName,argBusOut,argDirCache;
-		^super.new.init(serverName,argBusOut,argDirCache);
+		arg serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache;
+		^super.new.init(serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache);
 	}
 
 	init {
-		arg serverName,argBusOut,argDirCache;
+		arg serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache;
 
 		// set arguments
 		server=serverName;
-		busOut=argBusOut;
+		busOut1=argBusOut1;
+		busOut2=argBusOut2;
+		busOut3=argBusOut3;
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();
@@ -43,10 +47,16 @@ Paracosms {
 				ts=0,tsLag=0.0,
 				tsSeconds=0.25,tsSecondsLag=0.0,
 				tsSlow=1,tsSlowLag=0.0,
-				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,out;
+				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,
+				out1=0,out2,out3,send1=1.0,send2=0,send3=0;
+
 				var snd,pos,seconds,tsWindow;
+
+				// determine constants
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
+
+				// determine triggers
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
 					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
 				var manuTrig=Trig.ar(t_manu);
@@ -102,7 +112,10 @@ Paracosms {
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				FreeSelf.kr(TDelay.kr(t_free,ampLag));
-				Out.ar(out,snd/10);
+				snd=snd/10;
+				Out.ar(out1,snd*send1);
+				Out.ar(out2,snd*send2);
+				Out.ar(out3,snd*send3);
 			}).send(server);
 		});
 
@@ -195,7 +208,7 @@ Paracosms {
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				var ampLag=0;
-				var pars=[\id,id,\out,busOut,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
 				if (params.at(id).at("ampLag").notNil,{
 					ampLag=params.at(id).at("ampLag");
 				});
@@ -293,6 +306,9 @@ Paracosms {
 		syns.free;
 		bufs.free;
 		busPhasor.free;
+		busOut1.free;
+		busOut2.free;
+		busOut3.free;
 	}
 
 }
