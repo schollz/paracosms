@@ -50,7 +50,7 @@ function Turntable:init()
     {id="send2",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  params:add_group("sample "..self.id,17+#params_menu)
+  params:add_group("sample "..self.id,18+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -114,6 +114,7 @@ function Turntable:init()
   end
 
   params:add_separator("modify")
+  params:add_option(id.."guess","guess bpm?",{"no","yes"},1)
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
   params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo())

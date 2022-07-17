@@ -111,6 +111,7 @@ where `oneshot=2` defines the oneshot parameter to be activated for all those sa
 - retrigger option for one-shot playback
 - add pattern recorded
 - logarithm hold length?
+- try to guess bpm based on length of sample
 - ~~add midi transports (for syncing)~~
 - ~~load in the 808 kit by default as oneshot into the last row~~
 - ~~add miclouds granulator~~

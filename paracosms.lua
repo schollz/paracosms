@@ -21,8 +21,8 @@ er=require("er")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
+  {folder="/home/we/dust/audio/tehn",params={guess=2}},-- guess will guess the bpm based off the file length
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
-  {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
