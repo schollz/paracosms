@@ -10,17 +10,19 @@ Paracosms {
 	var bufs;
 	var params;
 	var watching;
+	var group;
 
 	*new {
-		arg serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache;
-		^super.new.init(serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache);
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
+		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache);
 	}
 
 	init {
-		arg serverName,argBusOut1,argBusOut2,argBusOut3,argDirCache;
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
 
 		// set arguments
 		server=serverName;
+		group=argGroup;
 		busOut1=argBusOut1;
 		busOut2=argBusOut2;
 		busOut3=argBusOut3;
@@ -138,13 +140,13 @@ Paracosms {
 
 		server.sync;
 
-		syns.put("phasor",Synth.head(server,"defPhasor",[\out,busPhasor]));
+		syns.put("phasor",Synth.head(group,"defPhasor",[\out,busPhasor]));
 
 	}
 
 	pattern {
 		arg id,duration;
-		Synth.after(syns.at("phasor"),"defPattern",[\duration,duration,\id,id,\busPhase,busPhasor]);
+		Synth.tail(group,"defPattern",[\duration,duration,\id,id,\busPhase,busPhasor]);
 	}
 
 	watch {

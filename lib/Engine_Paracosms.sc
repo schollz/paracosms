@@ -12,6 +12,8 @@ Engine_Paracosms : CroneEngine {
     var startupNum;
     var busTapedeck;
     var busClouds;
+    var groupSynths;
+    var groupEffects;
     // Paracosms ^
 
     *new { arg context, doneCallback;
@@ -22,6 +24,10 @@ Engine_Paracosms : CroneEngine {
         // Paracosms specific v0.0.1
         busTapedeck=Bus.audio(context.server,2);
         busClouds=Bus.audio(context.server,2);
+        groupSynths=Group.new;
+        context.server.sync;
+        groupEffects=Group.new(groupSynths,\addAfter);
+        context.server.sync;
 
         // startup systems
         startup=0;
@@ -44,9 +50,9 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,0);
-        tapedeck=Tapedeck.new(context.server,busTapedeck,0);
+        tapedeck=Tapedeck.new(context.server,groupEffects,busTapedeck,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
@@ -105,6 +111,10 @@ Engine_Paracosms : CroneEngine {
         // tapedeck
         this.addCommand("tapedeck_toggle","i",{arg msg;
             tapedeck.toggle(msg[1]);
+        });
+
+        this.addCommand("tapedeck_set","sf",{arg msg;
+            tapedeck.set(msg[1],msg[2]);
         });
 
 
