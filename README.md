@@ -106,7 +106,7 @@ where `oneshot=2` defines the oneshot parameter to be activated for all those sa
 
 ### todo
 
-<summary><details>a list of done and doing.</details>
+<details><summary>a list of done and doing.</summary>
 
 - retrigger option for one-shot playback
 - add pattern recorded
@@ -126,7 +126,7 @@ where `oneshot=2` defines the oneshot parameter to be activated for all those sa
 - ~~add option to declare whether it is “drum” or “melodic”~~
 - ~~when adding buf, check to see if syn is running with that id and replace its bufnum~~
 
-</summary>
+</details>
 
 
 ## Install
