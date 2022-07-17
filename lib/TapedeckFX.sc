@@ -1,4 +1,4 @@
-Tapedeck {
+TapedeckFX {
 
 	var server;
 	var busIn;
