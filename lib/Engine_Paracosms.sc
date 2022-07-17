@@ -6,9 +6,12 @@ Engine_Paracosms : CroneEngine {
     // Paracosms specific v0.1.0
     var paracosms;
     var ouroboros;
+    var tapedeck;
     var fnOSC;
     var startup;
     var startupNum;
+    var busTapedeck;
+    var busClouds;
     // Paracosms ^
 
     *new { arg context, doneCallback;
@@ -17,8 +20,13 @@ Engine_Paracosms : CroneEngine {
 
     alloc {
         // Paracosms specific v0.0.1
+        busTapedeck=Bus.audio(context.server,2);
+        busClouds=Bus.audio(context.server,2);
+
+        // startup systems
         startup=0;
         startupNum=1.0.neg;
+
         fnOSC= OSCFunc({
             arg msg, time;
             if (msg[2]==444,{
@@ -36,8 +44,9 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,0,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,0);
+        tapedeck=Tapedeck.new(context.server,busTapedeck,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
@@ -91,7 +100,12 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("startup","i",{arg msg;
             startup=msg[1];
             startupNum=1.0.neg;
-        })
+        });
+
+        // tapedeck
+        this.addCommand("tapedeck_toggle","i",{arg msg;
+            tapedeck.toggle(msg[1]);
+        });
 
 
         // ^ Paracosms specific
@@ -101,6 +115,8 @@ Engine_Paracosms : CroneEngine {
     free {
         // Paracosms Specific v0.0.1
         paracosms.free;
+        ouroboros.free;
+        tapedeck.free;
         fnOSC.free;
         // ^ Paracosms specific
     }
