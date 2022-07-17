@@ -105,6 +105,7 @@ function init()
     os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
   end
   -- setup effects parameters
+  params_clouds()
   params_tapedeck()
 
   -- setup parameters
@@ -284,16 +285,16 @@ function init()
   reset()
 
   --TEST STUFF
-  clock.run(function()
-    clock.sleep(3)
-    print("STARTING TEST")
-    --engine.tapedeck_toggle(1)
-    -- engine.set(1,"send1",0,0)
-    -- engine.set(1,"send2",1,0)
-    -- engine.set(2,"send1",0,0)
-    -- engine.set(2,"send2",1,0)
-    -- engine.tapedeck_set("amp",0)
-  end)
+  -- clock.run(function()
+  --   clock.sleep(3)
+  --   print("STARTING TEST")
+  --   --engine.tapedeck_toggle(1)
+  --   -- engine.set(1,"send1",0,0)
+  --   -- engine.set(1,"send2",1,0)
+  --   -- engine.set(2,"send1",0,0)
+  --   -- engine.set(2,"send2",1,0)
+  --   -- engine.tapedeck_set("amp",0)
+  -- end)
 end
 
 local ignore_transport=false
@@ -317,7 +318,7 @@ function params_tapedeck()
     {id="lowgain",name="dist low gain",min=0,max=1,exp=false,div=0.01,default=0.1},
     {id="highgain",name="dist high gain",min=0,max=1,exp=false,div=0.01,default=0.1},
     {id="shelvingfreq",name="dist shelf freq",min=50,max=2000,exp=true,div=5,default=600},
-    {id="wowflu",name="wow&flu wet/dry",min=0,max=1,exp=false,div=1,default=1.0},
+    {id="wowflu",name="wow&flu",min=0,max=1,exp=false,div=1,default=0.0,formatter=function(param) return param:get()>0 and "on" or "off" end},
     {id="wobble_rpm",name="wow rpm",min=1,max=120,exp=false,div=1,default=33},
     {id="wobble_amp",name="wow amp",min=0,max=1,exp=false,div=0.01,default=0.05},
     {id="flutter_amp",name="flutter amp",min=0,max=1,exp=false,div=0.01,default=0.03},
@@ -343,6 +344,62 @@ function params_tapedeck()
     }
     params:set_action("tape_"..pram.id,function(v)
       engine.tapedeck_set(pram.id,v)
+    end)
+  end
+end
+
+function params_clouds()
+  local params_menu={
+    {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="pitMin",name="pit min",min=-48,max=48,exp=false,div=0.1,default=-0.1},
+    {id="pitMax",name="pit max",min=-48,max=48,exp=false,div=0.1,default=0.1},
+    {id="pitPer",name="pit per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
+    {id="posMin",name="pos min",min=0,max=1,exp=false,div=0.01,default=0},
+    {id="posMax",name="pos max",min=0,max=1,exp=false,div=0.01,default=0.3},
+    {id="posPer",name="pos per",min=0.1,max=180,exp=true,div=0.1,default=math.random(2,9)},
+    {id="sizeMin",name="size min",min=0,max=1,exp=false,div=0.01,default=0.4},
+    {id="sizeMax",name="size max",min=0,max=1,exp=false,div=0.01,default=0.9},
+    {id="sizePer",name="size per",min=0.1,max=180,exp=true,div=0.1,default=math.random(300,600)/100},
+    {id="densMin",name="dens min",min=0,max=1,exp=false,div=0.01,default=0.33},
+    {id="densMax",name="dens max",min=0,max=1,exp=false,div=0.01,default=0.93},
+    {id="densPer",name="dens per",min=0.1,max=180,exp=true,div=0.1,default=math.random(50,150)/100},
+    {id="texMin",name="tex min",min=0,max=1,exp=false,div=0.01,default=0.3},
+    {id="texMax",name="tex max",min=0,max=1,exp=false,div=0.01,default=0.8},
+    {id="texPer",name="tex per",min=0.1,max=180,exp=true,div=0.1,default=math.random(100,900)/100},
+    {id="drywetMin",name="drywet min",min=0,max=1,exp=false,div=0.01,default=0.5},
+    {id="drywetMax",name="drywet max",min=0,max=1,exp=false,div=0.01,default=1.0},
+    {id="drywetPer",name="drywet per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
+    {id="in_gainMin",name="in_gain min",min=0.125,max=8,exp=false,div=0.125/2,default=0.8},
+    {id="in_gainMax",name="in_gain max",min=0.125,max=8,exp=false,div=0.125/2,default=1.2},
+    {id="in_gainPer",name="in_gain per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
+    {id="spreadMin",name="spread min",min=0,max=1,exp=false,div=0.01,default=0.3},
+    {id="spreadMax",name="spread max",min=0,max=1,exp=false,div=0.01,default=1.0},
+    {id="spreadPer",name="spread per",min=0.1,max=180,exp=true,div=0.1,default=math.random(100,900)/100},
+    {id="rvbMin",name="rvb min",min=0,max=1,exp=false,div=0.01,default=0.1},
+    {id="rvbMax",name="rvb max",min=0,max=1,exp=false,div=0.01,default=0.6},
+    {id="rvbPer",name="rvb per",min=0.1,max=180,exp=true,div=0.1,default=math.random(100,900)/100},
+    {id="fbMin",name="fb min",min=0,max=1,exp=false,div=0.01,default=0.4},
+    {id="fbMax",name="fb max",min=0,max=1,exp=false,div=0.01,default=0.9},
+    {id="fbPer",name="fb per",min=0.1,max=180,exp=true,div=0.1,default=math.random(200,400)/100},
+    {id="grainMin",name="grain freq min",min=0,max=60,exp=false,div=0.1,default=4},
+    {id="grainMax",name="grain freq max",min=0,max=60,exp=false,div=0.1,default=12},
+    {id="grainPer",name="grain freq per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
+  }
+  params:add_group("CLOUDS",1+#params_menu)
+  params:add_option("clouds_activate","include effect",{"no","yes"},1)
+  params:set_action("clouds_activate",function(v)
+    engine.clouds_toggle(v-1)
+  end)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id="clouds_"..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    params:set_action("clouds_"..pram.id,function(v)
+      engine.clouds_set(pram.id,v)
     end)
   end
 end
