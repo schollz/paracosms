@@ -49,6 +49,8 @@ Paracosms {
 				ts=0,tsLag=0.0,
 				tsSeconds=0.25,tsSecondsLag=0.0,
 				tsSlow=1,tsSlowLag=0.0,
+				pan_period=16,pan_strength=0,
+				amp_period=16,amp_strength=0,
 				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,
 				out1=0,out2,out3,send1=1.0,send2=0,send3=0;
 
@@ -94,10 +96,12 @@ Paracosms {
 				));
 
 				// balance the two channels
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
 				snd=Pan2.ar(snd,0.0);
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
 				snd=Balance2.ar(snd[0],snd[1],pan);
 
+				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 
 				// one-shot envelope
