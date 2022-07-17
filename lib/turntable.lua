@@ -149,7 +149,8 @@ function Turntable:init()
     filename=_path.audio.."paracosms/recordings/"..filename
     local seconds=params:get(id.."record_beats")*clock.get_beat_sec()
     local crossfade=params:get("record_crossfade")/16*clock.get_beat_sec()
-    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"))
+    local latency=params:get("record_predelay")/1000
+    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency)
   end)
 
 end

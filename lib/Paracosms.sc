@@ -72,10 +72,10 @@ Paracosms {
 
 				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,ampLag,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
-
+				rate=rate*BufRateScale.ir(bufnum);
 				pos=Phasor.ar(
 					trig:syncTrig+t_manu,
-					rate:rate*BufRateScale.ir(bufnum)/tsSlow,
+					rate:rate/tsSlow,
 					start:sampleStart*frames,
 					end:sampleEnd*frames,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
@@ -83,7 +83,7 @@ Paracosms {
 
 				tsWindow=Phasor.ar(
 					trig:manuTrig+t_manu,
-					rate:rate*BufRateScale.ir(bufnum),
+					rate:rate,
 					start:pos,
 					end:pos+(tsSeconds/duration*frames),
 					resetPos:pos,
@@ -105,7 +105,7 @@ Paracosms {
 				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
 
 				// one-shot envelope
-				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart))-0.01,0.005]),doneAction:oneshot*2);
+				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
 
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
 
