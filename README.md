@@ -14,6 +14,9 @@
 - each sample has **filters, pan+amp lfos, timestretching**
 - global **tapedeck and clouds effects** with per-sample sends 
 
+
+https://vimeo.com/730684724
+
 <details><summary><strong>why?</strong></summary>
 
 in about April 2022 I put away all my instruments (except the norns) and took a "sampling sabbatical". basically I decided to pretty much just use SuperCollider+sox and make non-realtime music with samples. after [developing an album](https://infinitedigits.bandcamp.com/album/paracosms) through this effort (more on that [here](https://llllllll.co/t/paracosms/56683)) I started thinking about whether I could make this approach more *real-time*. so I put together a SuperCollider class I called "[paracosms](https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc)". initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around my class. it was [very fun](https://www.instagram.com/p/CfogWyBFZ-V/). during this self-imposed sabbatical I also played around with making a SuperCollider class to make a multi-head playback/recorder that can do crossfading recordings (like softcut). this became "[ouroborus](https://github.com/schollz/paracosms/blob/main/lib/Ouroboros.sc)". without intending, I realized that I could combine ourborous with paracosms into a great sampler/looper thing. norns became the glue for that - and it is this *paracosms* script.
