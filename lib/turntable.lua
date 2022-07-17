@@ -106,6 +106,9 @@ function Turntable:init()
   params:add_number(id.."w","w",0,128,0)
   for _,pram in ipairs({"sequencer","n","k","w"}) do
     params:set_action(self.id..pram,function(v)
+      if pram=="sequencer" then
+        dat.sequencing[self.id]=v==2 and true or nil
+      end
       self.sequence=er.gen(params:get(self.id.."k"),params:get(self.id.."n"),params:get(self.id.."w"))
     end)
   end

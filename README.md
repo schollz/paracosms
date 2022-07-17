@@ -1,6 +1,6 @@
 # paracosms
 
-> an imagined world emerging from a combination of creators.
+> an imagined world emerging from a combination.
 
 ![paracosms](https://schollz.com/img/dali.png)
 

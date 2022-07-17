@@ -19,15 +19,15 @@ lattice_=require("lattice")
 er=require("er")
 
 engine.name="Paracosms"
-dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0}
+dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  "/home/we/dust/audio/paracosms/row1",
-  "/home/we/dust/audio/paracosms/row2",
-  "/home/we/dust/audio/paracosms/row3",
-  "/home/we/dust/audio/paracosms/row4",
-  "/home/we/dust/audio/paracosms/row5",
-  "/home/we/dust/audio/paracosms/row6",
-  "/home/we/dust/audio/paracosms/row7",
+  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/paracosms/row2"},
+  {folder="/home/we/dust/audio/paracosms/row3"},
+  {folder="/home/we/dust/audio/paracosms/row4"},
+  {folder="/home/we/dust/audio/paracosms/row5"},
+  {folder="/home/we/dust/audio/paracosms/row6"},
+  {folder="/home/we/dust/audio/paracosms/row7",params={oneshot=2}},
 }
 
 global_startup=false
@@ -73,6 +73,7 @@ table.insert(enc_func,{
 })
 
 function find_files(folder)
+  print(folder)
   os.execute("find "..folder.."* -print -type f -name '*.flac' | grep 'wav\\|flac' > /tmp/foo")
   os.execute("find "..folder.."* -print -type f -name '*.wav' | grep 'wav\\|flac' >> /tmp/foo")
   os.execute("cat /tmp/foo | sort | uniq > /tmp/files")
@@ -115,7 +116,8 @@ function init()
   params:add_separator("samples")
 
   -- collect which files
-  for row,folder in ipairs(dat.rows) do
+  for row,v in ipairs(dat.rows) do
+    local folder=v.folder
     local possible_files=find_files(folder)
     for col,fname in ipairs(possible_files) do
       table.insert(dat.files_to_load,{fname=fname,id=(row-1)*16+col})
@@ -254,9 +256,9 @@ function init()
 
   -- load in hardcoded files
   clock.run(function()
-    for row,folder in ipairs(dat.rows) do
+    for row,v in ipairs(dat.rows) do
+      local folder=v.folder
       local possible_files=find_files(folder)
-      -- shuffle(possible_files)
       for col,file in ipairs(possible_files) do
         local id=(row-1)*16+col
         params:set(id.."file",file)
@@ -267,6 +269,22 @@ function init()
     startup(true)
     params:bang()
     startup(false)
+
+    -- make sure we are on the actual first if the first row has nothing
+    enc(1,1);enc(1,-1)
+
+    -- initialize hardcoded parameters
+    for row=1,7 do
+      for col=1,16 do
+        if dat.rows[row].params~=nil then
+          for pram,val in pairs(dat.rows[row].params) do
+            local id=(row-1)*16+col
+            print("setting ",id,pram,val)
+            params:set(id..pram,val)
+          end
+        end
+      end
+    end
   end)
 
   -- initialize lattice
@@ -275,9 +293,9 @@ function init()
   pattern_qn=lattice:new_pattern{
     action=function(v)
       dat.beat=dat.beat+1
-      -- for _,v in ipairs(dat.tt) do
-      --   v:emit(dat.beat)
-      -- end
+      for id,_ in pairs(dat.sequencing) do
+        dat.tt[id]:emit(dat.beat)
+      end
     end,
     division=1/8,
   }
