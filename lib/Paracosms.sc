@@ -48,7 +48,7 @@ Paracosms {
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
-					(offset)+Changed.kr(rate));
+					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
 				var manuTrig=Trig.ar(t_manu);
 				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);

@@ -19,7 +19,7 @@ lattice_=require("lattice")
 er=require("er")
 
 engine.name="Paracosms"
-dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false}
+dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0}
 dat.rows={
   "/home/we/dust/audio/paracosms/row1",
   "/home/we/dust/audio/paracosms/row2",
@@ -183,6 +183,32 @@ function init()
     end
   end
 
+  -- midi
+  midi_device={}
+  midi_device_list={"disabled"}
+  for i,dev in pairs(midi.devices) do
+    if dev.port~=nil then
+      local name=string.lower(dev.name).." "..i
+      table.insert(midi_device_list,name)
+      print("adding "..name.." to port "..dev.port)
+      midi_device[name]={
+        name=name,
+        port=dev.port,
+        midi=midi.connect(dev.port),
+      }
+      midi_device[name].midi.event=function(data)
+        local msg=midi.to_msg(data)
+        if msg.type=="clock" then do return end end
+-- OP-1 fix for transport
+        if msg.type=='start' or msg.type=='continue' then
+          reset()
+        elseif msg.type=="stop" then
+        elseif msg.type=="note_on" then
+        end
+      end
+    end
+  end
+
   clock.run(function()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<99.9 then
@@ -241,13 +267,13 @@ function init()
 
   -- initialize lattice
   lattice=lattice_:new()
-  local beat=0
+  dat.beat=0
   pattern_qn=lattice:new_pattern{
     action=function(v)
-      beat=beat+1
-      for _,v in ipairs(dat.tt) do
-        v:emit(beat)
-      end
+      dat.beat=dat.beat+1
+      -- for _,v in ipairs(dat.tt) do
+      --   v:emit(dat.beat)
+      -- end
     end,
     division=1/8,
   }
@@ -255,9 +281,23 @@ function init()
   reset()
 end
 
+local ignore_transport=false
+function clock.transport.start()
+  if ignore_transport then
+    do return end
+  end
+  reset()
+end
+
 function reset()
+  dat.beat=0
   engine.resetPhase()
+  ignore_transport=true
   lattice:hard_restart()
+  clock.run(function()
+    clock.sleep(1)
+    ignore_transport=false
+  end)
 end
 
 function startup(on)
