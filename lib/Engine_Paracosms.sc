@@ -114,9 +114,16 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("tapedeck_toggle","i",{arg msg;
             tapedeck.toggle(msg[1]);
         });
-
         this.addCommand("tapedeck_set","sf",{arg msg;
             tapedeck.set(msg[1],msg[2]);
+        });
+
+        // clouds
+        this.addCommand("clouds_toggle","i",{arg msg;
+            clouds.toggle(msg[1]);
+        });
+        this.addCommand("clouds_set","sf",{arg msg;
+            clouds.set(msg[1],msg[2]);
         });
 
 
@@ -129,6 +136,7 @@ Engine_Paracosms : CroneEngine {
         paracosms.free;
         ouroboros.free;
         tapedeck.free;
+        clouds.free;
         fnOSC.free;
         // ^ Paracosms specific
     }
