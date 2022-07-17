@@ -94,7 +94,19 @@ os.execute("seamlessloop --in-folder ~/dust/audio/loops --out-folder ~/dust/audi
 
 </details>
 
-### Todo
+## loading sample banks
+
+sample banks can be loaded by editing the main script [in these lines](https://github.com/schollz/paracosms/blob/4338e7306809f3051c482e87a62fd55aadf4c594/paracosms.lua#L24-L30). there are seven lines that contain information about the folders for each block (one block = 16 samples, or 1 row on the grid), along with any parameters that you want to set for that row. for example, to load the 909 samples on the norns into the first block you could set it to:
+
+```lua
+{folder="/home/we/dust/audio/x0x/909",params={oneshot=2}}
+```
+
+where `oneshot=2` defines the oneshot parameter to be activated for all those samples (as opposed to looping).
+
+### todo
+
+<summary><details>a list of done and doing.</details>
 
 - retrigger option for one-shot playback
 - add pattern recorded
@@ -114,8 +126,12 @@ os.execute("seamlessloop --in-folder ~/dust/audio/loops --out-folder ~/dust/audi
 - ~~add option to declare whether it is “drum” or “melodic”~~
 - ~~when adding buf, check to see if syn is running with that id and replace its bufnum~~
 
+</summary>
+
 
 ## Install
+
+this script is not available on maiden because its install process requires two steps.
 
 first install the 3rd-party engines:
 
@@ -130,6 +146,8 @@ now install
 ```
 ;install https://github.com/schollz/paracosms
 ```
+
+and restart norns to complete!
 
 [DevelopingAnAlbum]: https://infinitedigits.bandcamp.com/album/paracosms
 [here]: https://llllllll.co/t/paracosms/56683
