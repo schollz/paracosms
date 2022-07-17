@@ -78,13 +78,13 @@ Tapedeck {
 			"tapedeck: running with buffer:".postln;
 			buf.postln;
 		},{
+			["tapedeck: stopped"].postln;
 			if (syn.notNil,{
 				if (syn.isRunning,{
+					["tapedeck: freed"].postln;
 					syn.free;
-					buf.free;
-				})
-			})
-			["tapedeck: stopped"].postln;
+				});
+			});
 		})
 	}
 

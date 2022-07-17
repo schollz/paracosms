@@ -104,6 +104,9 @@ function init()
   for i=1,8 do
     os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
   end
+  -- setup effects parameters
+  params_tapedeck()
+
   -- setup parameters
   params:add_separator("globals")
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
@@ -284,10 +287,12 @@ function init()
   clock.run(function()
     clock.sleep(3)
     print("STARTING TEST")
-    engine.tapedeck_toggle(1)
-    engine.set(1,"send1",0,0)
-    engine.set(1,"send2",1,0)
-    engine.tapedeck_set("amp",0)
+    --engine.tapedeck_toggle(1)
+    -- engine.set(1,"send1",0,0)
+    -- engine.set(1,"send2",1,0)
+    -- engine.set(2,"send1",0,0)
+    -- engine.set(2,"send2",1,0)
+    -- engine.tapedeck_set("amp",0)
   end)
 end
 
@@ -297,6 +302,49 @@ function clock.transport.start()
     do return end
   end
   reset()
+end
+
+function params_tapedeck()
+  local params_menu={
+    {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="tape_wet",name="tape wet/dry",min=0,max=1,exp=false,div=0.01,default=0.8},
+    {id="tape_bias",name="tape bias",min=0,max=1,exp=false,div=0.01,default=0.7},
+    {id="saturation",name="tape saturation",min=0,max=1,exp=false,div=0.01,default=0.9},
+    {id="drive",name="tape drive",min=0,max=1,exp=false,div=0.01,default=0.65},
+    {id="dist_wet",name="dist wet/dry",min=0,max=1,exp=false,div=0.01,default=0.05},
+    {id="drivegain",name="dist drive",min=0,max=1,exp=false,div=0.01,default=0.4},
+    {id="dist_bias",name="dist bias",min=0,max=1,exp=false,div=0.01,default=0.2},
+    {id="lowgain",name="dist low gain",min=0,max=1,exp=false,div=0.01,default=0.1},
+    {id="highgain",name="dist high gain",min=0,max=1,exp=false,div=0.01,default=0.1},
+    {id="shelvingfreq",name="dist shelf freq",min=50,max=2000,exp=true,div=5,default=600},
+    {id="wowflu",name="wow&flu wet/dry",min=0,max=1,exp=false,div=1,default=1.0},
+    {id="wobble_rpm",name="wow rpm",min=1,max=120,exp=false,div=1,default=33},
+    {id="wobble_amp",name="wow amp",min=0,max=1,exp=false,div=0.01,default=0.05},
+    {id="flutter_amp",name="flutter amp",min=0,max=1,exp=false,div=0.01,default=0.03},
+    {id="flutter_fixedfreq",name="flutter freq",min=0.1,max=12,exp=false,div=0.1,default=6},
+    {id="flutter_variationfreq",name="flutter var freq",min=0.1,max=12,exp=false,div=0.1,default=2},
+    {id="hpf",name="hpf",min=10,max=2000,exp=true,div=5,default=60},
+    {id="hpfqr",name="hpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
+    {id="lpf",name="lpf",min=200,max=20000,exp=true,div=100,default=18000},
+    {id="lpfqr",name="lpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
+  }
+  params:add_group("TAPEDECK",1+#params_menu)
+  params:add_option("tapedeck_activate","include effect",{"no","yes"},1)
+  params:set_action("tapedeck_activate",function(v)
+    engine.tapedeck_toggle(v-1)
+  end)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id="tape_"..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    params:set_action("tape_"..pram.id,function(v)
+      engine.tapedeck_set(pram.id,v)
+    end)
+  end
 end
 
 function reset()

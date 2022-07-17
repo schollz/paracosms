@@ -41,6 +41,9 @@ function Turntable:init()
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
     {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,response=1,formatter=function(param) return string.format("%2.0f ms",param:get()*1000) end},
+    {id="send1",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send2",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
   params:add_group("sample "..self.id,17+#params_menu)
   params:add_file(id.."file","file",_path.audio)
