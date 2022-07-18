@@ -1,5 +1,16 @@
 -- paracosms
 --
+--
+-- llllllll.co/t/?
+--
+--
+--
+--    ▼ instructions below ▼
+-- K3 start/stops sample
+-- (hold length = fade)
+-- K1+K3 primes recording
+-- (when primed, starts)
+--
 -- E1 select sample
 -- K1+E1 select running sample
 --
@@ -7,10 +18,9 @@
 -- E2/E3 modulate parameter
 -- K1+E2/E3 modulate more
 --
--- K3 start/stops sample
--- (hold length = fade)
--- K1+K3 primes recording
--- (when primed, starts)
+--
+--
+--
 
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
