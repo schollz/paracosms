@@ -5,6 +5,8 @@ Ouroboros {
 	var synRecordTrigger;
 	var fnXFader;
 	var preDelay;
+	var busStartFrame;
+	var busEndFrame;
 
 	*new {
 		arg argServer,argBusOut;
@@ -16,6 +18,9 @@ Ouroboros {
 		server=argServer;
 		busOut=argBusOut;
 		preDelay=0;
+
+		busStartFrame=Bus.control(server,1);
+		busEndFrame=Bus.control(server,1);
 
 		SynthDef("defRecordTrigger",{
 			arg threshold=(-60), volume=0.0, id=0;
@@ -42,13 +47,42 @@ Ouroboros {
 				doneAction:2,
 			);
 			FreeSelf.kr(TDelay.kr(Changed.kr(recordingTime),recordingTime));
+		}).send(server);
 
+
+		SynthDef("defRecord",{
+			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
+			startFrameBus,endFrameBus,t_record=0,threshold=60.neg;
+			var input=SoundIn.ar([0,1]);
+			var inputForTrigger=Mix.new(input)*EnvGen.ar(Env.new([0,1],[0.2]));
+			var coyoteTrig=Trig.kr(Coyote.kr(inputForTrigger,fastLag:0.05,fastMul:0.9,thresh:threshold.dbamp,minDur:0.05));
+			var recordTrig=Latch.kr(DC.kr(1),coyoteTrig+t_record);
+			var imp=Impulse.kr(5)*recordTrig;
+			var pos=Phasor.ar(
+				rate:1,
+				start:0,
+				end:28800000, // 10 minutes
+			);
+			var startFrame=Latch.kr(pos,recordTrig);
+			var endFrame=(recordTrig*(startFrame+recordingFrames))+((1-recordTrig)*28800000);
+			BufWr.ar(
+				inputArray: input*4,
+				bufnum:bufnum,
+				phase:pos,
+			);
+			// send the startFrame
+			Out.kr(startFrameBus,startFrame);
+			// send the endFrame
+			Out.kr(endFrameBus,endFrame);
+			// send the current position in the recording
+			SendTrig.kr(imp,777,(pos-startFrame)/(endFrame-startFrame)*100);
+			// free self when the position passes the end frame
+			FreeSelf.kr(pos>endFrame);
 		}).send(server);
 
 
 		// https://fredrikolofsson.com/f0blog/buffer-xfader/
-		fnXFader ={|inBuffer, duration= 2, curve= -2, action|
-			var frames= duration*inBuffer.sampleRate;
+		fnXFader ={|inBuffer, frames= 2, curve= -2, action|
 			if(frames>inBuffer.numFrames, {
 				"xfader: crossfade duration longer than half buffer - clipped.".warn;
 			});
@@ -71,11 +105,11 @@ Ouroboros {
 	}
 
 	recordStart {
-		if (synRecordTrigger.notNil,{
-			if (synRecordTrigger.isRunning,{
+		if (synRecord.notNil,{
+			if (synRecord.isRunning,{
 				// force recording and set predelay to 0
 				preDelay=0;
-				synRecordTrigger.free;
+				synRecord.set(\t_record,1);
 			});
 		});
 	}
@@ -89,27 +123,33 @@ Ouroboros {
 		Buffer.alloc(server,server.sampleRate*180,2,{
 			arg buf1;
 			"ouroborous: buffer ready".postln;
-			valStartTime=SystemClock.seconds;
 			// start the recording
-			synRecord=Synth("defRecordLoop",[\bufnum,buf1,\t_trig,1,\run,1,\loop,0]).onFree({
+			synRecord=Synth("defRecord",
+				[\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
+				\recordingFrames,(argSeconds+argCrossfade)*server.sampleRate,\threshold,argThreshold]
+			).onFree({
 				arg syn;
-				var valFinishTime=SystemClock.seconds;
-				var frameStart=((valTriggerTime-valStartTime-preDelay)*server.sampleRate).round.asInteger;
-				var frameTotal=((valFinishTime-valTriggerTime)*server.sampleRate).round.asInteger;
+				var frameStart=busStartFrame.getSynchronous-(preDelay*server.sampleRate).round; 
+				var frameEnd=busEndFrame.getSynchronous;
+				var frameTotal=(frameEnd-frameStart).round.asInteger;
 				if (frameStart<0,{
 					frameStart=0;
 				});
-				("ouroborous: done recording."+(valFinishTime-valTriggerTime)+"seconds recorded after waiting"+(valTriggerTime-valStartTime)+"seconds").postln;
+				("ouroborous: done recording."+(frameTotal/server.sampleRate)+"seconds").postln;
 				["frameStart",frameStart,"frameTotal",frameTotal].postln;
 				Buffer.alloc(server, frameTotal, buf1.numChannels, {|buf2|
+					["alloced",buf2].postln;
 					buf1.loadToFloatArray(
 						index:frameStart,
 						count:frameTotal,
 						action:{|arr|
 							buf2.loadCollection(arr,0,action:{ arg buf3;
-								buf3.postln;
-								argSeconds.postln;
-								fnXFader.value(buf3,buf3.duration-argSeconds,-2,{ arg buf4;
+								var crossfadeFrames=frameTotal-((argSeconds*server.sampleRate).round.asInteger);
+								["frameTotal",frameTotal,"((argSeconds*server.sampleRate).round.asInteger)",((argSeconds*server.sampleRate).round.asInteger)].postln;
+								["loaded",buf3].postln;
+								["argSeconds",argSeconds,"argCrossfade",argCrossfade,"crossfadeFrames",crossfadeFrames].postln;
+								fnXFader.value(buf3,crossfadeFrames,-2,{ arg buf4;
+									["faded",buf4].postln;
 									action.value(buf4);
 								});
 							});
@@ -118,15 +158,15 @@ Ouroboros {
 				});
 			});
 
-			// start the recording trigger
-			synRecordTrigger=Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
-				valTriggerTime=SystemClock.seconds;
-				// start the timer to release the recording buffer
-				[argSeconds,preDelay,argCrossfade].postln;
-				actionStart.value();
-				synRecord.set(\recordingTime,argSeconds-preDelay+argCrossfade);
-				("ouroborous: recording for"+(argSeconds-preDelay+argCrossfade)+"seconds").postln;
-			});
+			// // start the recording trigger
+			// synRecordTrigger=Synth.new("defRecordTrigger",[\threshold,argThreshold]).onFree({arg v;
+			// 	valTriggerTime=SystemClock.seconds;
+			// 	// start the timer to release the recording buffer
+			// 	[argSeconds,preDelay,argCrossfade].postln;
+			// 	actionStart.value();
+			// 	synRecord.set(\recordingTime,argSeconds-preDelay+argCrossfade);
+			// 	("ouroborous: recording for"+(argSeconds-preDelay+argCrossfade)+"seconds").postln;
+			// });
 
 		});
 	}

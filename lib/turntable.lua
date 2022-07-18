@@ -158,6 +158,7 @@ function Turntable:init()
     dat.recording_primed=true
     print("record_on",id)
     show_message("ready to record "..id)
+    dat.recording_id=id
     local datetime=util.os_capture("date +%Y%m%d%H%m%S")
     local filename=string.format("%s_bpm%d.wav",datetime,clock.get_tempo())
     filename=_path.audio.."paracosms/recordings/"..filename
