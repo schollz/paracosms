@@ -145,16 +145,19 @@ function init()
     os.execute("cp /home/we/dust/code/paracosms/lib/row1/* /home/we/dust/audio/paracosms/row1/")
     params:set("clock_tempo",120)
     clock.run(function()
-      clock.sleep(1)
-      show_message("WELCOME FIRST TIME USER")
-      clock.sleep(2)
-      show_message("WELCOME FIRST TIME USER")
+      show_message("WELCOME TO PARACOSMS",3)
       clock.sleep(3)
-      show_message("WELCOME FIRST TIME USER")
-      clock.sleep(4)
-      show_message("WELCOME FIRST TIME USER")
-      clock.sleep(5)
-      show_message("WELCOME FIRST TIME USER")
+      show_message("K1 TO EXPLORE SAMPLES")
+      clock.sleep(2)
+      show_message("K3 TO PLAY")
+      clock.sleep(2)
+      show_message("K1+K3 TO RECORD")
+      clock.sleep(2)
+      show_message("K2/K1+K2 TO CYCLE PARAM")
+      clock.sleep(2)
+      show_message("E2/E3 TO CHANGE PARAM")
+      clock.sleep(2)
+      show_message("K1+E2/E3 TO CHANGE PARAM")
     end)
   end
 
@@ -287,7 +290,9 @@ function init()
             end
           end
           if dat.percent_loaded>=0 and dat.percent_loaded<=100 then
-            show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded),0.5)
+            if not first_time then
+              show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded),0.5)
+            end
             show_progress(dat.percent_loaded)
           end
         end
@@ -619,6 +624,7 @@ function show_progress(val)
 end
 
 function show_message(message,seconds)
+  seconds=seconds or 2
   show_message_clock=10*seconds
   show_message_text=message
 end
