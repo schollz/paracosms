@@ -194,15 +194,14 @@ Paracosms {
 
 	stop {
 		arg id;
-		Routine {
-			0.1.wait;
-			if (syns.at(id).notNil,{
-				if (syns.at(id).isRunning,{
-					["stop",id].postln;
-					syns.at(id).set(\amp,0,\t_free,1);
-				});
+		if (syns.at(id).notNil,{
+			["stop",id].postln;
+			if (syns.at(id).isRunning,{
+				syns.at(id).set(\amp,0,\t_free,1);
+			},{
+				syns.at(id).free;
 			});
-		}.play;
+		});
 	}
 
 	play {
