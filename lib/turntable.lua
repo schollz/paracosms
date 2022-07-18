@@ -180,8 +180,12 @@ function Turntable:play()
   engine.play(self.id)
 end
 
+function Turntable:beats()
+  return self:duration()/clock.get_beat_sec()
+end
+
 function Turntable:duration()
-  local duration=1
+  local duration=0
   if self.vw~=nil and self.vw.duration~=nil then
     duration=self.vw.duration
   end
@@ -209,6 +213,7 @@ function Turntable:load_file(path)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
+  params:set(self.id.."record_beats",self:beats())
   self.loaded_file=true
 end
 

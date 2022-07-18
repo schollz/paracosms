@@ -48,20 +48,20 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 **E1 will select sample. K1+E1 will select sample *that is playing*.**
 
-**K3 will play a sample.** 
+**K1+K3 will play a sample.** 
 
 
 samples in the looping mode will fade with a duration according to how long you hold K3. samples in the one-shot mode will play instantly.
 
 ### recording
 
-**K1+K3 will prime a recording.** 
+**K1+K2 will prime a recording.** 
 
-by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the moments right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. also, you can skip waiting and **you can start recording immediately by pressing K1+K3 again.**
+by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the moments right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. also, you can skip waiting and **you can start recording immediately by pressing K1+K2 again.**
 
 ### parameters on the go
 
-**K2 will cycle through parameters.** 
+**K2/K3 will cycle through parameters.** 
 
 **E2/E3 or K1+(E2/E3) will modulate the current parameters.**
 
@@ -135,6 +135,7 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 ### known bugs
 
+- rarely a bug occurs where SuperCollider does not free all the synths when exiting. I've found this to happen infrequently and haven't been able to reproduce it. it is unexpected behavior because [all synths and buffers are explicitly freed](https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc#L303-L308) when exiting.
 - as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 
