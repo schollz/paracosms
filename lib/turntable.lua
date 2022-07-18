@@ -39,9 +39,9 @@ function Turntable:init()
     {id="pan_period",name="pan lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="pan_strength",name="pan lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=1,formatter=function(param) return param:get().."x" end},
-    {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
+    {id="lpf",name="lpf",min=100,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="lpfqr",name="lpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
-    {id="hpf",name="hpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
+    {id="hpf",name="hpf",min=10,max=20000,exp=true,div=10,default=10,unit="Hz",response=1},
     {id="hpfqr",name="hpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,response=1,formatter=function(param) return param:get()==1 and "on" or "off" end},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,response=1,unit="x"},
@@ -90,12 +90,12 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
-      if pram.id=="send2" then
+      if pram.id=="send2" and params:get(id..pram.id)>0 then
         if params:get("tapedeck_activate")==1 then
           params:set("tapedeck_activate",2)
         end
       end
-      if pram.id=="send3" then
+      if pram.id=="send3" and params:get(id..pram.id)>0 then
         if params:get("clouds_activate")==1 then
           params:set("clouds_activate",2)
         end
@@ -245,7 +245,7 @@ function Turntable:retune()
   self.path=self.path_original
   if bpm~=clock_tempo or tune~=self.last_tune then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-    local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),clock.get_tempo())
+    local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),math.floor(clock.get_tempo()))
     if not util.file_exists(newpath) then
       print(string.format("turntable%d: retuning %s",self.id,self.path_original))
       local cmd=string.format("sox %s %s ",self.path,newpath)

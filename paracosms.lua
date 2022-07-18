@@ -21,9 +21,8 @@ er=require("er")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  {folder="/home/we/dust/audio/tehn",params={guess=2}},
-  {folder="/home/we/dust/audio/paracosms/row3"},
-  -- {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
+  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
@@ -39,10 +38,10 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
   {function(d) params:delta(dat.ti.."amp_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."amp_strength")==0 and "off" or params:string(dat.ti.."amp_strength"))
   end},
-  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."amp_period",d) end,function()
     return "lfo period: "..params:string(dat.ti.."amp_period")
@@ -52,10 +51,10 @@ table.insert(enc_func,{
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."pan",d) end,function() return "pan: "..params:string(dat.ti.."pan") end},
   {function(d) params:delta(dat.ti.."pan_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."pan_strength")==0 and "off" or params:string(dat.ti.."pan_strength"))
   end},
-  {function(d) params:delta(dat.ti.."pan",d) end,function() return params:string(dat.ti.."pan") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."pan_period",d) end,function()
     return "lfo period: "..params:string(dat.ti.."pan_period")
@@ -138,9 +137,16 @@ function init()
   -- make sure cache directory exists
   os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
   os.execute("mkdir -p /home/we/dust/audio/paracosms/recordings")
+  local first_time=not util.file_exists("/home/we/dust/audio/paracosms/row1")
   for i=1,8 do
     os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
   end
+  if first_time then
+    print("FIRST TIME START")
+    os.execute("cp /home/we/dust/code/paracosms/lib/row1/* /home/we/dust/audio/paracosms/row1/")
+    params:set("clock_tempo",120)
+  end
+
   -- setup effects parameters
   params_clouds()
   params_tapedeck()
@@ -256,16 +262,24 @@ function init()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<99.9 then
         local inc=100.0/(#dat.files_to_load*2)
-        dat.percent_loaded=0
-        for i=1,112 do
-          v=dat.tt[i]
-          if v~=nil then
-            dat.percent_loaded=dat.percent_loaded+((v.loaded_file and v.retuned) and inc or 0)
-            dat.percent_loaded=dat.percent_loaded+((v.loaded_file and v.retuned and v.ready) and inc or 0)
+        if inc~=nil then
+          dat.percent_loaded=0
+          for i=1,112 do
+            v=dat.tt[i]
+            if v~=nil and v.loaded_file~=nil then
+              if v.retuned then
+                dat.percent_loaded=dat.percent_loaded+inc
+                if v.ready then
+                  dat.percent_loaded=dat.percent_loaded+inc
+                end
+              end
+            end
+          end
+          if dat.percent_loaded>=0 and dat.percent_loaded<=100 then
+            show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded),0.5)
+            show_progress(dat.percent_loaded)
           end
         end
-        show_message(string.format("%2.1f%% loaded... ",dat.percent_loaded),0.5)
-        show_progress(dat.percent_loaded)
       end
       clock.sleep(1/10)
       redraw()
@@ -304,7 +318,7 @@ function init()
     end
   end
 
-  -- load in hardcoded files
+  -- -- load in hardcoded files
   clock.run(function()
     for row,v in ipairs(dat.rows) do
       local folder=v.folder
@@ -321,9 +335,22 @@ function init()
     params:bang()
     startup(false)
 
+    -- re-initialize after-fx parameters
+    for row=1,7 do
+      for col=1,16 do
+        if dat.rows[row].params~=nil then
+          for pram,val in pairs(dat.rows[row].params) do
+            local id=(row-1)*16+col
+            if pram=="oneshot" then
+              print("setting ",id,pram,val)
+              params:set(id..pram,val)
+            end
+          end
+        end
+      end
+    end
     -- make sure we are on the actual first if the first row has nothing
     enc(1,1);enc(1,-1)
-
   end)
 
   -- initialize lattice
@@ -549,7 +576,7 @@ function key(k,z)
   if k==1 then
     shift=z==1
   elseif k==2 and z==1 then
-    delta_page(1)
+    delta_page(shift and-1 or 1)
   elseif shift and k==3 then
     if z==1 then
       params:delta(dat.ti.."record_on",1)
@@ -574,23 +601,15 @@ end
 
 local show_message_text=""
 local show_message_progress=0
+local show_message_clock=0
 
 function show_progress(val)
   show_message_progress=util.clamp(val,0,100)
 end
 
 function show_message(message,seconds)
-  if show_message_clock~=nil then
-    clock.cancel(show_message_clock)
-  end
-  show_message_clock=clock.run(function()
-    show_message_text=message
-    redraw()
-    clock.sleep(seconds or 2.0)
-    show_message_text=""
-    show_message_progress=0
-    redraw()
-  end)
+  show_message_clock=10*seconds
+  show_message_text=message
 end
 
 function redraw()
@@ -599,7 +618,12 @@ function redraw()
     do return end
   end
   local topleft=dat.tt[dat.ti]:redraw()
-  if show_message_text~="" then
+  if show_message_clock>0 and show_message_text~="" then
+    show_message_clock=show_message_clock-1
+    if show_message_clock==0 then
+      show_message_text=""
+      show_message_progress=0
+    end
     screen.blend_mode(0)
     local x=64
     local y=28
@@ -634,12 +658,12 @@ function redraw()
   screen.text_right(dat.ti)
 
   screen.level(5)
-  screen.move(128,64)
+  screen.move(128,62)
   if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
     screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
   end
 
-  screen.move(0,64)
+  screen.move(0,62)
   if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
     screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
   end
