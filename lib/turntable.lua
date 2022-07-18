@@ -112,7 +112,7 @@ function Turntable:init()
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
 
-  params:add_separator("sequencer")
+  params:add_separator("sequencing")
   params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
   params:add_number(id.."n","n",1,128,16)
   params:add_number(id.."k","k",0,128,math.random(1,4))
@@ -126,7 +126,7 @@ function Turntable:init()
     end)
   end
 
-  params:add_separator("modify")
+  params:add_separator("warping")
   params:add_option(id.."guess","guess bpm?",{"no","yes"},1)
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
