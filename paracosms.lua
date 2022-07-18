@@ -21,8 +21,9 @@ er=require("er")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  {folder="/home/we/dust/audio/tehn",params={guess=2}},-- guess will guess the bpm based off the file length
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
+  {folder="/home/we/dust/audio/tehn",params={guess=2}},
+  {folder="/home/we/dust/audio/paracosms/row3"},
+  -- {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
@@ -255,6 +256,19 @@ function init()
     table.insert(dat.tt,turntable_:new{id=i})
   end
 
+  -- initialize hardcoded parameters
+  for row=1,7 do
+    for col=1,16 do
+      if dat.rows[row].params~=nil then
+        for pram,val in pairs(dat.rows[row].params) do
+          local id=(row-1)*16+col
+          print("setting ",id,pram,val)
+          params:set(id..pram,val)
+        end
+      end
+    end
+  end
+
   -- load in hardcoded files
   clock.run(function()
     for row,v in ipairs(dat.rows) do
@@ -275,18 +289,6 @@ function init()
     -- make sure we are on the actual first if the first row has nothing
     enc(1,1);enc(1,-1)
 
-    -- initialize hardcoded parameters
-    for row=1,7 do
-      for col=1,16 do
-        if dat.rows[row].params~=nil then
-          for pram,val in pairs(dat.rows[row].params) do
-            local id=(row-1)*16+col
-            print("setting ",id,pram,val)
-            params:set(id..pram,val)
-          end
-        end
-      end
-    end
   end)
 
   -- initialize lattice
