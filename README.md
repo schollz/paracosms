@@ -21,7 +21,7 @@ https://vimeo.com/730684724
 
 in april 2022 I put all my instruments into a closet (well, except norns) and took a "sample sabbatical". basically, I decided to focus on something I never do- using samples to make music instead of hard/soft synths. my motivation was partly that I've never done it before and partly intrigued by the idea that there might be enough samples out in the world that hard/soft synths aren't even needed to anymore to make certain kinds of synth music.
 
-my only instrument during this time was a terminal. I pretty much just used my own [scripts][] with SuperCollider+sox to make music. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
+my only instrument during this time was a terminal. I made music using [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
 
 eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and quantized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
 
@@ -136,7 +136,7 @@ all the parameter ids are valid. for instance you can load a block of samples an
 ### known bugs
 
 - its possible, though rare, that a sample will not be "freed" and will continue to play after you toggle it off. the norns system needs to be restarted when this occurs. I haven't been able to reproduce this but it has happened to me twice (out of hundreds of plays) so let me know if it happens to you.
-- as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock.
+- as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 
 ### todo
