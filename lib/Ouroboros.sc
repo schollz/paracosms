@@ -173,8 +173,9 @@ Ouroboros {
 
 
 	free {
-        if (synRecord.notNil,{
-            synRecord.free;
-        });
+        synRecord.free;
+        busOut.free;
+        busStartFrame.free;
+        busEndFrame.free;
 	}
 }

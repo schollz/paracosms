@@ -67,6 +67,7 @@ function Turntable:init()
   end)
   params:add_option(id.."oneshot","mode",{"loop","oneshot"})
   params:set_action(id.."oneshot",function(v)
+    engine.stop(id)
     engine.set(id,"oneshot",v-1,0)
   end)
   params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
@@ -173,6 +174,7 @@ end
 function Turntable:play()
   engine.set(self.id,"oneshot",params:get(self.id.."oneshot")-1,0)
   if params:get(self.id.."oneshot")==2 then
+    engine.stop(self.id)
     engine.set(self.id,"amp",params:get(self.id.."amp"),0)
   end
   engine.play(self.id)
