@@ -6,15 +6,15 @@
 --
 --
 --    ▼ instructions below ▼
--- K3 start/stops sample
+-- K1+K3 start/stops sample
 -- (hold length = fade)
--- K1+K3 primes recording
+-- K1+K2 primes recording
 -- (when primed, starts)
 --
 -- E1 select sample
 -- K1+E1 select running sample
 --
--- K2 selects parameters
+-- K2/K3 selects parameters
 -- E2/E3 modulate parameter
 -- K1+E2/E3 modulate more
 --
@@ -48,28 +48,37 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "K1+K3 to play" end},
+  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return "K1+K2 to record" end},
+  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return string.format("%2.3f beats",params:get(dat.ti.."record_beats")) end},
+})
+
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
+  {function(d) params:delta(dat.ti.."amp",d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."amp_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."amp_strength")==0 and "off" or params:string(dat.ti.."amp_strength"))
   end},
-  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."amp_period",d) end,function()
-    return "lfo period: "..params:string(dat.ti.."amp_period")
+    return "period: "..params:string(dat.ti.."amp_period")
   end},
-  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
 })
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."pan",d) end,function() return "pan: "..params:string(dat.ti.."pan") end},
+  {function(d) params:delta(dat.ti.."pan",d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."pan_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."pan_strength")==0 and "off" or params:string(dat.ti.."pan_strength"))
   end},
-  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."pan_period",d) end,function()
-    return "lfo period: "..params:string(dat.ti.."pan_period")
+    return "period: "..params:string(dat.ti.."pan_period")
   end},
-  {function(d) params:delta(dat.ti.."pan",d) end,function() return params:string(dat.ti.."pan") end},
 })
 -- page 3
 table.insert(enc_func,{
@@ -159,15 +168,13 @@ function init()
       clock.sleep(3)
       show_message("E1 TO EXPLORE SAMPLES")
       clock.sleep(2)
-      show_message("K3 TO PLAY")
+      show_message("K1+K3 TO PLAY")
       clock.sleep(2)
-      show_message("K1+K3 TO RECORD")
+      show_message("K1+K2 TO RECORD")
       clock.sleep(2)
-      show_message("K2/K1+K2 TO CYCLE PARAM")
+      show_message("K2/K3 TO CYCLE PARAM")
       clock.sleep(2)
-      show_message("E2/E3 TO CHANGE PARAM")
-      clock.sleep(2)
-      show_message("K1+E2/E3 TO CHANGE PARAM")
+      show_message("(K1+)E2/E3 CHANGE PARAM")
     end)
   end
 
@@ -601,19 +608,19 @@ local hold_beats=0
 function key(k,z)
   if k==1 then
     shift=z==1
-  elseif k==2 and z==1 then
-    delta_page(shift and-1 or 1)
-  elseif shift and k==3 then
+  elseif (k==2 or k==3) and z==1 and not shift then
+    delta_page(k==2 and-1 or 1)
+  elseif shift and k==2 then
     if z==1 then
       params:delta(dat.ti.."record_on",1)
     end
-  elseif k==3 and z==1 then
+  elseif shift and k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
       dat.tt[dat.ti]:play()
     else
       hold_beats=clock.get_beats()
     end
-  elseif k==3 and z==0 then
+  elseif shift and k==3 and z==0 then
     if params:get(dat.ti.."oneshot")==1 then
       params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
       params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
@@ -684,15 +691,36 @@ function redraw()
   screen.move(128,7)
   screen.text_right(dat.ti)
 
-  screen.level(5)
-  screen.move(128,62)
-  if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
-    screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
+  -- screen.level(5)
+  -- screen.move(128,62)
+  -- if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
+  --   screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
+  -- end
+
+  -- screen.move(0,62)
+  -- if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
+  --   screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
+  -- end
+  if enc_func[ui_page][2][2]~=nil then
+    screen.level(shift and 1 or 5)
+    screen.move(0,63)
+    screen.text(enc_func[ui_page][2][2]())
+  end
+  if enc_func[ui_page][5][2]~=nil then
+    screen.level(shift and 5 or 1)
+    screen.move(0,63-8)
+    screen.text(enc_func[ui_page][5][2]())
   end
 
-  screen.move(0,62)
-  if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
-    screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
+  if enc_func[ui_page][3][2]~=nil then
+    screen.level(shift and 1 or 5)
+    screen.move(128,63)
+    screen.text_right(enc_func[ui_page][3][2]())
+  end
+  if enc_func[ui_page][6][2]~=nil then
+    screen.level(shift and 5 or 1)
+    screen.move(128,63-8)
+    screen.text_right(enc_func[ui_page][6][2]())
   end
 
   screen.update()

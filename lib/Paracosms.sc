@@ -300,14 +300,12 @@ Paracosms {
 	}
 
 	free {
-		bufs.keysValuesDo({ arg buf, val;
-			val.free;
-		});
 		syns.keysValuesDo({ arg note, val;
 			val.free;
 		});
-		syns.free;
-		bufs.free;
+		bufs.keysValuesDo({ arg buf, val;
+			val.free;
+		});
 		busPhasor.free;
 		busOut1.free;
 		busOut2.free;

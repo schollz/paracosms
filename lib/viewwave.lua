@@ -39,7 +39,7 @@ function ViewWave:init()
   self.png_file=self.cache_dir..filename..".png"
   self.filename=string.upper(filename)
   self.width=128
-  self.height=64-18
+  self.height=64-24
 
   if not util.file_exists(self.png_file) then
     local resolution=2
@@ -55,7 +55,7 @@ function ViewWave:redraw(x,y,width,height)
     do return end
   end
   x=x or 0
-  y=y or 9
+  y=y or 8
   if not util.file_exists(self.png_file) then
     do return end
   end
@@ -67,8 +67,8 @@ function ViewWave:redraw(x,y,width,height)
     local pos=util.linlin(0,self.duration,1,128,cursor)
     screen.aa(1)
     screen.level(15)
-    screen.move(pos,10)
-    screen.line(pos,60)
+    screen.move(pos,9)
+    screen.line(pos,60-12)
     screen.stroke()
     screen.aa(0)
   end
@@ -80,8 +80,8 @@ function ViewWave:redraw(x,y,width,height)
       screen.blend_mode(2)
       screen.level(3)
       screen.line_cap("square")
-      screen.move(pos,10)
-      screen.line(pos,60)
+      screen.move(pos,9)
+      screen.line(pos,60-12)
       screen.stroke()
       screen.blend_mode(0)
       screen.aa(0)
