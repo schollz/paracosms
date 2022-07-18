@@ -5,6 +5,7 @@ Paracosms {
 	var busOut1;
 	var busOut2;
 	var busOut3;
+	var busOut4;
 	var busPhasor;
 	var syns;
 	var bufs;
@@ -55,7 +56,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,
-				out1=0,out2,out3,send1=1.0,send2=0,send3=0;
+				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
 				var snd,pos,seconds,tsWindow;
 
@@ -120,6 +121,7 @@ Paracosms {
 				Out.ar(out1,snd*send1);
 				Out.ar(out2,snd*send2);
 				Out.ar(out3,snd*send3);
+				Out.ar(out4,snd*send4);
 			}).send(server);
 		});
 
@@ -211,7 +213,7 @@ Paracosms {
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				var ampLag=0;
-				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
 				if (params.at(id).at("ampLag").notNil,{
 					ampLag=params.at(id).at("ampLag");
 				});
@@ -310,6 +312,7 @@ Paracosms {
 		busOut1.free;
 		busOut2.free;
 		busOut3.free;
+		busOut4.free;
 	}
 
 }

@@ -110,11 +110,11 @@ table.insert(enc_func,{
 -- page 5
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
+  {function(d) params:delta(dat.ti.."send4",d) end,function() return "greyhole: "..params:string(dat.ti.."send4") end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."send2",d) end,function() return "tapedeck: "..params:string(dat.ti.."send2") end},
   {function(d) params:delta(dat.ti.."send3",d) end,function() return "clouds: "..params:string(dat.ti.."send3") end},
-  {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
-  {function(d) end},
 })
 -- page 4
 table.insert(enc_func,{
@@ -179,6 +179,7 @@ function init()
   end
 
   -- setup effects parameters
+  params_greyhole()
   params_clouds()
   params_tapedeck()
 
@@ -461,6 +462,36 @@ function params_tapedeck()
     }
     params:set_action("tape_"..pram.id,function(v)
       engine.tapedeck_set(pram.id,v)
+    end)
+  end
+end
+
+function params_greyhole()
+  local params_menu={
+    {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="delayTime",name="delay time",min=0.01,max=8,exp=false,div=0.01,default=2.0,unit="s"},
+    {id="damp",name="damping",min=0,max=2,exp=false,div=0.01,default=0.0},
+    {id="size",name="size",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="diff",name="diffuse",min=0,max=2,exp=false,div=0.01,default=0.707},
+    {id="feedback",name="feedback",min=0,max=1.0,exp=false,div=0.01,default=0.9},
+    {id="modDepth",name="mod depth",min=0,max=2,exp=false,div=0.01,default=0.1},
+    {id="modFreq",name="mod freq",min=0.1,max=10,exp=false,div=0.1,default=2.0},
+  }
+  params:add_group("GREYHOLE",1+#params_menu)
+  params:add_option("greyhole_activate","include effect",{"no","yes"},1)
+  params:set_action("greyhole_activate",function(v)
+    engine.greyhole_toggle(v-1)
+  end)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id="tape_"..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    params:set_action("tape_"..pram.id,function(v)
+      engine.greyhole_set(pram.id,v)
     end)
   end
 end
