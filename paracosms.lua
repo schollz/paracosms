@@ -142,9 +142,20 @@ function init()
     os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
   end
   if first_time then
-    print("FIRST TIME START")
     os.execute("cp /home/we/dust/code/paracosms/lib/row1/* /home/we/dust/audio/paracosms/row1/")
     params:set("clock_tempo",120)
+    clock.run(function()
+      clock.sleep(1)
+      show_message("WELCOME FIRST TIME USER")
+      clock.sleep(2)
+      show_message("WELCOME FIRST TIME USER")
+      clock.sleep(3)
+      show_message("WELCOME FIRST TIME USER")
+      clock.sleep(4)
+      show_message("WELCOME FIRST TIME USER")
+      clock.sleep(5)
+      show_message("WELCOME FIRST TIME USER")
+    end)
   end
 
   -- setup effects parameters
