@@ -169,7 +169,7 @@ function init()
   params:add_separator("globals")
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
-  params:add_number("record_predelay","rec latency (ms)",0,300,120)
+  params:add_number("record_predelay","rec latency (ms)",0,100,2)
   params:add_separator("samples")
 
   -- collect which files
@@ -188,18 +188,18 @@ function init()
   g_=grid_:new()
 
   -- osc
-  local recording_id=0
+  dat.recording_id=0
   osc_fun={
     trigger=function(args)
       print("triggered "..args[1])
     end,
     recording=function(args)
       dat.recording=true
-      recording_id=tonumber(args[1])
-      if recording_id~=nil then show_message("recording track "..recording_id) end
+      dat.recording_id=tonumber(args[1])
+      if dat.recording_id~=nil then show_message("recording track "..dat.recording_id) end
     end,
     progress=function(args)
-      show_message(string.format("recording track %d: %2.0f%%",recording_id,tonumber(args[1])))
+      show_message(string.format("recording track %d: %2.0f%%",dat.recording_id,tonumber(args[1])))
       show_progress(tonumber(args[1]))
     end,
     recorded=function(args)

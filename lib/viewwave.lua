@@ -39,7 +39,7 @@ function ViewWave:init()
   self.png_file=self.cache_dir..filename..".png"
   self.filename=string.upper(filename)
   self.width=128
-  self.height=60
+  self.height=64-18
 
   if not util.file_exists(self.png_file) then
     local resolution=2
@@ -55,7 +55,7 @@ function ViewWave:redraw(x,y,width,height)
     do return end
   end
   x=x or 0
-  y=y or 2
+  y=y or 9
   if not util.file_exists(self.png_file) then
     do return end
   end
