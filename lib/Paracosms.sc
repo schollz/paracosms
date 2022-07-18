@@ -38,6 +38,9 @@ Paracosms {
 			SynthDef("defPlay"++ch,{
 				arg amp=0.01,ampLag=0.2,
 				lpf=20000,lpfLag=0.2,
+				lpfqr=0.707,lpfqrLag=0.2,
+				hpf=20,hpfLag=0.2,
+				hpfqr=0.707,hpfqrLag=0.2,
 				offset=0,offsetLag=0.0,
 				t_sync=1,t_syncLag=0.0,
 				t_manu=0,t_manuLag=0.0,
@@ -107,14 +110,9 @@ Paracosms {
 				// one-shot envelope
 				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
 
-				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,0.707);
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,hpfLag,warp:\sine).exp,hpfqr);
 
-				// // clouds 
-				// snd=MiClouds.ar(snd,
-				// 	pos:LFNoise2.kr(0.4,0.5,0.5),
-				// 	size:LFNoise1.kr(0.3,0.5,0.5), 
-				// 	dens:LFNoise1.kr(0.3).range(0.3, 0.45),
-				// 	drywet: 1, mode: 0);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				FreeSelf.kr(TDelay.kr(t_free,ampLag));

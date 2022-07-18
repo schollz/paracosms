@@ -39,11 +39,46 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."rate",d) end,function() return "rate: "..params:string(dat.ti.."rate") end},
+  {function(d) params:delta(dat.ti.."amp_strength",d) end,function()
+    return "lfo: "..(params:get(dat.ti.."amp_strength")==0 and "off" or params:string(dat.ti.."amp_strength"))
+  end},
   {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
+  {function(d) params:delta(dat.ti.."amp_period",d) end,function()
+    return "lfo period: "..params:string(dat.ti.."amp_period")
+  end},
   {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
+})
+-- page 1
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."pan_strength",d) end,function()
+    return "lfo: "..(params:get(dat.ti.."pan_strength")==0 and "off" or params:string(dat.ti.."pan_strength"))
+  end},
+  {function(d) params:delta(dat.ti.."pan",d) end,function() return params:string(dat.ti.."pan") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."pan_period",d) end,function()
+    return "lfo period: "..params:string(dat.ti.."pan_period")
+  end},
+  {function(d) params:delta(dat.ti.."pan",d) end,function() return params:string(dat.ti.."pan") end},
+})
+-- page 3
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."lpf",d) end,function() return "lpf: "..params:string(dat.ti.."lpf") end},
+  {function(d) params:delta(dat.ti.."lpfqr",d) end,function() return "1/q: "..params:string(dat.ti.."lpfqr") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."hpf",d) end,function() return "hpf: "..params:string(dat.ti.."hpf") end},
+  {function(d) params:delta(dat.ti.."hpfqr",d) end,function() return "1/q: "..params:string(dat.ti.."hpfqr") end},
+})
+-- page 3
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return "start: "..params:string(dat.ti.."sampleStart") end},
+  {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
+  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
 })
 -- page 2
 table.insert(enc_func,{
@@ -54,23 +89,23 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."ts",d) end,function() return "timestretch "..(params:get(dat.ti.."ts")>0 and "on" or "off") end},
   {function(d) end},
 })
--- page 3
+-- page 5
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return "start: "..params:string(dat.ti.."sampleStart") end},
-  {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
+  {function(d) params:delta(dat.ti.."send2",d) end,function() return "tapedeck: "..params:string(dat.ti.."send2") end},
+  {function(d) params:delta(dat.ti.."send3",d) end,function() return "clouds: "..params:string(dat.ti.."send3") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
-  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
+  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
+  {function(d) end},
 })
 -- page 4
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."n",d) end,function() return "n: "..params:string(dat.ti.."n") end},
+  {function(d) params:delta(dat.ti.."sequencer",d) end,function() return "sequencer: "..params:string(dat.ti.."sequencer") end},
   {function(d) params:delta(dat.ti.."k",d) end,function() return "k: "..params:string(dat.ti.."k") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."sequencer",d) end,function() return "sequencer: "..params:string(dat.ti.."sequencer") end},
-  {function(d) params:delta(dat.ti.."w",d) end,function() return "k: "..params:string(dat.ti.."w") end},
+  {function(d) params:delta(dat.ti.."n",d) end,function() return "n: "..params:string(dat.ti.."n") end},
+  {function(d) params:delta(dat.ti.."w",d) end,function() return "w: "..params:string(dat.ti.."w") end},
 })
 
 function find_files(folder)
@@ -456,6 +491,10 @@ end
 
 function delta_page(d)
   ui_page=util.wrap(ui_page+d,1,#enc_func)
+  if ui_page==#enc_func and params:get(dat.ti.."oneshot")==1 then
+    -- skip one-shot sequencing menu for loops
+    ui_page=util.wrap(ui_page+d,1,#enc_func)
+  end
 end
 
 function delta_ti(d,is_playing)
