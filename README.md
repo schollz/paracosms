@@ -135,7 +135,6 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 ### known bugs
 
-- its possible, though rare, that a sample will not be "freed" and will continue to play after you toggle it off. the norns system needs to be restarted when this occurs. I haven't been able to reproduce this but it has happened to me twice (out of hundreds of plays) so let me know if it happens to you.
 - as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 
