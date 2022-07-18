@@ -38,7 +38,7 @@ function Turntable:init()
     {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
     {id="pan_period",name="pan lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1},
     {id="pan_strength",name="pan lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
-    {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=3,formatter=function(param) return param:get().."x" end},
+    {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=1,formatter=function(param) return param:get().."x" end},
     {id="lpf",name="lpf",min=10,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,response=1,formatter=function(param) return param:get()==1 and "on" or "off" end},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,response=1,unit="x"},
@@ -87,6 +87,16 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
+      if pram.id=="send2" then
+        if params:get("tapedeck_activate")==1 then
+          params:set("tapedeck_activate",2)
+        end
+      end
+      if pram.id=="send3" then
+        if params:get("clouds_activate")==1 then
+          params:set("clouds_activate",2)
+        end
+      end
       debounce_fn[id..pram.id]={
         pram.response or 3,function()
           engine.set(id,pram.id,params:get(id..pram.id),0.2)
@@ -177,17 +187,47 @@ function Turntable:load_file(path)
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-  local bpm=clock.get_tempo()
+  local bpm=nil
   for word in string.gmatch(self.path,'([^_]+)') do
     if string.find(word,"bpm") then
       bpm=tonumber(word:match("%d+"))
     end
+  end
+  if bpm==nil and params:get(self.id.."guess")==2 then
+    bpm=self:guess_bpm(path)
+  end
+  if bpm==nil then
+    bpm=clock.get_tempo()
   end
   params:set(self.id.."source_bpm",bpm,true)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
   self.loaded_file=true
+end
+
+function Turntable:guess_bpm(fname)
+  local ch,samples,samplerate=audio.file_info(fname)
+  if samples==nil or samples<10 then
+    print("ERROR PROCESSING FILE: "..self.path)
+    do return end
+  end
+  local duration=samples/samplerate
+  local closest={1,1000000}
+  for bpm=90,179 do
+    local beats=duration/(60/bpm)
+    local beats_round=util.round(beats)
+    -- only consider even numbers of beats
+    if beats_round%4==0 then
+      local dif=math.abs(beats-beats_round)/beats
+      if dif<closest[2] then
+        closest={bpm,dif,beats}
+      end
+    end
+  end
+  print("bpm guessing for",fname)
+  tab.print(closest)
+  return closest[1]
 end
 
 function Turntable:retune()
