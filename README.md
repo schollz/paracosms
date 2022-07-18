@@ -19,13 +19,13 @@ https://vimeo.com/730684724
 
 <details><summary><strong>why?</strong></summary><br>
 
-in april 2022 I put all my instruments into a closet (well, except norns) and took a "sample sabbatical". basically, I decided to focus on something I never do- using samples to make music instead of hard/soft synths. my motivation was partly that I've never done it before and partly intrigued by the idea that there might be enough samples out in the world that hard/soft synths aren't even needed to anymore to make certain kinds of synth music.
+between april and june 2022 I made music primarily with [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
 
-my only instrument during this time was a terminal. I made music using [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
+eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and quantized loops. 
 
-eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and quantized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
+initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
 
-during this self-imposed sabbatical I also played around with making a SuperCollider class to make a multi-head playback/recorder that can do crossfading recordings (like softcut). this became "[ouroborus][]". (okay, its not entirely SuperCollider, its also `sox` too).
+I also played around with making a SuperCollider class to make a crossfading stereo recording system (like softcut). this became "[ouroborus][]".
 
 without intending, I realized that I could combine ourborous with paracosms together into sampler/looper thing. norns became the glue for that - and it is now this *paracosms* script. 
 
