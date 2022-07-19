@@ -14,12 +14,12 @@ Paracosms {
 	var group;
 
 	*new {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
-		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache);
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
 
 		// set arguments
 		server=serverName;
@@ -27,6 +27,7 @@ Paracosms {
 		busOut1=argBusOut1;
 		busOut2=argBusOut2;
 		busOut3=argBusOut3;
+		busOut4=argBusOut4;
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();

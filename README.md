@@ -143,6 +143,8 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 <details><summary>a list of done and doing.</summary>
 
+- add option to record to a new track each time (available from ui)
+- when changing send, untoggle sends
 - add greyhole as another send
 - add record countdown (using Stepper and Phasor bus that overrides the record trig)
 - fix bugs
