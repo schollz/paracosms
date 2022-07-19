@@ -91,16 +91,28 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
-      if pram.id=="send2" and params:get(id..pram.id)>0 then
-        if params:get("tapedeck_activate")==1 then
-          params:set("tapedeck_activate",2)
+      for _,vv in ipairs({"send2","tapedeck"},{"send3","clouds"},{"send4","greyhole"}) do
+        if pram.id==vv[1] then
+          if params:get(id..pram.id)>0 then
+            if params:get(vv[2].."_activate")==1 then
+              params:set(vv[2].."_activate",2)
+            end
+          else
+            -- check to see whether all of them should be turned off
+            local all_off=true
+            for i=1,112 do
+              if params:get(i..vv[1])>0 then
+                all_off=false
+                break
+              end
+            end
+            if all_off then
+              params:set(vv[2].."_activate",1)
+            end
+          end
         end
       end
-      if pram.id=="send3" and params:get(id..pram.id)>0 then
-        if params:get("clouds_activate")==1 then
-          params:set("clouds_activate",2)
-        end
-      end
+
       debounce_fn[id..pram.id]={
         pram.response or 3,function()
           engine.set(id,pram.id,params:get(id..pram.id),0.2)
