@@ -7,12 +7,14 @@ Engine_Paracosms : CroneEngine {
     var paracosms;
     var ouroboros;
     var tapedeck;
+    var greyhole;
     var clouds;
     var fnOSC;
     var startup;
     var startupNum;
     var busTapedeck;
     var busClouds;
+    var busGreyhole;
     var groupSynths;
     var groupEffects;
     // Paracosms ^
@@ -25,6 +27,7 @@ Engine_Paracosms : CroneEngine {
         // Paracosms specific v0.0.1
         busTapedeck=Bus.audio(context.server,2);
         busClouds=Bus.audio(context.server,2);
+        busGreyhole=Bus.audio(context.server,2);
         groupSynths=Group.new;
         context.server.sync;
         groupEffects=Group.new(groupSynths,\addAfter);
@@ -51,10 +54,11 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,busGreyhole,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
         clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
+        greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
         context.server.sync;
 
         this.addCommand("add","is", { arg msg;
@@ -127,6 +131,14 @@ Engine_Paracosms : CroneEngine {
             clouds.set(msg[1],msg[2]);
         });
 
+        // greyhole
+        this.addCommand("greyhole_toggle","i",{arg msg;
+            greyhole.toggle(msg[1]);
+        });
+        this.addCommand("greyhole_set","sf",{arg msg;
+            greyhole.set(msg[1],msg[2]);
+        });
+
 
         // ^ Paracosms specific
 
@@ -137,8 +149,12 @@ Engine_Paracosms : CroneEngine {
         paracosms.free;
         ouroboros.free;
         tapedeck.free;
+        greyhole.free;
         clouds.free;
         fnOSC.free;
+        busGreyhole.free;
+        busClouds.free;
+        busTapedeck.free;
         // ^ Paracosms specific
     }
 }
