@@ -51,7 +51,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "K1+K3 to play" end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return "K1+K2 to record" end},
+  {function(d) params:delta("record_over",d)end,function() return "K1+K2 record "..params:string("record_over") end},
   {function(d) params:delta(dat.ti.."record_beats",d)end,function() return string.format("%2.3f beats",params:get(dat.ti.."record_beats")) end},
 })
 
@@ -188,6 +188,7 @@ function init()
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
+  params:add_option("record_over","recording track",{"new","over"},1)
   params:add_separator("samples")
 
   -- collect which files
@@ -643,6 +644,17 @@ function key(k,z)
     delta_page(k==2 and-1 or 1)
   elseif shift and k==2 then
     if z==1 then
+      if params:get("record_over")==1 then
+        -- try to find a track that is empty
+        local j=0
+        for i=1,112 do
+          if dat.tt[i].loaded_file~=nil then
+            j=i
+            break
+          end
+        end
+        dat.ti=j>0 and j or dat.ti
+      end
       params:delta(dat.ti.."record_on",1)
     end
   elseif shift and k==3 and z==1 then
