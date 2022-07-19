@@ -296,7 +296,8 @@ function Turntable:retune()
   self.last_tune=tune
   self.retuned=true
   print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
-  engine.add(self.id,self.path)
+  local play_on_load=dat.recording_id and 1 or 0
+  engine.add(self.id,self.path,play_on_load)
 end
 
 function Turntable:emit(beat)
