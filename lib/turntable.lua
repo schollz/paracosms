@@ -225,7 +225,13 @@ function Turntable:load_file(path)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
-  params:set(self.id.."record_beats",self:beats())
+  local ch,samples,samplerate=audio.file_info(self.path)
+  if samples==nil or samples<10 then
+    print("ERROR PROCESSING FILE: "..self.path)
+    do return end
+  end
+  local duration=samples/samplerate
+  params:set(self.id.."record_beats",duration/clock.get_beat_sec())
   self.loaded_file=true
 end
 

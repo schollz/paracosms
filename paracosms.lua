@@ -231,6 +231,13 @@ function init()
         show_message("recorded track "..id)
         params:set(id.."file",filename)
         dat.ti=id
+        if params:get(dat.ti.."oneshot")==1 and params:get(dat.ti.."play")==1 then
+          clock.run(function()
+            clock.sleep(1)
+            params:set(dat.ti.."fadetime",3*clock.get_beat_sec())
+            params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
+          end)
+        end
       end
     end,
     ready=function(args)
@@ -648,7 +655,7 @@ function key(k,z)
         -- try to find a track that is empty
         local j=0
         for i=1,112 do
-          if dat.tt[i].loaded_file~=nil then
+          if dat.tt[i].loaded_file==nil then
             j=i
             break
           end
