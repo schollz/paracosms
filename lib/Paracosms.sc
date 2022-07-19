@@ -232,7 +232,7 @@ Paracosms {
 	}
 
 	add {
-		arg id,fname;
+		arg id,fname,playOnLoad;
 		var doRead=true;
 		if (bufs.at(id).notNil,{
 			if (bufs.at(id).path==fname,{
@@ -242,7 +242,7 @@ Paracosms {
 		});
 		if (doRead,{
 			Buffer.read(server,fname,action:{arg buf;
-				var fadeIn=false;
+				var fadeIn=playOnLoad>0;
 				var oldBuf=nil;
 				if (bufs.at(id).notNil,{
 					oldBuf=bufs.at(id);

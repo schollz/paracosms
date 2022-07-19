@@ -230,14 +230,10 @@ function init()
         show_progress(100)
         show_message("recorded track "..id)
         params:set(id.."file",filename)
-        dat.ti=id
-        if params:get(dat.ti.."oneshot")==1 and params:get(dat.ti.."play")==1 then
-          clock.run(function()
-            clock.sleep(1)
-            params:set(dat.ti.."fadetime",3*clock.get_beat_sec())
-            params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
-          end)
-        end
+        clock.run(function()
+          clock.sleep(3)
+          dat.recording_id=0
+        end)
       end
     end,
     ready=function(args)

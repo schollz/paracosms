@@ -61,15 +61,15 @@ Engine_Paracosms : CroneEngine {
         greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
         context.server.sync;
 
-        this.addCommand("add","is", { arg msg;
+        this.addCommand("add","isi", { arg msg;
             if (startup>0,{
                 startupNum=startupNum+1.0;
                 Routine {
                     (startupNum/10.0).wait;
-                    paracosms.add(msg[1],msg[2].asString);
+                    paracosms.add(msg[1],msg[2].asString,msg[3]);
                 }.play;
             },{
-                paracosms.add(msg[1],msg[2].asString);
+                paracosms.add(msg[1],msg[2].asString,msg[3]);
             });
         });
         this.addCommand("watch","i", { arg msg;
