@@ -52,8 +52,10 @@ function Turntable:init()
     {id="send1",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send2",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  params:add_group("sample "..self.id,18+#params_menu)
+  self.all_params={"file","play","oneshot","amp","fadetime","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  -- params:add_group("sample "..self.id,17+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -83,6 +85,7 @@ function Turntable:init()
     }
   end)
   for _,pram in ipairs(params_menu) do
+    table.insert(self.all_params,pram.id)
     params:add{
       type="control",
       id=id..pram.id,
@@ -91,16 +94,29 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
-      if pram.id=="send2" and params:get(id..pram.id)>0 then
-        if params:get("tapedeck_activate")==1 then
-          params:set("tapedeck_activate",2)
+      for _,vv in ipairs({{"send2","tapedeck"},{"send3","clouds"},{"send4","greyhole"}}) do
+        if pram.id==vv[1] then
+          if v>0 then
+            if params:get(vv[2].."_activate")==1 then
+              print("activating")
+              params:set(vv[2].."_activate",2)
+            end
+          else
+            -- check to see whether all of them should be turned off
+            local all_off=true
+            for i=1,112 do
+              if params:get(i..vv[1])>0 then
+                all_off=false
+                break
+              end
+            end
+            if all_off then
+              params:set(vv[2].."_activate",1)
+            end
+          end
         end
       end
-      if pram.id=="send3" and params:get(id..pram.id)>0 then
-        if params:get("clouds_activate")==1 then
-          params:set("clouds_activate",2)
-        end
-      end
+
       debounce_fn[id..pram.id]={
         pram.response or 3,function()
           engine.set(id,pram.id,params:get(id..pram.id),0.2)
@@ -113,7 +129,6 @@ function Turntable:init()
     engine.set(id,"amp",params:get(id.."amp"),v)
   end)
 
-  params:add_separator("sequencing")
   params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
   params:add_number(id.."n","n",1,128,16)
   params:add_number(id.."k","k",0,128,math.random(1,4))
@@ -126,8 +141,6 @@ function Turntable:init()
       self.sequence=er.gen(params:get(self.id.."k"),params:get(self.id.."n"),params:get(self.id.."w"))
     end)
   end
-
-  params:add_separator("warping")
   params:add_option(id.."guess","guess bpm?",{"no","yes"},1)
   params:add_option(id.."type","type",{"melodic","drums"},1)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
@@ -145,8 +158,6 @@ function Turntable:init()
     end)
   end
 
-  params:add_separator("recording")
-  params:add_control(id.."record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
   params:add_binary(id.."record_on","record on","trigger")
   params:set_action(id.."record_on",function(x)
     if dat.recording then
@@ -163,12 +174,34 @@ function Turntable:init()
     local datetime=util.os_capture("date +%Y%m%d%H%m%S")
     local filename=string.format("%s_bpm%d.wav",datetime,clock.get_tempo())
     filename=_path.audio.."paracosms/recordings/"..filename
-    local seconds=params:get(id.."record_beats")*clock.get_beat_sec()
+    local seconds=params:get("record_beats")*clock.get_beat_sec()
     local crossfade=params:get("record_crossfade")/16*clock.get_beat_sec()
+    if crossfade>seconds then
+      crossfade=seconds*0.15
+    end
     local latency=params:get("record_predelay")/1000
     engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency)
   end)
 
+end
+
+function Turntable:hide()
+  if self.hidden==true then
+    do return end
+  end
+  self.hidden=true
+  for _,pram in ipairs(self.all_params) do
+    params:hide(self.id..pram)
+  end
+end
+
+function Turntable:show()
+  if self.hidden==true then
+    for _,pram in ipairs(self.all_params) do
+      params:show(self.id..pram)
+    end
+    self.hidden=false
+  end
 end
 
 function Turntable:play()
@@ -213,7 +246,14 @@ function Turntable:load_file(path)
   params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
-  params:set(self.id.."record_beats",self:beats())
+  local ch,samples,samplerate=audio.file_info(self.path)
+  if samples==nil or samples<10 then
+    print("ERROR PROCESSING FILE: "..self.path)
+    do return end
+  end
+  local duration=samples/samplerate
+  print(path,"duration",duration)
+  params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/8))
   self.loaded_file=true
 end
 
@@ -278,7 +318,8 @@ function Turntable:retune()
   self.last_tune=tune
   self.retuned=true
   print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
-  engine.add(self.id,self.path)
+  local play_on_load=dat.recording_id==self.id and 1 or 0
+  engine.add(self.id,self.path,play_on_load)
 end
 
 function Turntable:emit(beat)

@@ -5,20 +5,22 @@ Paracosms {
 	var busOut1;
 	var busOut2;
 	var busOut3;
+	var busOut4;
 	var busPhasor;
 	var syns;
+	var synMetronome;
 	var bufs;
 	var params;
 	var watching;
 	var group;
 
 	*new {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
-		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache);
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argDirCache;
+		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
 
 		// set arguments
 		server=serverName;
@@ -26,6 +28,7 @@ Paracosms {
 		busOut1=argBusOut1;
 		busOut2=argBusOut2;
 		busOut3=argBusOut3;
+		busOut4=argBusOut4;
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();
@@ -55,7 +58,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,
-				out1=0,out2,out3,send1=1.0,send2=0,send3=0;
+				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
 				var snd,pos,seconds,tsWindow;
 
@@ -120,8 +123,24 @@ Paracosms {
 				Out.ar(out1,snd*send1);
 				Out.ar(out2,snd*send2);
 				Out.ar(out3,snd*send3);
+				Out.ar(out4,snd*send4);
 			}).send(server);
 		});
+
+		SynthDef("defMetronome",{
+			arg bpm=120,busPhase,note=60,amp=1.0,t_free=0;
+			var snd,pos,phase,phaseMeasure,freq;
+			note=Lag.kr(note);
+			amp=Lag.kr(amp);
+			pos=In.ar(busPhase,1);
+			phase=pos.mod(60/bpm)-(60/bpm/2);
+			phaseMeasure=pos.mod(4*60/bpm)-(2*60/bpm);
+			note=(note+(Trig.kr(phaseMeasure<0,60/bpm)*12));
+			freq=[note-0.03,note+0.04].midicps;
+			snd=MoogFF.ar(Pulse.ar(freq,0.5),1000);
+			snd=snd*EnvGen.ar(Env.perc(releaseTime:60/bpm),phase<0);
+			Out.ar(0,snd*amp*EnvGen.ar(Env.new([1,0],[1]),t_free,doneAction:2));
+		}).send(server);
 
 		SynthDef("defPhasor",{
 			arg out,rate=1.0,rateLag=0.2,t_sync=0;
@@ -164,6 +183,31 @@ Paracosms {
 		});
 	}
 
+	metronome {
+		arg bpm,note,amp;
+		var doSet=false;
+		[bpm,note,amp].postln;
+		if (synMetronome.notNil,{
+			if (synMetronome.isRunning,{
+				doSet=true;
+				if (note<1,{
+					synMetronome.set(\t_free,1);
+				});
+			});
+		});
+		if (note>1,{
+			if (doSet,{
+				synMetronome.set(\bpm,bpm,\note,note,\amp,amp);
+			},{
+				synMetronome=Synth.after(syns.at("phasor"),"defMetronome",
+					[\busPhase,busPhasor,\bpm,bpm,\amp,amp,\note,note]);
+				NodeWatcher.register(synMetronome);
+			});
+		});
+	}
+
+
+
 	addMod {
 		arg id,fnameOriginal,bpm_source,bpm_target;
 		var fname=fnameOriginal;
@@ -194,8 +238,8 @@ Paracosms {
 
 	stop {
 		arg id;
+		["stop",id,syns.at(id)].postln;
 		if (syns.at(id).notNil,{
-			["stop",id].postln;
 			if (syns.at(id).isRunning,{
 				syns.at(id).set(\amp,0,\t_free,1);
 			},{
@@ -206,12 +250,12 @@ Paracosms {
 
 	play {
 		arg id;
-		stop(id);
+		this.stop(id);
 		["play",id].postln;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				var ampLag=0;
-				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
 				if (params.at(id).at("ampLag").notNil,{
 					ampLag=params.at(id).at("ampLag");
 				});
@@ -229,8 +273,9 @@ Paracosms {
 	}
 
 	add {
-		arg id,fname;
+		arg id,fname,playOnLoad;
 		var doRead=true;
+		["add",id,fname,playOnLoad].postln;
 		if (bufs.at(id).notNil,{
 			if (bufs.at(id).path==fname,{
 				doRead=false;
@@ -239,7 +284,7 @@ Paracosms {
 		});
 		if (doRead,{
 			Buffer.read(server,fname,action:{arg buf;
-				var fadeIn=false;
+				var fadeIn=playOnLoad>0;
 				var oldBuf=nil;
 				if (bufs.at(id).notNil,{
 					oldBuf=bufs.at(id);
@@ -262,12 +307,13 @@ Paracosms {
 						5.sleep;
 						oldBuf.free;
 					}.play;
-				},{
+				});
+				if (params.at(id).isNil,{
 					params.put(id,Dictionary.new());
 				});
 				// fade in the synth
 				fadeIn.postln;
-				if (fadeIn==true,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
+				if (fadeIn,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
 			});
 		});
 	}
@@ -310,6 +356,8 @@ Paracosms {
 		busOut1.free;
 		busOut2.free;
 		busOut3.free;
+		busOut4.free;
+		synMetronome.free;
 	}
 
 }

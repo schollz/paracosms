@@ -6,15 +6,15 @@
 --
 --
 --    ▼ instructions below ▼
--- K1+K3 start/stops sample
+-- K3 start/stops sample
 -- (hold length = fade)
--- K1+K2 primes recording
+-- K1+K3 primes recording
 -- (when primed, starts)
 --
 -- E1 select sample
 -- K1+E1 select running sample
 --
--- K2/K3 selects parameters
+-- K2/K1+K2 selects parameters
 -- E2/E3 modulate parameter
 -- K1+E2/E3 modulate more
 --
@@ -48,11 +48,11 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "K1+K3 to play" end},
+  {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return "K1+K2 to record" end},
-  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return string.format("%2.3f beats",params:get(dat.ti.."record_beats")) end},
+  {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
+  {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
 })
 
 table.insert(enc_func,{
@@ -110,11 +110,11 @@ table.insert(enc_func,{
 -- page 5
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
+  {function(d) params:delta(dat.ti.."send4",d) end,function() return "greyhole: "..params:string(dat.ti.."send4") end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."send2",d) end,function() return "tapedeck: "..params:string(dat.ti.."send2") end},
   {function(d) params:delta(dat.ti.."send3",d) end,function() return "clouds: "..params:string(dat.ti.."send3") end},
-  {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
-  {function(d) end},
 })
 -- page 4
 table.insert(enc_func,{
@@ -168,26 +168,45 @@ function init()
       clock.sleep(3)
       show_message("E1 TO EXPLORE SAMPLES")
       clock.sleep(2)
-      show_message("K1+K3 TO PLAY")
+      show_message("K3 TO PLAY")
       clock.sleep(2)
-      show_message("K1+K2 TO RECORD")
+      show_message("K1+K3 TO RECORD")
       clock.sleep(2)
-      show_message("K2/K3 TO CYCLE PARAM")
+      show_message("K2/K1+K2 TO CYCLE PARAM")
       clock.sleep(2)
       show_message("(K1+)E2/E3 CHANGE PARAM")
     end)
   end
 
   -- setup effects parameters
+  params_greyhole()
   params_clouds()
   params_tapedeck()
 
   -- setup parameters
-  params:add_separator("globals")
+  params:add_group("RECORDING",6)
+  params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
+  params:add_option("record_over","recording track",{"new","over"},1)
+  params:add_number("metronome","metronome",0,100,0)
+  params:set_action("metronome",function(x)
+    engine.metronome(clock.get_tempo(),x,0.2)
+  end)
   params:add_separator("samples")
+  params:add_number("sel","selected sample",1,112,1)
+  params:set_action("sel",function(x)
+    dat.ti=x
+    for i=1,112 do
+      if x==i then
+        dat.tt[i]:show()
+      else
+        dat.tt[i]:hide()
+      end
+    end
+    _menu.rebuild_params()
+  end)
 
   -- collect which files
   for row,v in ipairs(dat.rows) do
@@ -228,7 +247,11 @@ function init()
         show_progress(100)
         show_message("recorded track "..id)
         params:set(id.."file",filename)
-        dat.ti=id
+        params:set(id.."play",2,true)
+        clock.run(function()
+          clock.sleep(3)
+          dat.recording_id=0
+        end)
       end
     end,
     ready=function(args)
@@ -330,7 +353,7 @@ function init()
 
   -- initialize the dat turntables
   dat.seed=18
-  dat.ti=1
+  params:set("sel",1)
   dat.tt={}
   dat.percent_loaded=0
   math.randomseed(dat.seed)
@@ -465,6 +488,36 @@ function params_tapedeck()
   end
 end
 
+function params_greyhole()
+  local params_menu={
+    {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="delayTime",name="delay time",min=0.01,max=8,exp=false,div=0.01,default=2.0,unit="s"},
+    {id="damp",name="damping",min=0,max=2,exp=false,div=0.01,default=0.0},
+    {id="size",name="size",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="diff",name="diffuse",min=0,max=2,exp=false,div=0.01,default=0.707},
+    {id="feedback",name="feedback",min=0,max=1.0,exp=false,div=0.01,default=0.4},
+    {id="modDepth",name="mod depth",min=0,max=2,exp=false,div=0.01,default=0.1},
+    {id="modFreq",name="mod freq",min=0.1,max=10,exp=false,div=0.1,default=2.0},
+  }
+  params:add_group("GREYHOLE",1+#params_menu)
+  params:add_option("greyhole_activate","include effect",{"no","yes"},1)
+  params:set_action("greyhole_activate",function(v)
+    engine.greyhole_toggle(v-1)
+  end)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id="tape_"..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    params:set_action("tape_"..pram.id,function(v)
+      engine.greyhole_set(pram.id,v)
+    end)
+  end
+end
+
 function params_clouds()
   local params_menu={
     {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
@@ -541,7 +594,7 @@ function switch_view(id)
   if id>#dat.tt or id==dat.ti then
     do return end
   end
-  dat.ti=id
+  params:set("sel",id)
   engine.watch(id)
 end
 
@@ -577,7 +630,7 @@ function delta_ti(d,is_playing)
     end
     local i=closest[1]
     i=util.wrap(i+d,1,#available_ti)
-    dat.ti=available_ti[i]
+    params:set("sel",available_ti[i])
   else
     -- find only the ones that are ready
     local available_ti={}
@@ -598,8 +651,8 @@ function delta_ti(d,is_playing)
     end
     local i=closest[1]
     i=util.wrap(i+d,1,#available_ti)
-    dat.ti=available_ti[i]
-    -- dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+    params:set("sel",available_ti[i])
+    -- params:set("sel",util.wrap(dat.ti+d,1,#dat.tt))
   end
 end
 
@@ -608,19 +661,30 @@ local hold_beats=0
 function key(k,z)
   if k==1 then
     shift=z==1
-  elseif (k==2 or k==3) and z==1 and not shift then
-    delta_page(k==2 and-1 or 1)
-  elseif shift and k==2 then
+  elseif z==1 and k==2 then
+    delta_page(shift and-1 or 1)
+  elseif shift and k==3 then
     if z==1 then
+      if params:get("record_over")==1 then
+        -- try to find a track that is empty
+        local j=0
+        for i=1,112 do
+          if dat.tt[i].loaded_file==nil then
+            j=i
+            break
+          end
+        end
+        params:set("sel",j>0 and j or dat.ti)
+      end
       params:delta(dat.ti.."record_on",1)
     end
-  elseif shift and k==3 and z==1 then
+  elseif k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
       dat.tt[dat.ti]:play()
     else
       hold_beats=clock.get_beats()
     end
-  elseif shift and k==3 and z==0 then
+  elseif k==3 and z==0 then
     if params:get(dat.ti.."oneshot")==1 then
       params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
       params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
@@ -654,10 +718,6 @@ function redraw()
   local topleft=dat.tt[dat.ti]:redraw()
   if show_message_clock>0 and show_message_text~="" then
     show_message_clock=show_message_clock-1
-    if show_message_clock==0 then
-      show_message_text=""
-      show_message_progress=0
-    end
     screen.blend_mode(0)
     local x=64
     local y=28
@@ -678,6 +738,10 @@ function redraw()
       screen.level(10)
       screen.fill()
       screen.blend_mode(0)
+    end
+    if show_message_clock==0 then
+      show_message_text=""
+      show_message_progress=0
     end
   end
   -- top left corner

@@ -7,12 +7,14 @@ Engine_Paracosms : CroneEngine {
     var paracosms;
     var ouroboros;
     var tapedeck;
+    var greyhole;
     var clouds;
     var fnOSC;
     var startup;
     var startupNum;
     var busTapedeck;
     var busClouds;
+    var busGreyhole;
     var groupSynths;
     var groupEffects;
     // Paracosms ^
@@ -25,6 +27,7 @@ Engine_Paracosms : CroneEngine {
         // Paracosms specific v0.0.1
         busTapedeck=Bus.audio(context.server,2);
         busClouds=Bus.audio(context.server,2);
+        busGreyhole=Bus.audio(context.server,2);
         groupSynths=Group.new;
         context.server.sync;
         groupEffects=Group.new(groupSynths,\addAfter);
@@ -51,21 +54,22 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,busGreyhole,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
         clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
+        greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
         context.server.sync;
 
-        this.addCommand("add","is", { arg msg;
+        this.addCommand("add","isi", { arg msg;
             if (startup>0,{
                 startupNum=startupNum+1.0;
                 Routine {
                     (startupNum/10.0).wait;
-                    paracosms.add(msg[1],msg[2].asString);
+                    paracosms.add(msg[1],msg[2].asString,msg[3]);
                 }.play;
             },{
-                paracosms.add(msg[1],msg[2].asString);
+                paracosms.add(msg[1],msg[2].asString,msg[3]);
             });
         });
         this.addCommand("watch","i", { arg msg;
@@ -102,7 +106,11 @@ Engine_Paracosms : CroneEngine {
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
                     ["wrote",buf].postln;
-                    NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
+                    // a small delay is needed for the file to be finished writing
+                    Routine {
+                        0.2.wait;
+                        NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
+                    }.play;
                 });
             });
         });	
@@ -127,6 +135,22 @@ Engine_Paracosms : CroneEngine {
             clouds.set(msg[1],msg[2]);
         });
 
+        // greyhole
+        this.addCommand("greyhole_toggle","i",{arg msg;
+            greyhole.toggle(msg[1]);
+        });
+        this.addCommand("greyhole_set","sf",{arg msg;
+            greyhole.set(msg[1],msg[2]);
+        });
+
+        // metronome
+        this.addCommand("metronome","fff",{arg msg;
+            var bpm=msg[1];
+            var note=msg[2];
+            var amp=msg[3];
+            paracosms.metronome(bpm,note,amp);
+        });
+
 
         // ^ Paracosms specific
 
@@ -137,8 +161,12 @@ Engine_Paracosms : CroneEngine {
         paracosms.free;
         ouroboros.free;
         tapedeck.free;
+        greyhole.free;
         clouds.free;
         fnOSC.free;
+        busGreyhole.free;
+        busClouds.free;
+        busTapedeck.free;
         // ^ Paracosms specific
     }
 }
