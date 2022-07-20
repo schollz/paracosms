@@ -52,7 +52,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
-  {function(d) params:delta(dat.ti.."record_beats",d)end,function() return string.format("%2.3f beats",params:get(dat.ti.."record_beats")) end},
+  {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
 })
 
 table.insert(enc_func,{
@@ -184,7 +184,8 @@ function init()
   params_tapedeck()
 
   -- setup parameters
-  params:add_separator("globals")
+  params:add_group("RECORDING",6)
+  params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/8,8.0,'beats',(1/8)/(128-0.25)))
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
@@ -194,6 +195,18 @@ function init()
     engine.metronome(clock.get_tempo(),x,0.2)
   end)
   params:add_separator("samples")
+  params:add_number("sel","selected sample",1,112,1)
+  params:set_action("sel",function(x)
+    dat.ti=x
+    for i=1,112 do
+      if x==i then
+        dat.tt[i]:show()
+      else
+        dat.tt[i]:hide()
+      end
+    end
+    _menu.rebuild_params()
+  end)
 
   -- collect which files
   for row,v in ipairs(dat.rows) do
@@ -340,7 +353,7 @@ function init()
 
   -- initialize the dat turntables
   dat.seed=18
-  dat.ti=1
+  params:set("sel",1)
   dat.tt={}
   dat.percent_loaded=0
   math.randomseed(dat.seed)
@@ -581,7 +594,7 @@ function switch_view(id)
   if id>#dat.tt or id==dat.ti then
     do return end
   end
-  dat.ti=id
+  params:set("sel",id)
   engine.watch(id)
 end
 
@@ -617,7 +630,7 @@ function delta_ti(d,is_playing)
     end
     local i=closest[1]
     i=util.wrap(i+d,1,#available_ti)
-    dat.ti=available_ti[i]
+    params:set("sel",available_ti[i])
   else
     -- find only the ones that are ready
     local available_ti={}
@@ -638,8 +651,8 @@ function delta_ti(d,is_playing)
     end
     local i=closest[1]
     i=util.wrap(i+d,1,#available_ti)
-    dat.ti=available_ti[i]
-    -- dat.ti=util.wrap(dat.ti+d,1,#dat.tt)
+    params:set("sel",available_ti[i])
+    -- params:set("sel",util.wrap(dat.ti+d,1,#dat.tt))
   end
 end
 
@@ -661,7 +674,7 @@ function key(k,z)
             break
           end
         end
-        dat.ti=j>0 and j or dat.ti
+        params:set("sel",j>0 and j or dat.ti)
       end
       params:delta(dat.ti.."record_on",1)
     end
