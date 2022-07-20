@@ -54,8 +54,7 @@ GreyholeFX {
 			pars.postln;
 			syn=Synth.tail(group,"defGreyhole",pars);
 			NodeWatcher.register(syn);
-			"greyhole: running with buffer:".postln;
-			buf.postln;
+			"greyhole: running".postln;
 		},{
 			["greyhole: stopped"].postln;
 			if (syn.notNil,{
