@@ -106,7 +106,11 @@ Engine_Paracosms : CroneEngine {
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
                     ["wrote",buf].postln;
-                    NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
+                    // a small delay is needed for the file to be finished writing
+                    Routine {
+                        0.2.wait;
+                        NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
+                    }.play;
                 });
             });
         });	
