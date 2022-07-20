@@ -8,6 +8,7 @@ Paracosms {
 	var busOut4;
 	var busPhasor;
 	var syns;
+	var synsFinished;
 	var synMetronome;
 	var bufs;
 	var params;
@@ -32,6 +33,7 @@ Paracosms {
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();
+		synsFinished=List.new(300);
 		bufs=Dictionary.new();
 		params=Dictionary.new();
 
@@ -240,6 +242,7 @@ Paracosms {
 		arg id;
 		["stop",id,syns.at(id)].postln;
 		if (syns.at(id).notNil,{
+			synsFinished.add(syns.at(id));
 			if (syns.at(id).isRunning,{
 				syns.at(id).set(\amp,0,\t_free,1);
 			},{
@@ -351,6 +354,10 @@ Paracosms {
 		});
 		bufs.keysValuesDo({ arg buf, val;
 			val.free;
+		});
+		// make sure things are freed
+		synsFinished.do({ arg item, i;
+			item.free;
 		});
 		busPhasor.free;
 		busOut1.free;
