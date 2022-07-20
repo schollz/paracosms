@@ -143,14 +143,16 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 <details><summary>a list of done and doing.</summary>
 
-- add option to record to a new track each time (available from ui)
-- when changing send, untoggle sends
-- add greyhole as another send
+- record beats should be a global parameter that gets imported to the next track when recording
 - add record countdown (using Stepper and Phasor bus that overrides the record trig)
 - fix bugs
 - add pattern recorded
 - logarithm hold length?
 - retrigger option for one-shot playback
+- ~~add metronome~~
+- ~~add greyhole as another send~~
+- ~~add option to record to a new track each time (available from ui)~~
+- ~~when changing send, untoggle sends~~
 - ~~try to guess bpm based on length of sample~~
 - ~~add midi transports (for syncing)~~
 - ~~load in the 808 kit by default as oneshot into the last row~~

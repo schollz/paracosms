@@ -48,7 +48,7 @@ local enc_func={}
 -- page 1
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "K1+K3 to play" end},
+  {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
@@ -189,6 +189,10 @@ function init()
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
   params:add_option("record_over","recording track",{"new","over"},1)
+  params:add_number("metronome","metronome",0,100,0)
+  params:set_action("metronome",function(x)
+    engine.metronome(clock.get_tempo(),x,0.2)
+  end)
   params:add_separator("samples")
 
   -- collect which files
@@ -230,6 +234,7 @@ function init()
         show_progress(100)
         show_message("recorded track "..id)
         params:set(id.."file",filename)
+        params:set(id.."play",2,true)
         clock.run(function()
           clock.sleep(3)
           dat.recording_id=0

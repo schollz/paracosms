@@ -139,6 +139,14 @@ Engine_Paracosms : CroneEngine {
             greyhole.set(msg[1],msg[2]);
         });
 
+        // metronome
+        this.addCommand("metronome","fff",{arg msg;
+            var bpm=msg[1];
+            var note=msg[2];
+            var amp=msg[3];
+            paracosms.metronome(bpm,note,amp);
+        });
+
 
         // ^ Paracosms specific
 
