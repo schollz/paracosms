@@ -718,10 +718,6 @@ function redraw()
   local topleft=dat.tt[dat.ti]:redraw()
   if show_message_clock>0 and show_message_text~="" then
     show_message_clock=show_message_clock-1
-    if show_message_clock==0 then
-      show_message_text=""
-      show_message_progress=0
-    end
     screen.blend_mode(0)
     local x=64
     local y=28
@@ -742,6 +738,10 @@ function redraw()
       screen.level(10)
       screen.fill()
       screen.blend_mode(0)
+    end
+    if show_message_clock==0 then
+      show_message_text=""
+      show_message_progress=0
     end
   end
   -- top left corner

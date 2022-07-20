@@ -252,6 +252,7 @@ function Turntable:load_file(path)
     do return end
   end
   local duration=samples/samplerate
+  print(path,"duration",duration)
   params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/8))
   self.loaded_file=true
 end
