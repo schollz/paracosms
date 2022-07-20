@@ -52,6 +52,7 @@ function Turntable:init()
     {id="send1",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send2",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
   params:add_group("sample "..self.id,18+#params_menu)
   params:add_file(id.."file","file",_path.audio)
@@ -91,10 +92,11 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
-      for _,vv in ipairs({"send2","tapedeck"},{"send3","clouds"},{"send4","greyhole"}) do
+      for _,vv in ipairs({{"send2","tapedeck"},{"send3","clouds"},{"send4","greyhole"}}) do
         if pram.id==vv[1] then
-          if params:get(id..pram.id)>0 then
+          if v>0 then
             if params:get(vv[2].."_activate")==1 then
+              print("activating")
               params:set(vv[2].."_activate",2)
             end
           else
@@ -296,7 +298,7 @@ function Turntable:retune()
   self.last_tune=tune
   self.retuned=true
   print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
-  local play_on_load=dat.recording_id and 1 or 0
+  local play_on_load=dat.recording_id==self.id and 1 or 0
   engine.add(self.id,self.path,play_on_load)
 end
 

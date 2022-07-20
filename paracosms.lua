@@ -6,15 +6,15 @@
 --
 --
 --    ▼ instructions below ▼
--- K1+K3 start/stops sample
+-- K3 start/stops sample
 -- (hold length = fade)
--- K1+K2 primes recording
+-- K1+K3 primes recording
 -- (when primed, starts)
 --
 -- E1 select sample
 -- K1+E1 select running sample
 --
--- K2/K3 selects parameters
+-- K2/K1+K2 selects parameters
 -- E2/E3 modulate parameter
 -- K1+E2/E3 modulate more
 --
@@ -51,7 +51,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "K1+K3 to play" end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta("record_over",d)end,function() return "K1+K2 record "..params:string("record_over") end},
+  {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
   {function(d) params:delta(dat.ti.."record_beats",d)end,function() return string.format("%2.3f beats",params:get(dat.ti.."record_beats")) end},
 })
 
@@ -168,11 +168,11 @@ function init()
       clock.sleep(3)
       show_message("E1 TO EXPLORE SAMPLES")
       clock.sleep(2)
-      show_message("K1+K3 TO PLAY")
+      show_message("K3 TO PLAY")
       clock.sleep(2)
-      show_message("K1+K2 TO RECORD")
+      show_message("K1+K3 TO RECORD")
       clock.sleep(2)
-      show_message("K2/K3 TO CYCLE PARAM")
+      show_message("K2/K1+K2 TO CYCLE PARAM")
       clock.sleep(2)
       show_message("(K1+)E2/E3 CHANGE PARAM")
     end)
@@ -477,7 +477,7 @@ function params_greyhole()
     {id="damp",name="damping",min=0,max=2,exp=false,div=0.01,default=0.0},
     {id="size",name="size",min=0,max=2,exp=false,div=0.01,default=1.0},
     {id="diff",name="diffuse",min=0,max=2,exp=false,div=0.01,default=0.707},
-    {id="feedback",name="feedback",min=0,max=1.0,exp=false,div=0.01,default=0.9},
+    {id="feedback",name="feedback",min=0,max=1.0,exp=false,div=0.01,default=0.4},
     {id="modDepth",name="mod depth",min=0,max=2,exp=false,div=0.01,default=0.1},
     {id="modFreq",name="mod freq",min=0.1,max=10,exp=false,div=0.1,default=2.0},
   }
@@ -643,9 +643,9 @@ local hold_beats=0
 function key(k,z)
   if k==1 then
     shift=z==1
-  elseif (k==2 or k==3) and z==1 and not shift then
-    delta_page(k==2 and-1 or 1)
-  elseif shift and k==2 then
+  elseif z==1 and k==2 then
+    delta_page(shift and-1 or 1)
+  elseif shift and k==3 then
     if z==1 then
       if params:get("record_over")==1 then
         -- try to find a track that is empty
@@ -660,13 +660,13 @@ function key(k,z)
       end
       params:delta(dat.ti.."record_on",1)
     end
-  elseif shift and k==3 and z==1 then
+  elseif k==3 and z==1 then
     if params:get(dat.ti.."oneshot")==2 then
       dat.tt[dat.ti]:play()
     else
       hold_beats=clock.get_beats()
     end
-  elseif shift and k==3 and z==0 then
+  elseif k==3 and z==0 then
     if params:get(dat.ti.."oneshot")==1 then
       params:set(dat.ti.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-hold_beats))
       params:set(dat.ti.."play",3-params:get(dat.ti.."play"))
