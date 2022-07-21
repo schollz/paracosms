@@ -43,13 +43,40 @@ function GGrid:new(args)
   m.grid_refresh:start()
 
   m.light_setting={}
+
+  m:init()
   return m
 end
 
+function GGrid:init()
+  self.page=1
+  self.key_press_fn={}
+  -- page 1, selection/toggling
+  table.insert(self.key_press_fn,function(row,col,on,id)
+    if on then
+      switch_view(id)
+    end
+    if params:get(id.."oneshot")==2 then
+      if on then
+        print("oneshot")
+        dat.tt[id]:play()
+      end
+    elseif hold_time>0.25 then
+      print("loop")
+      params:set(id.."fadetime",hold_time*3)
+      params:set(id.."play",3-params:get(id.."play"))
+    end
+  end)
+  -- page 2, recording
+  table.insert(self.key_press_fn,function(row,col,on,id)
+  end)
+end
 function GGrid:grid_key(x,y,z)
   self:key_press(y,x,z==1)
   self:grid_redraw()
 end
+
+
 
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
@@ -61,19 +88,7 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   local id=(row-1)*16+col
-  if on then
-    switch_view(id)
-  end
-  if params:get(id.."oneshot")==2 then
-    if on then
-      print("oneshot")
-      dat.tt[id]:play()
-    end
-  elseif hold_time>0.25 then
-    print("loop")
-    params:set(id.."fadetime",hold_time*3)
-    params:set(id.."play",3-params:get(id.."play"))
-  end
+  self.key_press_fn[self.page](row,col,on,id)
 end
 
 function GGrid:light_up(id,val)
