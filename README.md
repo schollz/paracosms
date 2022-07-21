@@ -7,7 +7,7 @@
 *paracosms* is a sampler that can playback or record synchronized audio. main features:
 
 - can load up to **112 stereo samples**
-- **samples are quantized** to a main clock and synced together
+- **samples are synchronized** to a main clock so they can easily play in sync
 - recorded samples have **gapless playback** by crossfading post-roll
 - imported samples are **automatic warped** to current bpm
 - **one-shot samples can be sequenced** with euclidean sequencer
@@ -21,7 +21,7 @@ https://vimeo.com/730684724
 
 between april and june 2022 I made music primarily with [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
 
-eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and quantized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
+eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
 
 for awhile now I've been thinking about how to record perfectly seamless loops of audio. I added [a new function to do this easily in sofcut](https://github.com/schollz/softcut-lib/tree/rec-once4). but around the time I was playing with samples I started played around with making a SuperCollider class to make a crossfading stereo recording system (like softcut). this became "[ouroborus][]".
 

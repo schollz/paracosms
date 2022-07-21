@@ -49,10 +49,10 @@ local enc_func={}
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
   {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
-  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
+  {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
-  {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
+  {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
 })
 
 table.insert(enc_func,{
