@@ -44,7 +44,9 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  table.insert(m.patterns,patterner:new())
+  for i=1,12 do 
+    table.insert(m.patterns,patterner:new())
+  end
 
   m:init()
   return m
@@ -59,7 +61,16 @@ function GGrid:init()
     if on and no_switch==nil then
       switch_view(id)
     end
-    params:set(id.."play",on and 1 or 0)
+    if params:get(id.."oneshot")==2 then 
+      params:set(id.."play",on and 1 or 0)
+    else if hold_time>0.25 then 
+      if params:get(id.."play")==1 then
+        params:set(id.."release",hold_time)
+      else
+        params:set(id.."attack",hold_time)
+      end
+      params:delta(id.."play",1)
+    end
   end)
   -- page 2, recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
@@ -75,11 +86,17 @@ function GGrid:init()
       params:delta(id.."record_on",1)
     end
   end)
-  -- page 3, pattern recorder
+  -- page 3 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    self.key_press_fn[1](row,col,on,id,hold_time)
-    self.patterns[1]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
+    -- check to see if two notes are held down and set the start/end based on them
   end)
+  -- page 4-16 pattern recorder
+  for i=4,16 do 
+    table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
+      self.key_press_fn[1](row,col,on,id,hold_time)
+      self.patterns[i-3]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
+    end)  
+  end
 end
 
 function GGrid:grid_key(x,y,z)
@@ -102,15 +119,15 @@ function GGrid:key_press(row,col,on)
       local old_page=self.page
       self.page=(col<=#self.key_press_fn) and col or self.page
       self.page_switched=old_page~=self.page
-    elseif col==3 then
+    elseif col>=4 then
       if self.page_switched then
         do return end
       end
       if hold_time>0.5 then
         -- record a pattern
-        self.patterns[1]:record()
+        self.patterns[col-3]:record()
       else
-        self.patterns[1]:toggle()
+        self.patterns[col-3]:toggle()
       end
     end
   else
@@ -161,7 +178,7 @@ function GGrid:get_visual()
     self.visual[8][i]=self.page==i and 3 or 2
   end
   for i,v in ipairs(self.patterns) do
-    self.visual[8][i+2]=self.visual[8][i+2]+((v.playing or v.recording) and 5 or 0)
+    self.visual[8][i+3]=self.visual[8][i+3]+((v.playing or v.recording) and 5 or 0)
   end
 
   return self.visual
