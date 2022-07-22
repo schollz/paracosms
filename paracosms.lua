@@ -32,7 +32,7 @@ engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
   {folder="/home/we/dust/audio/paracosms/row1"},
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}},
+  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
@@ -247,7 +247,7 @@ function init()
         show_progress(100)
         show_message("recorded track "..id)
         params:set(id.."file",filename)
-        params:set(id.."play",2,true)
+        params:set(id.."play",1,true)
         clock.run(function()
           clock.sleep(3)
           dat.recording_id=0
@@ -510,12 +510,12 @@ function params_greyhole()
   for _,pram in ipairs(params_menu) do
     params:add{
       type="control",
-      id="tape_"..pram.id,
+      id="greyhole_"..pram.id,
       name=pram.name,
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    params:set_action("tape_"..pram.id,function(v)
+    params:set_action("greyhole_"..pram.id,function(v)
       engine.greyhole_set(pram.id,v)
     end)
   end
@@ -682,7 +682,21 @@ function key(k,z)
       params:delta(dat.ti.."record_on",1)
     end
   elseif k==3 then
-    dat.tt[dat.ti]:play(z==1)
+    print(k,z)
+    if params:get(dat.ti.."oneshot")==2 then
+      params:set(dat.ti.."play",z)
+    elseif z==1 then
+      hold_beats=clock.get_beats()
+    elseif z==0 then
+      local hold_time=math.pow((hold_beats-clock.get_beats())*clock.get_beat_sec()*2,2)
+      print(hold_time)
+      if params:get(dat.ti.."play")==1 then
+        params:set(dat.ti.."release",hold_time)
+      else
+        params:set(dat.ti.."attack",hold_time)
+      end
+      params:set(dat.ti.."play",1-params:get(dat.ti.."play"))
+    end
   end
 end
 

@@ -33,12 +33,15 @@ function Turntable:init()
   local id=self.id
   -- TODO: add pan and amp lfos
   local params_menu={
+    {id="amp",name="amp",min=0,max=5,exp=false,div=0.05,default=1,response=1},
     {id="amp_period",name="amp lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="amp_strength",name="amp lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
     {id="pan_period",name="pan lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="pan_strength",name="pan lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=1,formatter=function(param) return param:get().."x" end},
+    {id="attack",name="attack",dontsend=true,min=0.001,max=10,exp=false,div=0.005,default=clock.get_beat_sec(),response=1,unit="s"},
+    {id="release",name="release",dontsend=true,min=0.01,max=30,exp=false,div=0.01,default=clock.get_beat_sec()*4,response=1,unit="s"},
     {id="lpf",name="lpf",min=100,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="lpfqr",name="lpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
     {id="hpf",name="hpf",min=10,max=20000,exp=true,div=10,default=10,unit="Hz",response=1},
@@ -54,7 +57,7 @@ function Turntable:init()
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","release","play","oneshot","amp","fadetime","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","release","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -62,31 +65,14 @@ function Turntable:init()
       self:load_file(x)
     end
   end)
-  params:add_option(id.."play","play",{"stopped","playing"},1)
-  params:set_action(id.."play",function(v)
-    engine[v==1 and "stop" or "play"](id)
-  end)
+  params:add{type="binary",name="play",id=id.."play",behavior="toggle",action=function(v)
+    print("play",v,params:get(id..(v==1 and "attack" or "release")))
+    engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
+  end}
   params:add_option(id.."oneshot","mode",{"loop","oneshot"})
   params:set_action(id.."oneshot",function(v)
-    engine.stop(id)
-    engine.set(id,"oneshot",v-1,0)
-  end)
-  params:add_option(id.."release","release",{"play through","fade out"})
-  params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
-  params:set_action(id.."fadetime",function(v)
-    engine.set(id,"amp",params:get(id.."amp"),v)
-  end)
-  params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
-  params:set_action(id.."amp",function(v)
-    debounce_fn[id.."amp"]={
-      3,function()
-        if params:get(id.."play")==2 and params:get(id.."amp")==0 then
-          params:set(id.."play",1)
-        elseif params:get(id.."play")==2 then
-          engine.set(id,"amp",params:get(id.."amp"),params:get(id.."fadetime"))
-        end
-      end,
-    }
+    engine.stop(id,params:get(id.."release"))
+    engine.set(id,"oneshot",v-1)
   end)
   for _,pram in ipairs(params_menu) do
     table.insert(self.all_params,pram.id)
@@ -98,6 +84,9 @@ function Turntable:init()
       formatter=pram.formatter,
     }
     params:set_action(id..pram.id,function(v)
+      if pram.dontsend~=nil then
+        do return end
+      end
       for _,vv in ipairs({{"send2","tapedeck"},{"send3","clouds"},{"send4","greyhole"}}) do
         if pram.id==vv[1] then
           if v>0 then
@@ -123,7 +112,7 @@ function Turntable:init()
 
       debounce_fn[id..pram.id]={
         pram.response or 3,function()
-          engine.set(id,pram.id,params:get(id..pram.id),0.2)
+          engine.set(id,pram.id,params:get(id..pram.id))
         end,
       }
     end)
@@ -201,30 +190,6 @@ function Turntable:show()
       params:show(self.id..pram)
     end
     self.hidden=false
-  end
-end
-
-function Turntable:play(on,oneshot)
-  if oneshot~=nil then
-    -- force oneshot
-    engine.set(self.id,"oneshot",oneshot==true and 1 or 0,0)
-  end
-  if on then
-    if params:get(self.id.."oneshot")==2 then
-      engine.play(self.id)
-    else
-      self.hold_beats=clock.get_beats()
-    end
-  else
-    if params:get(self.id.."oneshot")==1 then
-      local fade_time=0.002
-      if self.hold_beats~=nil and self.hold_beats>0 then
-        params:set(self.id.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-self.hold_beats))
-      end
-      params:set(self.id.."play",3-params:get(self.id.."play"))
-    elseif (params:get(self.id.."oneshot")==2 and params:get(self.id.."release")==2) then
-      engine.stop(self.id)
-    end
   end
 end
 

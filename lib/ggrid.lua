@@ -59,14 +59,7 @@ function GGrid:init()
     if on and no_switch==nil then
       switch_view(id)
     end
-    if params:get(id.."oneshot")==2 then
-      if on then
-        dat.tt[id]:play(true,true)
-      end
-    elseif hold_time>0.25 then
-      params:set(id.."fadetime",hold_time*3)
-      params:set(id.."play",3-params:get(id.."play"))
-    end
+    params:set(id.."play",on and 1 or 0)
   end)
   -- page 2, recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)

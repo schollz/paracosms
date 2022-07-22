@@ -41,25 +41,17 @@ Paracosms {
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
 			SynthDef("defPlay"++ch,{
-				arg amp=0.01,ampLag=0.2,
-				lpf=20000,lpfLag=0.2,
-				lpfqr=0.707,lpfqrLag=0.2,
-				hpf=20,hpfLag=0.2,
-				hpfqr=0.707,hpfqrLag=0.2,
-				offset=0,offsetLag=0.0,
-				t_sync=1,t_syncLag=0.0,
-				t_manu=0,t_manuLag=0.0,
-				oneshot=0,oneshotLag=0.0,
+				arg amp=1.0,pan=0,
+				lpf=20000,lpfqr=0.707,
+				hpf=20,hpfqr=0.707,
+				offset=0,t_sync=1,t_manu=0,
+				oneshot=0,
 				rate=1.0,rateLag=0.0,
-				pan=0,panLag=0.0,
-				sampleStart=0,sampleStartLag=0.0,
-				sampleEnd=1.0,sampleEndLag=0.0,
-				ts=0,tsLag=0.0,
-				tsSeconds=0.25,tsSecondsLag=0.0,
-				tsSlow=1,tsSlowLag=0.0,
+				sampleStart=0,sampleEnd=1.0,
+				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
-				id=0,dataout=0,fadeInTime=0.1,t_free=0,bufnum,busPhase,
+				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
 				var snd,pos,seconds,tsWindow;
@@ -76,9 +68,9 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
-				fadeInTime=fadeInTime*(1-oneshot); // if one-shot then don't fade in
 
-				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,ampLag,warp:\sine));
+
+				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 				rate=rate*BufRateScale.ir(bufnum);
 				pos=Phasor.ar(
@@ -110,17 +102,21 @@ Paracosms {
 				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
-				snd=snd*amp*EnvGen.ar(Env.new([0,1],[fadeInTime],curve:\sine));
+				snd=snd*amp;
 
 				// one-shot envelope
 				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
 
-				snd=RLPF.ar(snd,VarLag.kr(lpf.log,lpfLag,warp:\sine).exp,lpfqr);
-				snd=RHPF.ar(snd,VarLag.kr(hpf.log,hpfLag,warp:\sine).exp,hpfqr);
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
+
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
+
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				FreeSelf.kr(TDelay.kr(t_free,ampLag));
 				snd=snd/10;
 				Out.ar(out1,snd*send1);
 				Out.ar(out2,snd*send2);
@@ -195,7 +191,9 @@ Paracosms {
 				if (note<1,{
 					synMetronome.set(\t_free,1);
 				});
-			});
+			},{
+				synMetronome.free;
+			})
 		});
 		if (note>1,{
 			if (doSet,{
@@ -209,68 +207,48 @@ Paracosms {
 	}
 
 
-
-	addMod {
-		arg id,fnameOriginal,bpm_source,bpm_target;
-		var fname=fnameOriginal;
-		if (bpm_source!=bpm_target,{
-			fname=(PathName(dirCache)+/+PathName(fnameOriginal).fileName);
-			fname=fname.fullPath++"_newbpm"++bpm_target.asInteger++".flac";
-			if (File.exists(fname)==false,{
-				var cmd="sox"+fnameOriginal+fname+"tempo -m "+(bpm_target/bpm_source)+"rate -v 48k";
-				if (fnameOriginal.contains("drum"),{
-					cmd="sox"+fnameOriginal+fname+"speed "+(bpm_target/bpm_source)+"rate -v 48k";
-				});
-				cmd.postln;
-				cmd.systemCmd;
-			});
-		});
-		if (bufs.at(id).notNil,{
-			bufs.at(id).free;
-		});
-		if (syns.at(id).notNil,{
-			syns.at(id).free;
-		}); 
-		Buffer.read(server,fname,action:{arg buf;
-			bufs.put(id,buf);
-			NetAddr("127.0.0.1", 10111).sendMsg("ready",id,id);
-		});
-	}
-
-
 	stop {
-		arg id;
-		// ["stop",id,syns.at(id)].postln;
+		arg id, fadeOut;
 		if (syns.at(id).notNil,{
 			synsFinished.add(syns.at(id));
 			if (syns.at(id).isRunning,{
-				syns.at(id).set(\amp,0,\t_free,1);
-			},{
-				syns.at(id).free;
+				syns.at(id).set(\gate,0,\release,fadeOut);
 			});
 		});
 	}
 
 	play {
-		arg id;
-		this.stop(id);
-		["play",id].postln;
+		arg id,fadeIn;
+		["play",id,fadeIn].postln;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
-				var ampLag=0;
-				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
-				("making synth"+id).postln;
-				if (params.at(id).at("ampLag").notNil,{
-					ampLag=params.at(id).at("ampLag");
-				});
-				pars=pars++[\fadeInTime,ampLag];
+				var makeNew=true;
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,fadeIn];
 				params.at(id).keysValuesDo({ arg pk,pv; 
 					pars=pars++[pk,pv];
 				});
-				syns.put(id,Synth.after(syns.at("phasor"),
-					"defPlay"++bufs.at(id).numChannels,pars,
-				).onFree({["freed"+id].postln}));
-				NodeWatcher.register(syns.at(id));
+
+				if (syns.at(id).notNil,{
+					if (syns.at(id).isRunning,{
+						if (params.at(id).at("oneshot")>0,{
+							("retriggering synth"+id).postln;
+							syns.at(id).set(\release,0.2,\gate,0);
+						},{
+							makeNew=false;
+						});
+					});
+				});
+
+				if (makeNew,{
+					("making synth"+id).postln;
+					syns.put(id,Synth.after(syns.at("phasor"),
+						"defPlay"++bufs.at(id).numChannels,pars,
+					).onFree({["freed"+id].postln}));
+					NodeWatcher.register(syns.at(id));
+				},{
+					("updating synth"+id).postln;
+					syns.at(id).set(\gate,1,\attack,fadeIn);
+				});
 			});
 		});
 	}
@@ -316,23 +294,23 @@ Paracosms {
 				});
 				// fade in the synth
 				fadeIn.postln;
-				if (fadeIn,{ this.play(id); }); // GOTCHA: this.play is needed instead of just "play"
+				if (fadeIn,{ this.play(id,0); }); // GOTCHA: this.play is needed instead of just "play"
 			});
 		});
 	}
 
 
 	set {
-		arg id,key,val,valLag;
+		arg id,key,val;
 		if (params.at(id).isNil,{
 			params.put(id,Dictionary.new());
 		});
-		// [id,key,val].postln;
-		params.at(id).put(key,val);
-		params.at(id).put(key++"Lag",valLag);
+		//[id,key,val].postln;
+		// GOTCHA: if not "asString" then it can be manually polled using at("something")
+		params.at(id).put(key.asString,val);
 		if (syns.at(id).notNil,{
 			if (syns.at(id).isRunning,{
-				syns.at(id).set(key,val,key++"Lag",valLag)
+				syns.at(id).set(key,val);
 			});
 		});
 	}
@@ -366,6 +344,8 @@ Paracosms {
 		busOut3.free;
 		busOut4.free;
 		synMetronome.free;
+		syns.free;
+		bufs.free;
 	}
 
 }
