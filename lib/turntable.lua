@@ -55,7 +55,6 @@ function Turntable:init()
     {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
   self.all_params={"file","play","oneshot","amp","fadetime","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
-  -- params:add_group("sample "..self.id,17+#params_menu)
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -71,6 +70,11 @@ function Turntable:init()
   params:set_action(id.."oneshot",function(v)
     engine.stop(id)
     engine.set(id,"oneshot",v-1,0)
+  end)
+  params:add_option(id.."release","release",{"play through","fade out"})
+  params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
+  params:set_action(id.."fadetime",function(v)
+    engine.set(id,"amp",params:get(id.."amp"),v)
   end)
   params:add_control(id.."amp","amp",controlspec.new(0,4,'lin',0.01,1.0,'amp',0.01/4))
   params:set_action(id.."amp",function(v)
@@ -124,10 +128,6 @@ function Turntable:init()
       }
     end)
   end
-  params:add_control(id.."fadetime","fade time",controlspec.new(0,64,'lin',0.01,1,'seconds',0.01/64))
-  params:set_action(id.."fadetime",function(v)
-    engine.set(id,"amp",params:get(id.."amp"),v)
-  end)
 
   params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
   params:add_number(id.."n","n",1,128,16)
@@ -204,13 +204,28 @@ function Turntable:show()
   end
 end
 
-function Turntable:play()
-  engine.set(self.id,"oneshot",params:get(self.id.."oneshot")-1,0)
-  if params:get(self.id.."oneshot")==2 then
-    engine.stop(self.id)
-    engine.set(self.id,"amp",params:get(self.id.."amp"),0)
+function Turntable:play(on,oneshot)
+  if oneshot~=nil then
+    -- force oneshot
+    engine.set(self.id,"oneshot",onsehot and 1 or 0,0)
   end
-  engine.play(self.id)
+  if on then
+    if params:get(self.id.."oneshot")==2 then
+      engine.play(self.id)
+    else
+      self.hold_beats=clock.get_beats()
+    end
+  else
+    if params:get(self.id.."oneshot")==1 then
+      local fade_time=0.002
+      if self.hold_beats~=nil and self.hold_beats>0 then
+        params:set(self.id.."fadetime",3*clock.get_beat_sec()*(clock.get_beats()-self.hold_beats))
+      end
+      params:set(self.id.."play",3-params:get(self.id.."play"))
+    elseif (params:get(self.id.."oneshot")==2 and params:get(self.id.."release")==2) then
+      engine.stop(self.id)
+    end
+  end
 end
 
 function Turntable:beats()
@@ -328,7 +343,7 @@ function Turntable:emit(beat)
   end
   local i=((beat-1)%#self.sequence)+1
   if self.sequence[i] then
-    self:play()
+    self:play(true,true)
   end
 end
 
