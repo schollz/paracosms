@@ -1,5 +1,5 @@
 local GGrid={}
-local patterner=include("lib/pattern")
+local patterner=include("lib/patterner")
 
 function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})

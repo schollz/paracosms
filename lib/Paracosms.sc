@@ -240,7 +240,7 @@ Paracosms {
 
 	stop {
 		arg id;
-		["stop",id,syns.at(id)].postln;
+		// ["stop",id,syns.at(id)].postln;
 		if (syns.at(id).notNil,{
 			synsFinished.add(syns.at(id));
 			if (syns.at(id).isRunning,{
