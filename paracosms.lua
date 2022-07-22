@@ -683,105 +683,103 @@ function key(k,z)
   end
 end
 
-function do_record()
-end
 
 function enc(k,d)
   enc_func[ui_page][k+(shift and 3 or 0)][1](d)
-  endf
+end
 
-  local show_message_text=""
-  local show_message_progress=0
-  local show_message_clock=0
+local show_message_text=""
+local show_message_progress=0
+local show_message_clock=0
 
-  function show_progress(val)
-    show_message_progress=util.clamp(val,0,100)
+function show_progress(val)
+  show_message_progress=util.clamp(val,0,100)
+end
+
+function show_message(message,seconds)
+  seconds=seconds or 2
+  show_message_clock=10*seconds
+  show_message_text=message
+end
+
+function redraw()
+  screen.clear()
+  if dat.tt[dat.ti]==nil then
+    do return end
   end
-
-  function show_message(message,seconds)
-    seconds=seconds or 2
-    show_message_clock=10*seconds
-    show_message_text=message
-  end
-
-  function redraw()
-    screen.clear()
-    if dat.tt[dat.ti]==nil then
-      do return end
-    end
-    local topleft=dat.tt[dat.ti]:redraw()
-    if show_message_clock>0 and show_message_text~="" then
-      show_message_clock=show_message_clock-1
-      screen.blend_mode(0)
-      local x=64
-      local y=28
-      local w=screen.text_extents(show_message_text)+8
-      screen.rect(x-w/2,y,w,10)
-      screen.level(0)
-      screen.fill()
-      screen.rect(x-w/2,y,w,10)
-      screen.level(15)
-      screen.stroke()
-      screen.move(x,y+7)
+  local topleft=dat.tt[dat.ti]:redraw()
+  if show_message_clock>0 and show_message_text~="" then
+    show_message_clock=show_message_clock-1
+    screen.blend_mode(0)
+    local x=64
+    local y=28
+    local w=screen.text_extents(show_message_text)+8
+    screen.rect(x-w/2,y,w,10)
+    screen.level(0)
+    screen.fill()
+    screen.rect(x-w/2,y,w,10)
+    screen.level(15)
+    screen.stroke()
+    screen.move(x,y+7)
+    screen.level(10)
+    screen.text_center(show_message_text)
+    if show_message_progress>0 then
+      screen.update()
+      screen.blend_mode(13)
+      screen.rect(x-w/2,y,w*(show_message_progress/100),9)
       screen.level(10)
-      screen.text_center(show_message_text)
-      if show_message_progress>0 then
-        screen.update()
-        screen.blend_mode(13)
-        screen.rect(x-w/2,y,w*(show_message_progress/100),9)
-        screen.level(10)
-        screen.fill()
-        screen.blend_mode(0)
-      end
-      if show_message_clock==0 then
-        show_message_text=""
-        show_message_progress=0
-      end
+      screen.fill()
+      screen.blend_mode(0)
     end
-    -- top left corner
-    screen.level(7)
-    screen.move(1,7)
-    if dat.percent_loaded<99.0 then
-    elseif topleft~=nil then
-      screen.text(topleft:sub(1,24))
+    if show_message_clock==0 then
+      show_message_text=""
+      show_message_progress=0
     end
-
-    screen.move(128,7)
-    screen.text_right(dat.ti)
-
-    -- screen.level(5)
-    -- screen.move(128,62)
-    -- if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
-    --   screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
-    -- end
-
-    -- screen.move(0,62)
-    -- if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
-    --   screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
-    -- end
-    if enc_func[ui_page][2][2]~=nil then
-      screen.level(shift and 1 or 5)
-      screen.move(0,63)
-      screen.text(enc_func[ui_page][2][2]())
-    end
-    if enc_func[ui_page][5][2]~=nil then
-      screen.level(shift and 5 or 1)
-      screen.move(0,63-8)
-      screen.text(enc_func[ui_page][5][2]())
-    end
-
-    if enc_func[ui_page][3][2]~=nil then
-      screen.level(shift and 1 or 5)
-      screen.move(128,63)
-      screen.text_right(enc_func[ui_page][3][2]())
-    end
-    if enc_func[ui_page][6][2]~=nil then
-      screen.level(shift and 5 or 1)
-      screen.move(128,63-8)
-      screen.text_right(enc_func[ui_page][6][2]())
-    end
-
-    screen.update()
+  end
+  -- top left corner
+  screen.level(7)
+  screen.move(1,7)
+  if dat.percent_loaded<99.0 then
+  elseif topleft~=nil then
+    screen.text(topleft:sub(1,24))
   end
 
- 
+  screen.move(128,7)
+  screen.text_right(dat.ti)
+
+  -- screen.level(5)
+  -- screen.move(128,62)
+  -- if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
+  --   screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
+  -- end
+
+  -- screen.move(0,62)
+  -- if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
+  --   screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
+  -- end
+  if enc_func[ui_page][2][2]~=nil then
+    screen.level(shift and 1 or 5)
+    screen.move(0,63)
+    screen.text(enc_func[ui_page][2][2]())
+  end
+  if enc_func[ui_page][5][2]~=nil then
+    screen.level(shift and 5 or 1)
+    screen.move(0,63-8)
+    screen.text(enc_func[ui_page][5][2]())
+  end
+
+  if enc_func[ui_page][3][2]~=nil then
+    screen.level(shift and 1 or 5)
+    screen.move(128,63)
+    screen.text_right(enc_func[ui_page][3][2]())
+  end
+  if enc_func[ui_page][6][2]~=nil then
+    screen.level(shift and 5 or 1)
+    screen.move(128,63-8)
+    screen.text_right(enc_func[ui_page][6][2]())
+  end
+
+  screen.update()
+end
+
+
