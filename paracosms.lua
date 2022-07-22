@@ -33,7 +33,7 @@ dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=fa
 dat.rows={
   {folder="/home/we/dust/audio/paracosms/row1"},
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
-  {folder="/home/we/dust/audio/paracosms/row3"},
+  {folder="/home/we/dust/audio/paracosms/row3",params={oneshot=2,attack=0.001,release=1}},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
@@ -367,7 +367,7 @@ function init()
       if dat.rows[row].params~=nil then
         for pram,val in pairs(dat.rows[row].params) do
           local id=(row-1)*16+col
-          print("setting ",id,pram,val)
+          --print("setting ",id,pram,val)
           params:set(id..pram,val)
         end
       end
@@ -682,14 +682,12 @@ function key(k,z)
       params:delta(dat.ti.."record_on",1)
     end
   elseif k==3 then
-    print(k,z)
     if params:get(dat.ti.."oneshot")==2 then
       params:set(dat.ti.."play",z)
     elseif z==1 then
       hold_beats=clock.get_beats()
     elseif z==0 then
       local hold_time=math.pow((hold_beats-clock.get_beats())*clock.get_beat_sec()*2,2)
-      print(hold_time)
       if params:get(dat.ti.."play")==1 then
         params:set(dat.ti.."release",hold_time)
       else

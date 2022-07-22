@@ -145,6 +145,11 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 <details><summary>a list of done and doing.</summary>
 
+
+- calculate lcm of all current beats and reset every time lattice hits it (to stay synced)
+- add page for sample position
+- make test of pages for patterns
+- light up when recording
 - pattern saving/loading
 - add more patterns
 - ui to explain pattern recording

@@ -232,7 +232,7 @@ Paracosms {
 					if (syns.at(id).isRunning,{
 						if (params.at(id).at("oneshot")>0,{
 							("retriggering synth"+id).postln;
-							syns.at(id).set(\release,0.2,\gate,0);
+							syns.at(id).set(\release,0.05,\gate,0);
 						},{
 							makeNew=false;
 						});

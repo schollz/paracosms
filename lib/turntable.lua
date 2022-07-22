@@ -65,9 +65,13 @@ function Turntable:init()
       self:load_file(x)
     end
   end)
+  self.last_play=0
   params:add{type="binary",name="play",id=id.."play",behavior="toggle",action=function(v)
-    print("play",v,params:get(id..(v==1 and "attack" or "release")))
-    engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
+    if v~=self.last_play then
+      print("play",v,params:get(id..(v==1 and "attack" or "release")))
+      engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
+      self.last_play=v
+    end
   end}
   params:add_option(id.."oneshot","mode",{"loop","oneshot"})
   params:set_action(id.."oneshot",function(v)
