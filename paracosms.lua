@@ -185,7 +185,7 @@ function init()
 
   -- setup parameters
   params:add_group("RECORDING",6)
-  params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4,/(128-0.25)))
+  params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4)/(128-0.25)))
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
@@ -382,7 +382,7 @@ function init()
       for col,file in ipairs(possible_files) do
         local id=(row-1)*16+col
         params:set(id.."file",file)
-        clock.sleep(0.05)
+        clock.sleep(0.01)
       end
     end
     clock.sleep(1)
