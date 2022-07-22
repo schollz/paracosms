@@ -75,7 +75,7 @@ function Turntable:init()
       dat.playing[id]=(v==1 and nil or true)
       local beats={}
       for vid,_ in pairs(dat.playing) do
-        table.insert(beats,dat.tt[vid]:beats()*8)
+        table.insert(beats,math.floor(dat.tt[vid]:beats()*4))
       end
       dat.lcm_beat=lvm(beats)
       print("turntable: new lcm beat ",dat.lcm_beat)
@@ -245,7 +245,7 @@ function Turntable:load_file(path)
   end
   local duration=samples/samplerate
   print(path,"duration",duration)
-  params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/8))
+  params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/4))
   self.loaded_file=true
 end
 

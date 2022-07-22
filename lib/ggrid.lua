@@ -89,6 +89,16 @@ function GGrid:init()
   -- page 3 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
     -- check to see if two notes are held down and set the start/end based on them
+    if #self.pressed_ids~=2 then 
+      do return end
+    end
+    local ids={}
+    for v,_ in pairs(self.pressed_ids) do
+      table.insert(ids,v)
+    end
+    table.sort(ids)
+    params:set(dat.ti.."sampleStart",util.linlin(1,112,0,1,ids[1]))
+    params:set(dat.ti.."sampleEnd",util.linlin(1,112,0,1,ids[2]))
   end)
   -- page 4-16 pattern recorder
   for i=4,16 do
@@ -107,13 +117,15 @@ end
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
   local hold_time=0
+  local id=(row-1)*16+col
   if on then
     self.pressed_buttons[row..","..col]=ct
+    self.pressed_ids[id]=true
   else
     hold_time=ct-self.pressed_buttons[row..","..col]
     self.pressed_buttons[row..","..col]=nil
+    self.pressed_ids[id]=false
   end
-  local id=(row-1)*16+col
   if row==8 then
     if on then
       local old_page=self.page
@@ -142,6 +154,11 @@ end
 function GGrid:get_visual()
   -- clear visual
   local id=0
+  local sampleSE={}
+  if self.page==3 then 
+    sampleSE[1]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleStart")))
+    sampleSE[2]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleEnd")))
+  end
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
@@ -154,7 +171,9 @@ function GGrid:get_visual()
         end
       elseif self.page==3 then
         -- sample start/stop
-
+        if id>=sampleSE[1] and id<=sampleSE[2] then 
+          self.visual[row][col]=5
+        end
       else
         self.visual[row][col]=self.light_setting[id] or 0
         if self.light_setting[id]~=nil and self.light_setting[id]>0 then
