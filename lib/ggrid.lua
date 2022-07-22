@@ -24,7 +24,7 @@ function GGrid:new(args)
   m.grid_width=16
   for i=1,8 do
     m.visual[i]={}
-    for j=1,m.grid_width do
+    for j=1,16 do
       m.visual[i][j]=0
     end
   end
@@ -138,7 +138,7 @@ function GGrid:get_visual()
         if id/4<=params:get("record_beats") then
           self.visual[row][col]=10
         end
-      else then
+      else
         self.visual[row][col]=self.light_setting[id] or 0
         if self.light_setting[id]~=nil and self.light_setting[id]>0 then
           self.light_setting[id]=self.light_setting[id]-1
@@ -150,8 +150,8 @@ function GGrid:get_visual()
       -- always blink
       if id==dat.ti then
         self.blink=self.blink-1
-        if self.blink<-0.5/m.grid_refresh.time then
-          self.blink=0.5/m.grid_refresh.time
+        if self.blink<-0.5/self.grid_refresh.time then
+          self.blink=0.5/self.grid_refresh.time
         end
         if self.blink>0 then
           self.visual[row][col]=15
@@ -161,8 +161,8 @@ function GGrid:get_visual()
   end
 
   -- highlight available pages / current page
-  for i,_ in ipairs(self.key_press_fn) do return
-    self.visual[8][i]==self.page==i and 15 or 5
+  for i,_ in ipairs(self.key_press_fn) do
+    self.visual[8][i]=self.page==i and 15 or 5
   end
 
   return self.visual
@@ -176,7 +176,7 @@ function GGrid:grid_redraw()
   local adj=0
   for row=1,8 do
     for col=s,e do
-      if gd[row][col]~=0 then
+      if gd~=nil and gd[row]~=nil and gd[row][col]~=0 then
         self.g:led(col+adj,row,gd[row][col])
       end
     end
