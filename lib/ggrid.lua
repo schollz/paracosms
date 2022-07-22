@@ -49,6 +49,7 @@ function GGrid:new(args)
 end
 
 function GGrid:init()
+  self.blink=0
   self.page=1
   self.key_press_fn={}
   -- page 1, selection/toggling
@@ -75,8 +76,6 @@ function GGrid:grid_key(x,y,z)
   self:key_press(y,x,z==1)
   self:grid_redraw()
 end
-
-
 
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
@@ -107,6 +106,15 @@ function GGrid:get_visual()
       end
       if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
         self.visual[row][col]=1
+      end
+      if id==dat.ti then
+        self.blink=self.blink-1
+        if self.blink<-0.5/m.grid_refresh.time then
+          self.blink=0.5/m.grid_refresh.time
+        end
+        if self.blink>0 then
+          self.visual[row][col]=15
+        end
       end
     end
   end
