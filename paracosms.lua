@@ -415,6 +415,10 @@ function init()
   pattern_qn=lattice:new_pattern{
     action=function(v)
       dat.beat=dat.beat+1
+      -- TODO: on LCM beat, do a reset
+      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then 
+        reset()
+      end
       for id,_ in pairs(dat.sequencing) do
         dat.tt[id]:emit(dat.beat)
       end
@@ -578,6 +582,7 @@ function params_clouds()
 end
 
 function reset()
+  print("paracosms: resetting")
   dat.beat=0
   engine.resetPhase()
   ignore_transport=true

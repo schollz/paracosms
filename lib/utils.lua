@@ -1,6 +1,8 @@
 function lcm(arr)
     if #arr==1 then 
         do return arr[1] end
+    elseif #arr==0 then 
+        do return end 
     end
     local lcm_ = function(num1, num2)
         if (num1 > num2) then

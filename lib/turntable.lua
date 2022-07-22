@@ -71,6 +71,14 @@ function Turntable:init()
       print("play",v,params:get(id..(v==1 and "attack" or "release")))
       engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
       self.last_play=v
+      -- check all playing and get the lcm_beat
+      dat.playing[id]=(v==1 and nil or true)
+      local beats={}
+      for vid,_ in pairs(dat.playing) do
+        table.insert(beats,dat.tt[vid]:beats()*8)
+      end
+      dat.lcm_beat=lvm(beats)
+      print("turntable: new lcm beat ",dat.lcm_beat)
     end
   end}
   params:add_option(id.."oneshot","mode",{"loop","oneshot"})
