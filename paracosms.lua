@@ -419,7 +419,7 @@ function init()
         dat.tt[id]:emit(dat.beat)
       end
     end,
-    division=1/8,
+    division=1/16,
   }
   lattice:start()
   reset()
@@ -783,5 +783,3 @@ function enc(k,d)
 
     screen.update()
   end
-
- 

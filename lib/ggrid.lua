@@ -1,5 +1,5 @@
--- local pattern_time = require("pattern")
 local GGrid={}
+local patterner=include("lib/pattern")
 
 function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})
@@ -43,6 +43,8 @@ function GGrid:new(args)
   m.grid_refresh:start()
 
   m.light_setting={}
+  m.patterns={}
+  table.insert(m.patterns,patterner:new())
 
   m:init()
   return m
@@ -60,7 +62,7 @@ function GGrid:init()
     if params:get(id.."oneshot")==2 then
       if on then
         print("oneshot")
-        dat.tt[id]:play()
+        dat.tt[id]:play(true,true)
       end
     elseif hold_time>0.25 then
       print("loop")
@@ -82,6 +84,11 @@ function GGrid:init()
       params:delta(id.."record_on",1)
     end
   end)
+  -- page 3, pattern recorder
+  table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
+    self.key_press_fn[1](row,col,on,id,hold_time)
+    self.patterns[1]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time) end)
+  end)
 end
 
 function GGrid:grid_key(x,y,z)
@@ -100,7 +107,18 @@ function GGrid:key_press(row,col,on)
   end
   local id=(row-1)*16+col
   if row==8 then
-    self.page=(col<=#self.key_press_fn) and col or self.page
+    if on then
+      local old_page=self.page
+      self.page=(col<=#self.key_press_fn) and col or self.page
+      self.page_switched=old_page==self.page
+    elseif col==3 then
+      if hold_time>0.5 then
+        -- record a pattern
+        self.patterns[1]:record()
+      elseif not self.page_switched then
+        self.patterns[1]:play()
+      end
+    end
   else
     self.key_press_fn[self.page](row,col,on,id,hold_time)
   end
@@ -116,17 +134,17 @@ function GGrid:get_visual()
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
-      if self.page==1 then
+      if self.page==2 then
+        if id/4<=params:get("record_beats") then
+          self.visual[row][col]=10
+        end
+      else then
         self.visual[row][col]=self.light_setting[id] or 0
         if self.light_setting[id]~=nil and self.light_setting[id]>0 then
           self.light_setting[id]=self.light_setting[id]-1
         end
         if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
           self.visual[row][col]=1
-        end
-      elseif self.page==2 then
-        if id/4<=params:get("record_beats") then
-          self.visual[row][col]=10
         end
       end
       -- always blink
