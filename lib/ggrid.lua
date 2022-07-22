@@ -53,7 +53,7 @@ function GGrid:init()
   self.page=1
   self.key_press_fn={}
   -- page 1, selection/toggling
-  table.insert(self.key_press_fn,function(row,col,on,id)
+  table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
     if on then
       switch_view(id)
     end
@@ -69,13 +69,21 @@ function GGrid:init()
     end
   end)
   -- page 2, recording
-  table.insert(self.key_press_fn,function(row,col,on,id)
-    if not on then
+  table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
+    if on then
       do return end
     end
-    params:set("record_beats",id/4)
+    if hold_time<1 then
+      -- set recording time
+      params:set("record_beats",id/4)
+    else
+      -- select and do record
+      params:set("sel",id)
+      params:delta(id.."record_on",1)
+    end
   end)
 end
+
 function GGrid:grid_key(x,y,z)
   self:key_press(y,x,z==1)
   self:grid_redraw()
@@ -94,7 +102,7 @@ function GGrid:key_press(row,col,on)
   if row==8 then
     self.page=(col<=#self.key_press_fn) and col or self.page
   else
-    self.key_press_fn[self.page](row,col,on,id)
+    self.key_press_fn[self.page](row,col,on,id,hold_time)
   end
 end
 

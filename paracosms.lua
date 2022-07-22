@@ -683,6 +683,9 @@ function key(k,z)
   end
 end
 
+function do_record()
+end
+
 function enc(k,d)
   enc_func[ui_page][k+(shift and 3 or 0)][1](d)
   endf
