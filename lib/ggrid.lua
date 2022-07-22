@@ -70,6 +70,10 @@ function GGrid:init()
   end)
   -- page 2, recording
   table.insert(self.key_press_fn,function(row,col,on,id)
+    if not on then
+      do return end
+    end
+    params:set("record_beats",id/4)
   end)
 end
 function GGrid:grid_key(x,y,z)
@@ -87,7 +91,11 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   local id=(row-1)*16+col
-  self.key_press_fn[self.page](row,col,on,id)
+  if row==8 then
+    self.page=(col<=#self.key_press_fn) and col or self.page
+  else
+    self.key_press_fn[self.page](row,col,on,id)
+  end
 end
 
 function GGrid:light_up(id,val)
@@ -97,16 +105,23 @@ end
 function GGrid:get_visual()
   -- clear visual
   local id=0
-  for row=1,8 do
+  for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
-      self.visual[row][col]=self.light_setting[id] or 0
-      if self.light_setting[id]~=nil and self.light_setting[id]>0 then
-        self.light_setting[id]=self.light_setting[id]-1
+      if self.page==1 then
+        self.visual[row][col]=self.light_setting[id] or 0
+        if self.light_setting[id]~=nil and self.light_setting[id]>0 then
+          self.light_setting[id]=self.light_setting[id]-1
+        end
+        if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
+          self.visual[row][col]=1
+        end
+      elseif self.page==2 then
+        if id/4<=params:get("record_beats") then
+          self.visual[row][col]=10
+        end
       end
-      if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
-        self.visual[row][col]=1
-      end
+      -- always blink
       if id==dat.ti then
         self.blink=self.blink-1
         if self.blink<-0.5/m.grid_refresh.time then
@@ -117,6 +132,11 @@ function GGrid:get_visual()
         end
       end
     end
+  end
+
+  -- highlight available pages / current page
+  for i,_ in ipairs(self.key_press_fn) do return
+    self.visual[8][i]==self.page==i and 15 or 5
   end
 
   return self.visual
