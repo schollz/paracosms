@@ -77,7 +77,7 @@ function GGrid:init()
     if on then
       do return end
     end
-    if hold_time<1 then
+    if hold_time<0.5 then
       -- set recording time
       params:set("record_beats",id/4)
     else
@@ -146,11 +146,15 @@ function GGrid:get_visual()
     for col=1,self.grid_width do
       id=id+1
       if self.page==2 then
+        -- recording
         if id<=params:get("record_beats")*4 then
-          self.visual[row][col]=10
+          self.visual[row][col]=dat.recording_id>0 and 10 or 2
         else
           self.visual[row][col]=0
         end
+      elseif self.page==3 then
+        -- sample start/stop
+
       else
         self.visual[row][col]=self.light_setting[id] or 0
         if self.light_setting[id]~=nil and self.light_setting[id]>0 then
