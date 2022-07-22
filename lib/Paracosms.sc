@@ -259,6 +259,7 @@ Paracosms {
 			if (bufs.at(id).notNil,{
 				var ampLag=0;
 				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1];
+				("making synth"+id).postln;
 				if (params.at(id).at("ampLag").notNil,{
 					ampLag=params.at(id).at("ampLag");
 				});
@@ -266,7 +267,6 @@ Paracosms {
 				params.at(id).keysValuesDo({ arg pk,pv; 
 					pars=pars++[pk,pv];
 				});
-				("making synth"+id).postln;
 				syns.put(id,Synth.after(syns.at("phasor"),
 					"defPlay"++bufs.at(id).numChannels,pars,
 				).onFree({["freed"+id].postln}));
@@ -327,6 +327,7 @@ Paracosms {
 		if (params.at(id).isNil,{
 			params.put(id,Dictionary.new());
 		});
+		// [id,key,val].postln;
 		params.at(id).put(key,val);
 		params.at(id).put(key++"Lag",valLag);
 		if (syns.at(id).notNil,{

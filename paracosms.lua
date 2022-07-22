@@ -418,6 +418,9 @@ function init()
       for id,_ in pairs(dat.sequencing) do
         dat.tt[id]:emit(dat.beat)
       end
+      for _,v in ipairs(g_.patterns) do
+        v:emit(dat.beat)
+      end
     end,
     division=1/16,
   }

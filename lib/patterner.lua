@@ -13,7 +13,7 @@ function Pattern:init()
   self.recording=false
   self.primed=false
   self.playing=false
-  self.eigth_notes=8*4
+  self.sixteenth_notes=16*4
   self.en_rec=0
   self.pattern={}
 end
@@ -26,23 +26,23 @@ function Pattern:add(fn)
     self.primed=false
     self.recording=true
     self.pattern={}
-    self.en_rec=1
-    self.eigth_notes=params:get("record_beats")*4
+    self.rec_start=clock.get_beats()
+    self.beats=params:get("record_beats")
   end
-  -- move to the next beat in case its closer
-  if (self.last_en-clock.get_beats())>3/16 and self.en_rec>1 then
-    self.en_rec=self.en_rec+1
-  end
-  table.insert(self.pattern,{en=self.en_rec,fn=fn})
+  local beat_diff=clock.get_beats()-self.rec_start
+  print("adding",beat_diff)
+  table.insert(self.pattern,{diff=beat_diff,fn=fn,played=false})
 end
 
 function Pattern:record()
+  print("patterner: record")
   self.primed=true
   self.playing=false
   self.recording=false
 end
 
 function Pattern:stop()
+  print("patterner: stop")
   self.playing=false
 end
 
@@ -50,10 +50,12 @@ function Pattern:play()
   if self.recording or not self.loaded then
     do return end
   end
+  print("patterner: play")
   self.playing=true
 end
 
 function Pattern:toggle()
+  print("patterner: toggle")
   self.recording=false
   self.primed=false
   self.playing=not self.playing
@@ -61,17 +63,23 @@ end
 
 function Pattern:emit(global_beat)
   if self.recording then
-    self.last_en=clock.get_beats()
-    self.en_rec=self.en_rec+1
-    if self.en_rec>self.eigth_notes then
-      self.en_rec=0
-      self.recording=false
+    if clock.get_beats()-self.rec_start>self.beats then
+      print("recording stopped")
+      self:toggle()
     end
   elseif self.playing then
-    local en=(global_beat-1)%self.eigth_notes+1
-    for _,v in ipairs(self.pattern) do
-      if v.en==en then
+    local beat=((global_beat-1)%(self.beats*4))/4 -- [0,total)
+    if beat==0 then
+      -- reset
+      for i,_ in ipairs(self.pattern) do
+        self.pattern[i].played=false
+      end
+    end
+    for i,v in ipairs(self.pattern) do
+      if not v.played and math.abs(v.diff-beat)<0.125 then
+        -- print(i,beat,v.diff)
         v.fn()
+        self.pattern[i].played=true
       end
     end
   end

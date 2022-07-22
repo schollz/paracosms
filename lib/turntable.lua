@@ -54,7 +54,7 @@ function Turntable:init()
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","play","oneshot","amp","fadetime","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","release","play","oneshot","amp","fadetime","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -207,7 +207,7 @@ end
 function Turntable:play(on,oneshot)
   if oneshot~=nil then
     -- force oneshot
-    engine.set(self.id,"oneshot",onsehot and 1 or 0,0)
+    engine.set(self.id,"oneshot",oneshot==true and 1 or 0,0)
   end
   if on then
     if params:get(self.id.."oneshot")==2 then

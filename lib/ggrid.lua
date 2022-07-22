@@ -52,20 +52,18 @@ end
 
 function GGrid:init()
   self.blink=0
-  self.page=1
+  self.page=2
   self.key_press_fn={}
   -- page 1, selection/toggling
-  table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    if on then
+  table.insert(self.key_press_fn,function(row,col,on,id,hold_time,no_switch)
+    if on and no_switch==nil then
       switch_view(id)
     end
     if params:get(id.."oneshot")==2 then
       if on then
-        print("oneshot")
         dat.tt[id]:play(true,true)
       end
     elseif hold_time>0.25 then
-      print("loop")
       params:set(id.."fadetime",hold_time*3)
       params:set(id.."play",3-params:get(id.."play"))
     end
@@ -87,7 +85,7 @@ function GGrid:init()
   -- page 3, pattern recorder
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
     self.key_press_fn[1](row,col,on,id,hold_time)
-    self.patterns[1]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time) end)
+    self.patterns[1]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
   end)
 end
 
@@ -110,13 +108,16 @@ function GGrid:key_press(row,col,on)
     if on then
       local old_page=self.page
       self.page=(col<=#self.key_press_fn) and col or self.page
-      self.page_switched=old_page==self.page
+      self.page_switched=old_page~=self.page
     elseif col==3 then
+      if self.page_switched then
+        do return end
+      end
       if hold_time>0.5 then
         -- record a pattern
         self.patterns[1]:record()
-      elseif not self.page_switched then
-        self.patterns[1]:play()
+      else
+        self.patterns[1]:toggle()
       end
     end
   else
@@ -135,8 +136,10 @@ function GGrid:get_visual()
     for col=1,self.grid_width do
       id=id+1
       if self.page==2 then
-        if id/4<=params:get("record_beats") then
+        if id<=params:get("record_beats")*4 then
           self.visual[row][col]=10
+        else
+          self.visual[row][col]=0
         end
       else
         self.visual[row][col]=self.light_setting[id] or 0
@@ -154,7 +157,7 @@ function GGrid:get_visual()
           self.blink=0.5/self.grid_refresh.time
         end
         if self.blink>0 then
-          self.visual[row][col]=15
+          self.visual[row][col]=5
         end
       end
     end
@@ -162,7 +165,10 @@ function GGrid:get_visual()
 
   -- highlight available pages / current page
   for i,_ in ipairs(self.key_press_fn) do
-    self.visual[8][i]=self.page==i and 15 or 5
+    self.visual[8][i]=self.page==i and 3 or 2
+  end
+  for i,v in ipairs(self.patterns) do
+    self.visual[8][i+2]=self.visual[8][i+2]+((v.playing or v.recording) and 5 or 0)
   end
 
   return self.visual

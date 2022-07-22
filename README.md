@@ -145,6 +145,10 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 <details><summary>a list of done and doing.</summary>
 
+- pattern saving/loading
+- add more patterns
+- ui to explain pattern recording
+- keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample
 - pattern recording
 - fix bugs
 - logarithm hold length?
