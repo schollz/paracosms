@@ -416,7 +416,7 @@ function init()
     action=function(v)
       dat.beat=dat.beat+1
       -- TODO: on LCM beat, do a reset
-      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then 
+      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then
         reset()
       end
       for id,_ in pairs(dat.sequencing) do

@@ -44,7 +44,7 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  for i=1,12 do 
+  for i=1,12 do
     table.insert(m.patterns,patterner:new())
   end
 
@@ -61,9 +61,9 @@ function GGrid:init()
     if on and no_switch==nil then
       switch_view(id)
     end
-    if params:get(id.."oneshot")==2 then 
+    if params:get(id.."oneshot")==2 then
       params:set(id.."play",on and 1 or 0)
-    else if hold_time>0.25 then 
+    elseif hold_time>0.25 then
       if params:get(id.."play")==1 then
         params:set(id.."release",hold_time)
       else
@@ -91,11 +91,11 @@ function GGrid:init()
     -- check to see if two notes are held down and set the start/end based on them
   end)
   -- page 4-16 pattern recorder
-  for i=4,16 do 
+  for i=4,16 do
     table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
       self.key_press_fn[1](row,col,on,id,hold_time)
       self.patterns[i-3]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
-    end)  
+    end)
   end
 end
 
