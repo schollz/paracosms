@@ -97,6 +97,7 @@ function GGrid:init()
     for v,_ in pairs(self.pressed_ids) do
       table.insert(ids,v)
     end
+    print("sample start/end",dat.ti)
     table.sort(ids)
     params:set(dat.ti.."sampleStart",util.linlin(1,112,0,1,ids[1]))
     params:set(dat.ti.."sampleEnd",util.linlin(1,112,0,1,ids[2]))
@@ -166,7 +167,7 @@ function GGrid:get_visual()
       if self.page==2 then
         -- recording
         if id<=params:get("record_beats")*4 then
-          self.visual[row][col]=dat.recording_id>0 and 10 or 2
+          self.visual[row][col]=dat.recording_id>0 and 5 or 2
         else
           self.visual[row][col]=0
         end
@@ -187,8 +188,8 @@ function GGrid:get_visual()
       -- always blink
       if id==dat.ti then
         self.blink=self.blink-1
-        if self.blink<-0.5/self.grid_refresh.time then
-          self.blink=0.5/self.grid_refresh.time
+        if self.blink<-3 then
+          self.blink=3
         end
         if self.blink>0 then
           self.visual[row][col]=5

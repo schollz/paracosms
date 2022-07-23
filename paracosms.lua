@@ -58,7 +58,7 @@ table.insert(enc_func,{
 
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."amp",d) end,function() return params:string(dat.ti.."amp") end},
+  {function(d) params:delta(dat.ti.."amp",d) end,function() return "volume: "..params:string(dat.ti.."amp") end},
   {function(d) params:delta(dat.ti.."amp",d) end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."amp_strength",d) end,function()
