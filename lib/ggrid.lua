@@ -54,7 +54,8 @@ end
 
 function GGrid:init()
   self.blink=0
-  self.page=2
+  self.page=1
+  self.pressed_ids={}
   self.key_press_fn={}
   -- page 1, selection/toggling
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time,no_switch)
@@ -89,7 +90,7 @@ function GGrid:init()
   -- page 3 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
     -- check to see if two notes are held down and set the start/end based on them
-    if #self.pressed_ids~=2 then 
+    if #self.pressed_ids~=2 then
       do return end
     end
     local ids={}
@@ -155,7 +156,7 @@ function GGrid:get_visual()
   -- clear visual
   local id=0
   local sampleSE={}
-  if self.page==3 then 
+  if self.page==3 then
     sampleSE[1]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleStart")))
     sampleSE[2]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleEnd")))
   end
@@ -171,7 +172,7 @@ function GGrid:get_visual()
         end
       elseif self.page==3 then
         -- sample start/stop
-        if id>=sampleSE[1] and id<=sampleSE[2] then 
+        if id>=sampleSE[1] and id<=sampleSE[2] then
           self.visual[row][col]=5
         end
       else

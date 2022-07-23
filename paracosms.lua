@@ -22,6 +22,7 @@
 --
 --
 
+utils=include("lib/utils")
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
@@ -29,7 +30,7 @@ lattice_=require("lattice")
 er=require("er")
 
 engine.name="Paracosms"
-dat={percent_loaded=0,tt={},files_to_load={},recording=false,recording_primed=false,beat=0,sequencing={}}
+dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
   {folder="/home/we/dust/audio/paracosms/row1"},
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
@@ -407,6 +408,9 @@ function init()
     end
     -- make sure we are on the actual first if the first row has nothing
     enc(1,1);enc(1,-1)
+    clock.sleep(1)
+    reset()
+
   end)
 
   -- initialize lattice
@@ -415,9 +419,10 @@ function init()
   pattern_qn=lattice:new_pattern{
     action=function(v)
       dat.beat=dat.beat+1
-      -- TODO: on LCM beat, do a reset
-      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then
-        reset()
+      -- TODO: make option to change the probability of reset
+      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and math.random(1,100)<10 then
+        print("resetPhase")
+        engine.resetPhase()
       end
       for id,_ in pairs(dat.sequencing) do
         dat.tt[id]:emit(dat.beat)
@@ -429,7 +434,6 @@ function init()
     division=1/16,
   }
   lattice:start()
-  reset()
 
   --TEST STUFF
   -- clock.run(function()
