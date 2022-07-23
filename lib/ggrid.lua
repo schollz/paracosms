@@ -126,7 +126,7 @@ function GGrid:key_press(row,col,on)
   else
     hold_time=ct-self.pressed_buttons[row..","..col]
     self.pressed_buttons[row..","..col]=nil
-    self.pressed_ids[id]=false
+    self.pressed_ids[id]=nil
   end
   if row==8 then
     if on then
@@ -167,7 +167,7 @@ function GGrid:get_visual()
       if self.page==2 then
         -- recording
         if id<=params:get("record_beats")*4 then
-          self.visual[row][col]=dat.recording_id>0 and 5 or 2
+          self.visual[row][col]=dat.recording_id>0 and 10 or 3
         else
           self.visual[row][col]=0
         end
@@ -192,7 +192,7 @@ function GGrid:get_visual()
           self.blink=3
         end
         if self.blink>0 then
-          self.visual[row][col]=5
+          self.visual[row][col]=0
         end
       end
     end
@@ -200,10 +200,11 @@ function GGrid:get_visual()
 
   -- highlight available pages / current page
   for i,_ in ipairs(self.key_press_fn) do
-    self.visual[8][i]=self.page==i and 3 or 2
+    self.visual[8][i]=self.page==i and 3 or 1
   end
   for i,v in ipairs(self.patterns) do
-    self.visual[8][i+3]=self.visual[8][i+3]+((v.playing or v.recording) and 5 or 0)
+    self.visual[8][i+3]=self.visual[8][i+3]+(v.playing and 5 or 0)
+    self.visual[8][i+3]=self.visual[8][i+3]+(v.recording and 10 or 0)
   end
 
   return self.visual
