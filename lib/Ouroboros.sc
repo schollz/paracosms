@@ -51,7 +51,7 @@ Ouroboros {
 
 
 		SynthDef("defRecord",{
-			arg bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
+			arg id, bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
 			startFrameBus,endFrameBus,t_record=0,threshold=60.neg;
 			var input=SoundIn.ar([0,1]);
 			var inputForTrigger=Mix.new(input)*EnvGen.ar(Env.new([0,1],[0.2]));
@@ -75,7 +75,7 @@ Ouroboros {
 			// send the endFrame
 			Out.kr(endFrameBus,endFrame);
 			// send the current position in the recording
-			SendTrig.kr(imp,777,(pos-startFrame)/(endFrame-startFrame)*100);
+			SendTrig.kr(imp,2000+id,(pos-startFrame)/(endFrame-startFrame)*100);
 			// free self when the position passes the end frame
 			FreeSelf.kr(pos>endFrame);
 		}).send(server);
@@ -115,7 +115,8 @@ Ouroboros {
 	}
 
 	record {
-		arg argSeconds, argCrossfade, argThreshold, argPreDelay, actionStart, action;
+		arg argID,argSeconds, argCrossfade, argThreshold, argPreDelay, actionStart, action;
+		var id=argID;
 	    var valStartTime=0;
     	var valTriggerTime=0;
 		preDelay=argPreDelay;
@@ -125,7 +126,7 @@ Ouroboros {
 			"ouroborous: buffer ready".postln;
 			// start the recording
 			synRecord=Synth("defRecord",
-				[\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
+				[\id,id,\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
 				\recordingFrames,(argSeconds+argCrossfade)*server.sampleRate,\threshold,argThreshold]
 			).onFree({
 				arg syn;

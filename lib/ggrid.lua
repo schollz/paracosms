@@ -167,7 +167,7 @@ function GGrid:get_visual()
       if self.page==2 then
         -- recording
         if id<=params:get("record_beats")*4 then
-          self.visual[row][col]=dat.recording_id>0 and 10 or 3
+          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
         else
           self.visual[row][col]=0
         end

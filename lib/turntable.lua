@@ -29,11 +29,15 @@ function Turntable:init()
   self.ready=false
   self.last_tune=0
 
+  -- recording stuff
+  self.recording=false
+  self.recording_primed=false
+
   -- setup params
   local id=self.id
   -- TODO: add pan and amp lfos
   local params_menu={
-    {id="amp",name="amp",min=0,max=5,exp=false,div=0.05,default=1,response=1},
+    {id="amp",name="amp",min=0,max=5,exp=false,div=0.01,default=1,response=1},
     {id="amp_period",name="amp lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="amp_strength",name="amp lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
@@ -68,7 +72,6 @@ function Turntable:init()
   self.last_play=0
   params:add{type="binary",name="play",id=id.."play",behavior="toggle",action=function(v)
     if v~=self.last_play then
-      print("play",v,params:get(id..(v==1 and "attack" or "release")))
       engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
       self.last_play=v
       if params:get(id.."oneshot")==1 then
@@ -82,7 +85,6 @@ function Turntable:init()
         for vid,_ in pairs(dat.playing) do
           table.insert(beats,math.floor(dat.tt[vid]:beats()*4))
         end
-        tab.print(beats)
         dat.lcm_beat=utils.lcm(beats)
         print("turntable: new lcm beat ",dat.lcm_beat)
       end
@@ -168,17 +170,16 @@ function Turntable:init()
 
   params:add_binary(id.."record_on","record on","trigger")
   params:set_action(id.."record_on",function(x)
-    if dat.recording then
+    if self.recording then
       do return end
     end
-    if dat.recording_primed then
+    if self.recording_primed then
       engine.record_start()
       do return end
     end
-    dat.recording_primed=true
+    self.recording_primed=true
     print("record_on",id)
     show_message("ready to record "..id)
-    dat.recording_id=id
     local datetime=util.os_capture("date +%Y%m%d%H%m%S")
     local filename=string.format("%s_bpm%d.wav",datetime,clock.get_tempo())
     filename=_path.audio.."paracosms/recordings/"..filename
@@ -211,6 +212,15 @@ function Turntable:show()
     end
     self.hidden=false
   end
+end
+
+function Turntable:recording_finish(filename)
+  self.play_on_load=true
+  self.recording=false
+  self.recording_primed=false
+  params:set(self.id.."file",filename)
+  params:set(self.id.."play",1,true)
+  self.last_play=true
 end
 
 function Turntable:beats()
@@ -252,7 +262,7 @@ function Turntable:load_file(path)
     do return end
   end
   local duration=samples/samplerate
-  params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/4))
+  --params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/4))
   self.loaded_file=true
 end
 
@@ -310,15 +320,15 @@ function Turntable:retune()
       print(cmd)
       os.execute(cmd)
     else
-      print(string.format("turntable%d: using cached retuned",self.id))
+      -- print(string.format("turntable%d: using cached retuned",self.id))
     end
     self.path=newpath
   end
   self.last_tune=tune
   self.retuned=true
   -- print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
-  local play_on_load=dat.recording_id==self.id and 1 or 0
-  engine.add(self.id,self.path,play_on_load)
+  engine.add(self.id,self.path,self.play_on_load==true and 1 or 0)
+  self.play_on_load=false
 end
 
 function Turntable:emit(beat)

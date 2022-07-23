@@ -21,7 +21,7 @@ function ViewWave:init()
   -- extract filename
   local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
 
-  print(string.format("viewwave%d: init %s",self.id,filename))
+  -- print(string.format("viewwave%d: init %s",self.id,filename))
 
   -- load file info
   local ch,samples,samplerate=audio.file_info(self.path)

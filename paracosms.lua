@@ -128,7 +128,7 @@ table.insert(enc_func,{
 })
 
 function find_files(folder)
-  print(folder)
+  -- print(folder)
   os.execute("find "..folder.."* -print -type f -name '*.flac' | grep 'wav\\|flac' > /tmp/foo")
   os.execute("find "..folder.."* -print -type f -name '*.wav' | grep 'wav\\|flac' >> /tmp/foo")
   os.execute("cat /tmp/foo | sort | uniq > /tmp/files")
@@ -224,34 +224,19 @@ function init()
   g_=grid_:new()
 
   -- osc
-  dat.recording_id=0
   osc_fun={
-    trigger=function(args)
-      print("triggered "..args[1])
-    end,
-    recording=function(args)
-      dat.recording=true
-      dat.recording_id=tonumber(args[1])
-      if dat.recording_id~=nil then show_message("recording track "..dat.recording_id) end
-    end,
     progress=function(args)
-      show_message(string.format("recording track %d: %2.0f%%",dat.recording_id,tonumber(args[1])))
-      show_progress(tonumber(args[1]))
+      local id=tonumber(args[1])
+      show_message(string.format("recording track %d: %2.0f%%",id,tonumber(args[2])))
+      show_progress(tonumber(args[2]))
     end,
     recorded=function(args)
-      dat.recording=false
-      dat.recording_primed=false
       local id=tonumber(args[1])
       local filename=args[2]
       if id~=nil and filename~=nil then
         show_progress(100)
         show_message("recorded track "..id)
-        params:set(id.."file",filename)
-        params:set(id.."play",1,true)
-        clock.run(function()
-          clock.sleep(3)
-          dat.recording_id=0
-        end)
+        dat.tt[id]:recording_finish(filename)
       end
     end,
     ready=function(args)
@@ -355,6 +340,7 @@ function init()
   dat.seed=18
   params:set("sel",1)
   dat.tt={}
+  dat.ti=1
   dat.percent_loaded=0
   math.randomseed(dat.seed)
   for i=1,112 do
