@@ -1,5 +1,4 @@
 local GGrid={}
-local patterner=include("lib/patterner")
 
 function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})
@@ -44,7 +43,7 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  for i=1,12 do
+  for i=3,16 do
     table.insert(m.patterns,patterner:new())
   end
 
@@ -57,47 +56,53 @@ function GGrid:init()
   self.page=3
   self.pressed_ids={}
   self.key_press_fn={}
-  -- page 1, selection/toggling
-  table.insert(self.key_press_fn,function(row,col,on,id,hold_time,no_switch)
-    if on and no_switch==nil then
-      switch_view(id)
-    end
-    if params:get(id.."oneshot")==2 then
-      params:set(id.."play",on and 1 or 0)
-    elseif hold_time>0.25 then
-      if params:get(id.."play")==1 then
-        params:set(id.."release",hold_time)
-      else
-        params:set(id.."attack",hold_time)
-      end
-      params:delta(id.."play",1)
-    end
-  end)
-  -- page 2, recording
+  -- page 1 recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
     params:set("record_beats",id/4)
   end)
-  -- page 3 sample start/end
-  table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
+  -- page 2 sample start/end
+  table.insert(self.key_press_fn,function(row,col,on,id,hold_time,datti)
     if not on then
       do return end
+    end
+    local from_pattern=datti~=nil
+    if datti==nil then
+      datti=dat.ti
     end
     -- check to see if two notes are held down and set the start/end based on them
     if row<5 then
       -- set sample start position
-      params:set(dat.ti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64))
-      params:set(dat.ti.."sampleEnd",params:get(dat.ti.."sampleStart")+params:get(dat.ti.."sampleDuration"))
+      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64))
+      params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-      params:set(dat.ti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80))
-      params:set(dat.ti.."sampleEnd",params:get(dat.ti.."sampleStart")+params:get(dat.ti.."sampleDuration"))
+      params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80))
+      params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
+    end
+    if not from_pattern then
+      local ti=dat.ti
+      dat.tt[dat.ti].sample_pattern:add(function() g_.key_press_fn[2](row,col,on,id,hold_time,ti) end)
     end
   end)
-  -- page 4-16 pattern recorder
-  for i=4,16 do
-    table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-      -- self.key_press_fn[1](row,col,on,id,hold_time)
-      -- self.patterns[i-3]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
+  -- page 3 and beyond: playing
+  for i=3,16 do
+    table.insert(self.key_press_fn,function(row,col,on,id,hold_time,from_pattern)
+      if on and from_pattern==nil then
+        switch_view(id)
+      end
+      if params:get(id.."oneshot")==2 then
+        params:set(id.."play",on and 1 or 0)
+      elseif hold_time>0.25 then
+        if params:get(id.."play")==1 then
+          params:set(id.."release",hold_time)
+        else
+          params:set(id.."attack",hold_time)
+        end
+        params:delta(id.."play",1)
+      end
+      if from_pattern==nil then
+        self.patterns[i-2]:add(function() g_.key_press_fn[i](row,col,on,id,hold_time,true) end)
+      end
     end)
   end
 end
@@ -124,15 +129,28 @@ function GGrid:key_press(row,col,on)
       local old_page=self.page
       self.page=(col<=#self.key_press_fn) and col or self.page
       self.page_switched=old_page~=self.page
-    elseif col>=4 then
+    elseif col>1 then -- pattern start/stop
       if self.page_switched then
         do return end
       end
       if hold_time>0.5 then
         -- record a pattern
-        self.patterns[col-3]:record()
+        if col>2 then
+          print("ggrid: recording key pattern on",col-2)
+          self.patterns[col-2]:record()
+        else
+          print("ggrid: recording edge pattern on",dat.ti)
+          dat.tt[dat.ti].sample_pattern:record()
+        end
       else
-        self.patterns[col-3]:toggle()
+        -- toggle a pattern
+        if col>2 then
+          print("ggrid: toggling key pattern on",col-2)
+          self.patterns[col-2]:toggle()
+        else
+          print("ggrid: toggling edge pattern on",dat.ti)
+          dat.tt[dat.ti].sample_pattern:toggle()
+        end
       end
     end
   else
@@ -145,10 +163,13 @@ function GGrid:light_up(id,val)
 end
 
 function GGrid:get_visual()
+  if dat==nil or dat.ti==nil then
+    do return end
+  end
   -- clear visual
   local id=0
   local sampleSD={}
-  if self.page==3 then
+  if self.page==2 then
     sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart")))
     sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration")))
     sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd")))
@@ -157,7 +178,7 @@ function GGrid:get_visual()
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
-      if self.page==3 then
+      if self.page==2 then
         if id==sampleSD[1] then
           self.visual[row][col]=5
         elseif id>0 and id<=64 and id<=sampleSD[3] and id>sampleSD[1] then
@@ -171,7 +192,7 @@ function GGrid:get_visual()
         else
           self.visual[row][col]=0
         end
-      elseif self.page==2 then
+      elseif self.page==1 then
         -- recording
         if id<=params:get("record_beats")*4 then
           self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
@@ -206,8 +227,8 @@ function GGrid:get_visual()
     self.visual[8][i]=self.page==i and 3 or 1
   end
   for i,v in ipairs(self.patterns) do
-    self.visual[8][i+3]=self.visual[8][i+3]+(v.playing and 5 or 0)
-    self.visual[8][i+3]=self.visual[8][i+3]+(v.recording and 10 or 0)
+    self.visual[8][i+2]=self.visual[8][i+2]+(v.playing and 5 or 0)
+    self.visual[8][i+2]=self.visual[8][i+2]+(v.recording and 10 or 0)
   end
 
   return self.visual

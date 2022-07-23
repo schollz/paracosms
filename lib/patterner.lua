@@ -9,7 +9,7 @@ function Pattern:new(o)
 end
 
 function Pattern:init()
-  self.loaded=false
+  self.recorded=false
   self.recording=false
   self.primed=false
   self.playing=false
@@ -32,6 +32,7 @@ function Pattern:add(fn)
   local beat_diff=clock.get_beats()-self.rec_start
   print("adding",beat_diff)
   table.insert(self.pattern,{diff=beat_diff,fn=fn,played=false})
+  self.recorded=true
 end
 
 function Pattern:record()
@@ -41,23 +42,13 @@ function Pattern:record()
   self.recording=false
 end
 
-function Pattern:stop()
-  print("patterner: stop")
-  self.playing=false
-end
-
-function Pattern:play()
-  if self.recording or not self.loaded then
-    do return end
-  end
-  print("patterner: play")
-  self.playing=true
-end
-
 function Pattern:toggle()
-  print("patterner: toggle")
   self.recording=false
   self.primed=false
+  if not self.recorded then
+    do return end
+  end
+  print("patterner: toggle")
   self.playing=not self.playing
 end
 

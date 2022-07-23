@@ -28,6 +28,7 @@ turntable_=include("lib/turntable")
 grid_=include("lib/ggrid")
 lattice_=require("lattice")
 er=require("er")
+patterner=include("lib/patterner")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
@@ -415,6 +416,9 @@ function init()
       for _,v in ipairs(g_.patterns) do
         v:emit(dat.beat)
       end
+      for _,v in ipairs(dat.tt) do
+        v.sample_pattern:emit(dat.beat)
+      end
     end,
     division=1/16,
   }
@@ -662,7 +666,7 @@ function key(k,z)
     delta_page(shift and-1 or 1)
   elseif shift and k==3 then
     if z==1 then
-      if params:get("record_over")==1 then
+      if params:get("record_over")==1 and dat.tt[dat.ti].loaded_file~=nil then
         -- try to find a track that is empty
         local j=0
         for i=1,112 do

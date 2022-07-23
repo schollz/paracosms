@@ -33,6 +33,9 @@ function Turntable:init()
   self.recording=false
   self.recording_primed=false
 
+  -- sample start/end patterning
+  self.sample_pattern=patterner:new()
+
   -- setup params
   local id=self.id
   -- TODO: add pan and amp lfos
@@ -353,6 +356,10 @@ function Turntable:redraw()
   if self.ready then
     local info=self.vw:redraw()
     return info
+  else
+    screen.move(64,32)
+    screen.text_center("<K1+K3 to record>")
+
   end
 end
 
