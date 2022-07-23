@@ -67,11 +67,11 @@ there are a bunch of sample-specific parameters: volume (+lfo), panning (+lfo), 
 
 ### effects
 
-there are two global effects - clouds and tapedeck. their parameters are editable in the main parameters menu. every parameter for clouds is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
+there are three global effects - greyhole, clouds and tapedeck. their parameters are editable in the main parameters menu. every parameter for clouds is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
 
 ### automatic warping
 
-imported audio is automatically warped when either the `guess bpm` parameter is actived, or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automaticlly stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
+imported audio is automatically warped when either the `guess bpm` parameter is activated, or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automatically stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
 
 _another note:_ if you include "`drum`" in the filename, then warping happens without using pitch-compensation.
 
