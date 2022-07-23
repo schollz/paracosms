@@ -55,6 +55,7 @@ function Turntable:init()
     {id="tsSeconds",name="timestretch window",min=clock.get_beat_sec()/64,max=20,exp=false,response=1,div=clock.get_beat_sec()/64,default=clock.get_beat_sec()/8,unit="s"},
     {id="sampleStart",name="sample start",min=0,max=1,exp=false,div=1/64,default=0,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
     {id="sampleEnd",name="sample end",min=0,max=1,exp=false,div=1/64,default=1,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
+    {id="sampleDuration",name="sample duration",dontsend=true,min=0,max=1,exp=false,div=1/64,default=1,response=1,formatter=function(param) return string.format("%3.2f s",param:get()*self:duration()) end},
     {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,response=1,formatter=function(param) return string.format("%2.0f ms",param:get()*1000) end},
     {id="send1",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send2",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},

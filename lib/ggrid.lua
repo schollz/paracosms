@@ -54,7 +54,7 @@ end
 
 function GGrid:init()
   self.blink=0
-  self.page=1
+  self.page=3
   self.pressed_ids={}
   self.key_press_fn={}
   -- page 1, selection/toggling
@@ -75,38 +75,29 @@ function GGrid:init()
   end)
   -- page 2, recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    if on then
-      do return end
-    end
-    if hold_time<0.5 then
-      -- set recording time
-      params:set("record_beats",id/4)
-    else
-      -- select and do record
-      params:set("sel",id)
-      params:delta(id.."record_on",1)
-    end
+    params:set("record_beats",id/4)
   end)
   -- page 3 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    -- check to see if two notes are held down and set the start/end based on them
-    if #self.pressed_ids~=2 then
+    if not on then
       do return end
     end
-    local ids={}
-    for v,_ in pairs(self.pressed_ids) do
-      table.insert(ids,v)
+    -- check to see if two notes are held down and set the start/end based on them
+    if row<5 then
+      -- set sample start position
+      params:set(dat.ti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64))
+      params:set(dat.ti.."sampleEnd",params:get(dat.ti.."sampleStart")+params:get(dat.ti.."sampleDuration"))
+    elseif row>5 then
+      -- set sample duration
+      params:set(dat.ti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80))
+      params:set(dat.ti.."sampleEnd",params:get(dat.ti.."sampleStart")+params:get(dat.ti.."sampleDuration"))
     end
-    print("sample start/end",dat.ti)
-    table.sort(ids)
-    params:set(dat.ti.."sampleStart",util.linlin(1,112,0,1,ids[1]))
-    params:set(dat.ti.."sampleEnd",util.linlin(1,112,0,1,ids[2]))
   end)
   -- page 4-16 pattern recorder
   for i=4,16 do
     table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-      self.key_press_fn[1](row,col,on,id,hold_time)
-      self.patterns[i-3]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
+      -- self.key_press_fn[1](row,col,on,id,hold_time)
+      -- self.patterns[i-3]:add(function() g_.key_press_fn[1](row,col,on,id,hold_time,true) end)
     end)
   end
 end
@@ -156,25 +147,36 @@ end
 function GGrid:get_visual()
   -- clear visual
   local id=0
-  local sampleSE={}
+  local sampleSD={}
   if self.page==3 then
-    sampleSE[1]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleStart")))
-    sampleSE[2]=util.round(util.linlin(0,1,1,112,params:get(dat.ti.."sampleEnd")))
+    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart")))
+    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration")))
+    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd")))
   end
+
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
-      if self.page==2 then
+      if self.page==3 then
+        if id==sampleSD[1] then
+          self.visual[row][col]=5
+        elseif id>0 and id<=64 and id<=sampleSD[3] and id>sampleSD[1] then
+          self.visual[row][col]=3
+        elseif id>80 and id-80<=sampleSD[2] then
+          self.visual[row][col]=5
+        elseif id>0 and id<=64 then
+          self.visual[row][col]=2
+        elseif id>80 and id<=112 then
+          self.visual[row][col]=2
+        else
+          self.visual[row][col]=0
+        end
+      elseif self.page==2 then
         -- recording
         if id<=params:get("record_beats")*4 then
           self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
         else
           self.visual[row][col]=0
-        end
-      elseif self.page==3 then
-        -- sample start/stop
-        if id>=sampleSE[1] and id<=sampleSE[2] then
-          self.visual[row][col]=5
         end
       else
         self.visual[row][col]=self.light_setting[id] or 0
@@ -182,17 +184,18 @@ function GGrid:get_visual()
           self.light_setting[id]=self.light_setting[id]-1
         end
         if dat.tt~=nil and dat.tt[id]~=nil and dat.tt[id].ready and self.visual[row][col]==0 then
-          self.visual[row][col]=1
+          self.visual[row][col]=2
         end
       end
       -- always blink
       if id==dat.ti then
         self.blink=self.blink-1
-        if self.blink<-3 then
-          self.blink=3
+        if self.blink<-1 then
+          self.blink=6
         end
         if self.blink>0 then
-          self.visual[row][col]=0
+          self.visual[row][col]=5-self.visual[row][col]
+          self.visual[row][col]=(self.visual[row][col]<0 and 0 or self.visual[row][col])
         end
       end
     end
