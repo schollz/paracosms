@@ -6,14 +6,14 @@
 
 *paracosms* is a sampler that can playback or record synchronized audio. main features:
 
-- can load up to **112 stereo samples**
-- **samples are synchronized** to a main clock so they can easily play in sync
+- can load up to **112 stereo or mono samples**
+- **samples are synchronized** 
 - recorded samples have **gapless playback** by crossfading post-roll
-- imported samples are **automatic warped** to current bpm
+- imported samples can be **automatically warped** to current bpm
 - **one-shot samples can be sequenced** with euclidean sequencer
 - each sample has **filters, pan+amp lfos, timestretching**
 - global **tapedeck, greyhole and clouds fx** with per-sample sends 
-
+- the grid (optional) can **pattern record sample playback**
 
 https://vimeo.com/730684724
 
