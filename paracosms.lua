@@ -394,7 +394,7 @@ function init()
     end
     -- make sure we are on the actual first if the first row has nothing
     enc(1,1);enc(1,-1)
-    clock.sleep(1)
+    clock.sleep(0.1)
     reset()
 
   end)

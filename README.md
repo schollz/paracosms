@@ -103,11 +103,7 @@ this tool does one of two things: *if* the number of determined beats is greater
 
 ## the grid
 
-the grid has several pages. the pages are accessible on the last row.
-
-**page 1**: each key is a sample which can be toggled by pressing. the longer you hold the key, the longer the fade in/out. press times < 250 ms will not toggle the sample, they will only switch between samples (so you can switch between samples by pressing the keys quickly). 
-
-**page 2**: set the recording number of 1/8th notes by pressing anywhere on the grid. long-press to record into that particular sample (sample order is the same as page 1).
+![images](https://user-images.githubusercontent.com/6550035/180621149-f479edee-53ea-4b89-bdce-48e25d95d0c1.png)
 
 ## loading sample banks
 

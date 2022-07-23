@@ -33,7 +33,7 @@ function GGrid:new(args)
 
   -- grid refreshing
   m.grid_refresh=metro.init()
-  m.grid_refresh.time=midigrid and 0.12 or 0.105
+  m.grid_refresh.time=midigrid and 0.12 or 0.07
   m.grid_refresh.event=function()
     if m.grid_on then
       m:grid_redraw()
@@ -53,6 +53,8 @@ end
 
 function GGrid:init()
   self.blink=0
+  self.blink2=0
+  self.fader={0,0.04,3}
   self.page=3
   self.pressed_ids={}
   self.key_press_fn={}
@@ -224,11 +226,21 @@ function GGrid:get_visual()
 
   -- highlight available pages / current page
   for i,_ in ipairs(self.key_press_fn) do
-    self.visual[8][i]=self.page==i and 3 or 1
+    self.visual[8][i]=self.page==i and 4 or 1
   end
   for i,v in ipairs(self.patterns) do
-    self.visual[8][i+2]=self.visual[8][i+2]+(v.playing and 5 or 0)
-    self.visual[8][i+2]=self.visual[8][i+2]+(v.recording and 10 or 0)
+    self.fader[1]=self.fader[1]+self.fader[2]
+    if self.fader[1]>self.fader[3] or self.fader[1]<-1 then
+      self.fader[2]=-1*self.fader[2]
+    end
+    self.visual[8][i+2]=self.visual[8][i+2]+(v.playing and util.round(self.fader[1]) or 0)
+    if v.recording or v.primed then
+      self.blink2=self.blink2-1
+      if self.blink2<-1 then
+        self.blink2=1
+      end
+      self.visual[8][i+2]=self.blink2>0 and self.visual[8][i+2] or 0
+    end
   end
 
   return self.visual
