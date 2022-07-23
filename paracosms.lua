@@ -34,7 +34,7 @@ dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recordin
 dat.rows={
   {folder="/home/we/dust/audio/paracosms/row1"},
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
-  {folder="/home/we/dust/audio/paracosms/row3",params={oneshot=2,attack=0.001,release=1}},
+  {folder="/home/we/dust/audio/paracosms/row3",params={oneshot=2,attack=0.001,release=1,normalize=1}},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
@@ -142,7 +142,6 @@ function lines_from(file)
     lines[#lines+1]=line
   end
   table.sort(lines)
-  tab.print(lines)
   return lines
 end
 
@@ -399,7 +398,7 @@ function init()
           for pram,val in pairs(dat.rows[row].params) do
             local id=(row-1)*16+col
             if pram=="oneshot" then
-              print("setting ",id,pram,val)
+              -- print("setting ",id,pram,val)
               params:set(id..pram,val)
             end
           end

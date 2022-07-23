@@ -61,7 +61,7 @@ function Turntable:init()
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
-      print("loading files "..x)
+      -- print("loading files "..x)
       self:load_file(x)
     end
   end)
@@ -190,7 +190,8 @@ function Turntable:init()
     local latency=params:get("record_predelay")/1000
     engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency)
   end)
-
+  params:add_number(id.."normalize","normalize",0,1,0)
+  params:hide(id.."normalize")
 end
 
 function Turntable:hide()
@@ -225,7 +226,7 @@ function Turntable:duration()
 end
 
 function Turntable:load_file(path)
-  print(string.format("[%d] turntable: loading %s",self.id,path))
+  -- print(string.format("[%d] turntable: loading %s",self.id,path))
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -251,7 +252,6 @@ function Turntable:load_file(path)
     do return end
   end
   local duration=samples/samplerate
-  print(path,"duration",duration)
   params:set("record_beats",util.round(duration/clock.get_beat_sec(),1/4))
   self.loaded_file=true
 end
@@ -284,13 +284,13 @@ function Turntable:retune()
   if self.path_original==nil then
     do return end
   end
-  print(string.format("[%d] turntable: retune",self.id))
+  -- print(string.format("[%d] turntable: retune",self.id))
   -- convert the file
   local bpm=params:get(self.id.."source_bpm")
   local tune=params:get(self.id.."tune")
   local clock_tempo=clock.get_tempo()
   self.path=self.path_original
-  if bpm~=clock_tempo or tune~=self.last_tune then
+  if bpm~=clock_tempo or tune~=self.last_tune or params:get(self.id.."normalize")==1 then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
     local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),math.floor(clock.get_tempo()))
     if not util.file_exists(newpath) then
@@ -316,7 +316,7 @@ function Turntable:retune()
   end
   self.last_tune=tune
   self.retuned=true
-  print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
+  -- print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
   local play_on_load=dat.recording_id==self.id and 1 or 0
   engine.add(self.id,self.path,play_on_load)
 end
