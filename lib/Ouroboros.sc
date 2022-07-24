@@ -66,7 +66,7 @@ Ouroboros {
 			var startFrame=Latch.kr(pos,recordTrig);
 			var endFrame=(recordTrig*(startFrame+recordingFrames))+((1-recordTrig)*28800000);
 			BufWr.ar(
-				inputArray: input*4,
+				inputArray: input*EnvGen.ar(Env.new([0,1],[0.05])),
 				bufnum:bufnum,
 				phase:pos,
 			);

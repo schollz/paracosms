@@ -71,7 +71,7 @@ Engine_Paracosms : CroneEngine {
             paracosms.watch(msg[1].asInteger);
         });
         this.addCommand("play","if", { arg msg;
-            paracosms.play(msg[1].asInteger,msg[2]);
+            paracosms.play(msg[1].asInteger,msg[2],0);
         });
         this.addCommand("stop","if", { arg msg;
             paracosms.stop(msg[1].asInteger,msg[2]);
@@ -88,7 +88,7 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("record_start","",{ arg msg;
             ouroboros.recordStart();
         });
-        this.addCommand("record","isffffi", { arg msg;
+        this.addCommand("record","isffffii", { arg msg;
             var id=msg[1].asInteger;
             var filename=msg[2];
             var seconds=msg[3];
@@ -96,6 +96,7 @@ Engine_Paracosms : CroneEngine {
             var threshold=msg[5];
             var preDelay=msg[6];
             var startImmedietly=msg[7];
+            var playWhenFinished=msg[8];
             ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
@@ -105,6 +106,9 @@ Engine_Paracosms : CroneEngine {
                     Routine {
                         0.2.wait;
                         NetAddr("127.0.0.1", 10111).sendMsg("recorded",id,filename);
+                        if (playWhenFinished>0,{
+                            paracosms.add(id,filename.asString,1);
+                        });
                     }.play;
                 });
             });

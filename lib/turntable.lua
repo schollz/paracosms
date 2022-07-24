@@ -193,7 +193,7 @@ function Turntable:init()
       crossfade=seconds*0.15
     end
     local latency=params:get("record_predelay")/1000
-    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,0)
+    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,0,0)
   end)
   params:add_number(id.."normalize","normalize",0,1,0)
   params:hide(id.."normalize")

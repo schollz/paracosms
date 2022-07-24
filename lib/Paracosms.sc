@@ -117,7 +117,6 @@ Paracosms {
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				snd=snd/10;
 				Out.ar(out1,snd*send1);
 				Out.ar(out2,snd*send2);
 				Out.ar(out3,snd*send3);
@@ -218,7 +217,7 @@ Paracosms {
 	}
 
 	play {
-		arg id,fadeIn;
+		arg id,fadeIn,forceNew;
 		["play",id,fadeIn].postln;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
@@ -230,11 +229,18 @@ Paracosms {
 
 				if (syns.at(id).notNil,{
 					if (syns.at(id).isRunning,{
-						if (params.at(id).at("oneshot")>0,{
-							("retriggering synth"+id).postln;
+						makeNew=false;
+						if (forceNew>0,{
+							("releasing current synth"+id).postln;
 							syns.at(id).set(\release,0.05,\gate,0);
-						},{
-							makeNew=false;
+							makeNew=true;
+						});
+						if (params.at(id).at("oneshot").notNil,{
+							if (params.at(id).at("oneshot")>0,{
+								("retriggering synth"+id).postln;
+								syns.at(id).set(\release,0.05,\gate,0);
+								makeNew=true;
+							});
 						});
 					});
 				});
@@ -294,7 +300,7 @@ Paracosms {
 				});
 				// fade in the synth
 				fadeIn.postln;
-				if (fadeIn,{ this.play(id,0); }); // GOTCHA: this.play is needed instead of just "play"
+				if (fadeIn,{ this.play(id,1,1); }); // GOTCHA: this.play is needed instead of just "play"
 			});
 		});
 	}
