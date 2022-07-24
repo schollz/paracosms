@@ -11,7 +11,7 @@ function Tracker:new(o)
 end
 
 function Tracker:init()
-  self.playing=self.id==1
+  self.playing=false
   self.recording=false
   self.edit_mode=true
   self.cursor={1,1}
@@ -136,7 +136,7 @@ function Tracker:beat(beat_num,division)
     if next_rec~=nil and next_rec[1]==self.id then
       -- start recording
       print(string.format("[%d]: recording go",self.id))
-      params:set("sel",self.id)
+      --params:set("sel",self.id)
       global_rec_queue[1][2]=true
       self.recording=true
       self.recording_queued=false

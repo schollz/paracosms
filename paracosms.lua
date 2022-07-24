@@ -36,8 +36,8 @@ manager_=include("lib/manager")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  {folder="/home/we/dust/audio/paracosms/row1",params={amp_strength=0.1,amp=0.5,pan_strength=0.3,send1=1,send2=0}},
-  {folder="/home/we/dust/audio/paracosms/row2"},
+  {folder="/home/we/dust/audio/paracosms/row1",params={amp_strength=0.2,amp=0.5,pan_strength=0.3,send1=1,send2=0}},
+  {folder="/home/we/dust/audio/paracosms/row2",params={amp=1.0,send1=0,send2=1}},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
