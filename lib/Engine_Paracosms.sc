@@ -95,7 +95,8 @@ Engine_Paracosms : CroneEngine {
             var crossfade=msg[4];
             var threshold=msg[5];
             var preDelay=msg[6];
-            ouroboros.record(id,seconds,crossfade,threshold,preDelay,{
+            var startImmedietly=0;
+            ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{

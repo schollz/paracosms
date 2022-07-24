@@ -115,7 +115,7 @@ Ouroboros {
 	}
 
 	record {
-		arg argID,argSeconds, argCrossfade, argThreshold, argPreDelay, actionStart, action;
+		arg argID,argSeconds, argCrossfade, argThreshold, argPreDelay, argStart, actionStart, action;
 		var id=argID;
 	    var valStartTime=0;
     	var valTriggerTime=0;
@@ -126,7 +126,7 @@ Ouroboros {
 			"ouroborous: buffer ready".postln;
 			// start the recording
 			synRecord=Synth("defRecord",
-				[\id,id,\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
+				[\id,id,\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,\t_record,argStart,
 				\recordingFrames,(argSeconds+argCrossfade)*server.sampleRate,\threshold,argThreshold]
 			).onFree({
 				arg syn;
