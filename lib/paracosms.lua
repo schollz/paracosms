@@ -694,6 +694,7 @@ function key(k,z)
 end
 
 function enc(k,d)
+  show_manager=false
   enc_func[ui_page][k+(shift and 3 or 0)][1](d)
 end
 
@@ -711,21 +712,17 @@ function show_message(message,seconds)
   show_message_text=message
 end
 
-local show_manager=false
+show_manager=false
 local ctl_code=false
 local shift_code=false
 function keyboard.code(code,value)
+  show_manager=true
   if string.find(code,"CTRL") then
     ctl_code=value>0
     do return end
   end
   if string.find(code,"SHIFT") then
     shift_code=value>0
-    do return end
-  end
-  if string.find(code,"ESC") and value>0 then
-    show_manager=not show_manager
-    print(show_manager)
     do return end
   end
   code=ctl_code and "CTRL+"..code or code
