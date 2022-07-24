@@ -88,14 +88,14 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("record_start","",{ arg msg;
             ouroboros.recordStart();
         });
-        this.addCommand("record","isffff", { arg msg;
+        this.addCommand("record","isffffi", { arg msg;
             var id=msg[1].asInteger;
             var filename=msg[2];
             var seconds=msg[3];
             var crossfade=msg[4];
             var threshold=msg[5];
             var preDelay=msg[6];
-            var startImmedietly=0;
+            var startImmedietly=msg[7];
             ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;

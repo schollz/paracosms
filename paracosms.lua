@@ -33,7 +33,7 @@ patterner=include("lib/patterner")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/paracosms/row1",params={type=2}},
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
   {folder="/home/we/dust/audio/paracosms/row3",params={oneshot=2,attack=0.001,release=1,normalize=1}},
   {folder="/home/we/dust/audio/paracosms/row4"},
