@@ -456,10 +456,12 @@ function init()
   clock.run(function()
     clock.sleep(1)
     print("STARTING TEST")
-    manager:load("/home/we/dust/data/paracosms/song1")
-    for i=1,10 do
-      params:set(i.."send2",1)
-      params:set(i.."send1",0)
+    if util.file_exists("/home/we/dust/data/paracosms/song1") then
+      manager:load("/home/we/dust/data/paracosms/song1")
+      for i=1,10 do
+        params:set(i.."send2",1)
+        params:set(i.."send1",0)
+      end
     end
     --engine.tapedeck_toggle(1)
     -- engine.set(1,"send1",0,0)

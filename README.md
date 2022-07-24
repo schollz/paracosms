@@ -37,6 +37,8 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 - norns
 - grid (optional)
+- crow (optional)
+- keyboard (optional)
 
 ## Documentation
 
@@ -142,19 +144,20 @@ all the parameter ids are valid. for instance you can load a block of samples an
 <details><summary>a list of done and doing.</summary>
 
 
-- calculate lcm of all current beats and reset every time lattice hits it (to stay synced)
-- add page for sample position
-- make test of pages for patterns
-- light up when recording
+- keyboard help
+- ~~add page for sample position~~
+- ~~make test of pages for patterns~~
+- ~~light up when recording~~
 - pattern saving/loading
-- add more patterns
+- ~~add more patterns~~
 - ui to explain pattern recording
-- keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample
+- ~~keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample~~
 - pattern recording
 - fix bugs
 - logarithm hold length?
 - retrigger option for one-shot playback
 - add record countdown (using Stepper and Phasor bus that overrides the record trig)?
+- ~~calculate lcm of all current beats and reset every time lattice hits it (to stay synced)~~
 - ~~show/hide sample~~
 - ~~record beats should be a global parameter that gets imported to the next track when recording~~
 - ~~add metronome~~
