@@ -67,16 +67,24 @@ TapedeckFX {
 
 	toggle {
 		arg on;
+		var alreadyOff=true;
 		if (on==1,{
-			var pars=[\outBus,busOut,\inBus,busIn,\buf,buf];
-			params.keysValuesDo({ arg pk,pv; 
-				pars=pars++[pk,pv];
+			if (syn.notNil,{
+				if (syn.isRunning,{
+					alreadyOff=false;
+				});
 			});
-			pars.postln;
-			syn=Synth.tail(group,"defTapedeck",pars);
-			NodeWatcher.register(syn);
-			"tapedeck: running with buffer:".postln;
-			buf.postln;
+			if (alreadyOff,{
+				var pars=[\outBus,busOut,\inBus,busIn,\buf,buf];
+				params.keysValuesDo({ arg pk,pv; 
+					pars=pars++[pk,pv];
+				});
+				pars.postln;
+				syn=Synth.tail(group,"defTapedeck",pars);
+				NodeWatcher.register(syn);
+				"tapedeck: running with buffer:".postln;
+				buf.postln;
+			});
 		},{
 			["tapedeck: stopped"].postln;
 			if (syn.notNil,{

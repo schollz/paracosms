@@ -65,7 +65,7 @@ function Turntable:init()
     {id="send3",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send4",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","release","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","voice","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -142,7 +142,7 @@ function Turntable:init()
       }
     end)
   end
-
+  params:add_number(id.."next","next",1,112,id,function(v) return v:get() end,true)
   params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
   params:add_number(id.."n","n",1,128,16)
   params:add_number(id.."k","k",0,128,math.random(1,4))
@@ -172,6 +172,8 @@ function Turntable:init()
     end)
   end
 
+  params:add_option(id.."record_immediately","immediate",{"no","yes"})
+  params:hide(id.."record_immediately")
   params:add_binary(id.."record_on","record on","trigger")
   params:set_action(id.."record_on",function(x)
     if self.recording then
@@ -193,7 +195,7 @@ function Turntable:init()
       crossfade=seconds*0.15
     end
     local latency=params:get("record_predelay")/1000
-    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,0,0)
+    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,params:get(id.."record_immediately")-1,0)
   end)
   params:add_number(id.."normalize","normalize",0,1,0)
   params:hide(id.."normalize")

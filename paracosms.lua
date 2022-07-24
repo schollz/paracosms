@@ -29,13 +29,16 @@ grid_=include("lib/ggrid")
 lattice_=require("lattice")
 er=require("er")
 patterner=include("lib/patterner")
+musicutil_=require("musicutil")
+tracker_=include("lib/tracker")
+manager_=include("lib/manager")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows={
-  {folder="/home/we/dust/audio/paracosms/row1",params={type=2}},
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.001}},
-  {folder="/home/we/dust/audio/paracosms/row3",params={oneshot=2,attack=0.001,release=1,normalize=1}},
+  {folder="/home/we/dust/audio/paracosms/row1",params={amp_strength=0.1,amp=0.5,pan_strength=0.3,send1=1,send2=0}},
+  {folder="/home/we/dust/audio/paracosms/row2"},
+  {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
@@ -422,19 +425,49 @@ function init()
     end,
     division=1/16,
   }
+
+  -- sequencer tracker
+  global_rec_queue={}
+  global_divisions={1/32}
+  manager=manager_:new()
+  beat_num={}
+  for divisioni,division in ipairs(global_divisions) do
+    table.insert(beat_num,-1)
+    lattice:new_pattern{
+      action=function(t)
+        beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
+        manager:beat(beat_num[divisioni],divisioni)
+      end,
+      division=division,
+    }
+  end
+  params.action_write=function(filename,name)
+    print("write",filename,name)
+    manager:save(filename)
+  end
+  params.action_read=function(filename,silent)
+    print("read",filename,silent)
+    manager:load(filename)
+  end
+
   lattice:start()
 
   --TEST STUFF
-  -- clock.run(function()
-  --   clock.sleep(3)
-  --   print("STARTING TEST")
-  --   --engine.tapedeck_toggle(1)
-  --   -- engine.set(1,"send1",0,0)
-  --   -- engine.set(1,"send2",1,0)
-  --   -- engine.set(2,"send1",0,0)
-  --   -- engine.set(2,"send2",1,0)
-  --   -- engine.tapedeck_set("amp",0)
-  -- end)
+  clock.run(function()
+    clock.sleep(1)
+    print("STARTING TEST")
+    manager:load("/home/we/dust/data/paracosms/song1")
+    for i=1,10 do
+      params:set(i.."send2",1)
+      params:set(i.."send1",0)
+    end
+    --engine.tapedeck_toggle(1)
+    -- engine.set(1,"send1",0,0)
+    -- engine.set(1,"send2",1,0)
+    -- engine.set(2,"send1",0,0)
+    -- engine.set(2,"send2",1,0)
+    -- engine.tapedeck_set("amp",0)
+  end)
 end
 
 local ignore_transport=false
@@ -714,12 +747,43 @@ function show_message(message,seconds)
   show_message_text=message
 end
 
+local show_manager=false
+local ctl_code=false
+local shift_code=false
+function keyboard.code(code,value)
+  if string.find(code,"CTRL") then
+    ctl_code=value>0
+    do return end
+  end
+  if string.find(code,"SHIFT") then
+    shift_code=value>0
+    do return end
+  end
+  if string.find(code,"ESC") and value>0 then
+    show_manager=not show_manager
+    print(show_manager)
+    do return end
+  end
+  code=ctl_code and "CTRL+"..code or code
+  code=shift_code and "SHIFT+"..code or code
+  manager:keyboard(code,value)
+end
+
 function redraw()
   screen.clear()
   if dat.tt[dat.ti]==nil then
     do return end
   end
-  local topleft=dat.tt[dat.ti]:redraw()
+  if show_manager then
+    manager:redraw()
+    draw_message()
+  else
+    draw_paracosms()
+  end
+  screen.update()
+end
+
+function draw_message()
   if show_message_clock>0 and show_message_text~="" then
     show_message_clock=show_message_clock-1
     screen.blend_mode(0)
@@ -748,6 +812,11 @@ function redraw()
       show_message_progress=0
     end
   end
+end
+function draw_paracosms()
+
+  local topleft=dat.tt[dat.ti]:redraw()
+  draw_message()
   -- top left corner
   screen.level(7)
   screen.move(1,7)
@@ -759,16 +828,6 @@ function redraw()
   screen.move(128,7)
   screen.text_right(dat.ti)
 
-  -- screen.level(5)
-  -- screen.move(128,62)
-  -- if enc_func[ui_page][3+(shift and 3 or 0)][2]~=nil then
-  --   screen.text_right(enc_func[ui_page][3+(shift and 3 or 0)][2]())
-  -- end
-
-  -- screen.move(0,62)
-  -- if enc_func[ui_page][2+(shift and 3 or 0)][2]~=nil then
-  --   screen.text(enc_func[ui_page][2+(shift and 3 or 0)][2]())
-  -- end
   if enc_func[ui_page][2][2]~=nil then
     screen.level(shift and 1 or 5)
     screen.move(0,63)
@@ -791,6 +850,4 @@ function redraw()
     screen.text_right(enc_func[ui_page][6][2]())
   end
 
-  screen.update()
 end
-
