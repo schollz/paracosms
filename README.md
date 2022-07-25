@@ -144,6 +144,8 @@ all the parameter ids are valid. for instance you can load a block of samples an
 <details><summary>a list of done and doing.</summary>
 
 
+- upload the seamlessloop binary and audiowaveform
+- add more install steps for required files
 - "track" -> "cosm"
 - keyboard help
 - ~~add page for sample position~~
