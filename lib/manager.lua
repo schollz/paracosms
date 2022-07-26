@@ -54,6 +54,7 @@ function Manager:init()
       note_off=function(note,vel,ch)
         crow.output[(i-1)*2+2](false)
       end,
+      mono=true,
     })
   end
 
@@ -71,16 +72,22 @@ function Manager:init()
 
 end
 
-function Manager:note_off(id,device_id)
-  if self.last_note[id]==nil then
+function Manager:note_off(id,device_id,note)
+  if self.last_note[id]==nil and note==nil then
     do return end
   end
-  print(string.format("[%d:%s] note_off %d",id,self.outputs[device_id].name,self.last_note[id]))
-  self.outputs[device_id]:note_off(self.last_note[id])
+  if note==nil then
+    note=self.last_note[id]
+  end
+  print(string.format("[%d:%s] note_off %d",id,self.outputs[device_id].name,note))
+  self.outputs[device_id]:note_off(note)
   self.last_note[id]=nil
 end
 
 function Manager:note_on(id,device_id,note)
+  if self.outputs[device_id].mono and self.last_note[id]~=nil then
+    self.outputs[device_id]:note_off()
+  end
   print(string.format("[%d:%s] note_on %d",id,self.outputs[device_id].name,note))
   self.outputs[device_id]:note_on(note)
   self.last_note[id]=note

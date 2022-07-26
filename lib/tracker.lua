@@ -240,7 +240,7 @@ function Tracker:keyboard(code,value)
   elseif code=="SHIFT+MINUS" and value>0 then
     self.octave=util.clamp(self.octave-1,1,8)
     show_message("octave "..self.octave,0.5)
-  elseif value>0 then
+  else then
     local p="SHIFT+"
     local insert=string.find(code,p)
     code=(code:sub(0,#p)==p) and code:sub(#p+1) or code
@@ -262,12 +262,13 @@ function Tracker:keyboard(code,value)
       end
     end
     -- check if we have a new note
-    if new_note>-3 then
-      if self.edit_mode then
-        -- change the note
-        self:note_change(new_note,insert,false)
-      else
-        -- TODO: simply play the note out loud
+    if new_note>-3 and value>0 and self.edit_mode then
+      self:note_change(new_note,insert,false)
+    elseif new_note>0 and not self.edit_mode then
+      if value==1 then
+        self.note_on(new_note,params:get(self.id.."output"))
+      elseif value==0 then
+        self.note_off(params:get(self.id.."output"),new_note)
       end
     end
   end
