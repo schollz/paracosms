@@ -77,6 +77,7 @@ function install()
   os.execute("wget -q -O /home/we/dust/code/paracosms/lib/row1.zip https://github.com/schollz/paracosms/releases/download/release/row1.zip")
   os.execute("cd /home/we/dust/code/paracosms/lib && unzip row1.zip")
 
+  please_wait=false
   has_installed=true
 end
 
