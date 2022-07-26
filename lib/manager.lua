@@ -14,43 +14,75 @@ function Manager:init()
   self.tracks={}
   self.num_tracks=112
   self.last_note={}
-  crow.output[2].action="adsr(0.1,0.5,5,1,'linear')"
-  self.voices={
-    {name="crow",mono=true,
-      on=function(note) print("crow",note);crow.output[1].volts=(note-24)/12;crow.output[2](true) end,
-      off=function(note) print("crow off",note);crow.output[2](false) end,
-    },
 
-  }
-
-  local voice_names={}
-  for _,voice in ipairs(self.voices) do
-    table.insert(voice_names,voice.name)
+  -- setup crow
+  params:add_group("CROW",8)
+  for j=1,2 do
+    local i=(j-1)*2+2
+    params:add_control(i.."crow_attack",string.format("crow %d attack",i),controlspec.new(0.01,4,'lin',0.01,0.2,'s',0.01/3.99))
+    params:add_control(i.."crow_sustain",string.format("crow %d sustain",i),controlspec.new(0,10,'lin',0.1,7,'volts',0.1/10))
+    params:add_control(i.."crow_decay",string.format("crow %d decay",i),controlspec.new(0.01,4,'lin',0.01,0.5,'s',0.01/3.99))
+    params:add_control(i.."crow_release",string.format("crow %d release",i),controlspec.new(0.01,4,'lin',0.01,0.2,'s',0.01/3.99))
+    for _,v in ipairs({"attack","sustain","decay","release"}) do
+      params:set_action(i..v,function(x)
+        debounce_fn[i.."crow"]={
+          5,function()
+            crow.output[i].action=string.format("adsr(%3.3f,%3.3f,%3.3f,%3.3f,'linear')",
+            params:get(i.."crow_attack"),params:get(i.."crow_sustain"),params:get(i.."crow_decay"),params:get(i.."crow_release"))
+          end,
+        }
+      end)
+    end
   end
+
+  -- setup outputs
+  self.outputs={}
+  for _,v in ipairs(midi_devices) do
+    table.insert(self.outputs,{
+      name=v.name,
+      note_on=v.note_on,
+      note_off=v.note_off,
+    })
+  end
+  for i=1,2 do
+    table.insert(self.outputs,{
+      name=string.format("crow %d+%d",(i-1)*2+1,(i-1)*2+2),
+      note_on=function(note,vel,ch)
+        crow.output[(i-1)*2+1].volts=(note-24)/12
+        crow.output[(i-1)*2+2](true)
+      end,
+      note_off=function(note,vel,ch)
+        crow.output[(i-1)*2+2](false)
+      end,
+    })
+  end
+
+  self.output_list={}
+  for _,v in ipairs(self.outputs) do
+    table.insert(self.output_list,v.name)
+  end
+
+  -- setup trackers
   for i=1,self.num_tracks do
-    table.insert(self.tracks,tracker_:new{id=i,
-      voices=voice_names,
-      note_on=function(note) self:note_on(i,note) end,
-    note_off=function() self:note_off(i) end})
+    table.insert(self.tracks,tracker_:new{id=i,output_list=self.output_list,
+      note_on=function(note) self:note_on(i,j,note) end,
+    note_off=function() self:note_off(i,j) end})
   end
 
 end
 
-function Manager:note_off(id)
+function Manager:note_off(id,device_id)
   if self.last_note[id]==nil then
     do return end
   end
-  local voice=self.voices[params:get(id.."voice")]
-  local note=self.last_note[id]
-  voice.off(note)
-  print(string.format("[%d] note_off %d",id,note))
+  print(string.format("[%d:%s] note_off %d",id,self.outputs[device_id].name,self.last_note[id]))
+  self.outputs[device_id]:note_off(self.last_note[id])
   self.last_note[id]=nil
 end
 
-function Manager:note_on(id,note)
-  print(string.format("[%d] note_on %d",id,note))
-  local voice=self.voices[params:get(id.."voice")]
-  voice.on(note)
+function Manager:note_on(id,device_id,note)
+  print(string.format("[%d:%s] note_on %d",id,self.outputs[device_id].name,note))
+  self.outputs[device_id]:note_on(note)
   self.last_note[id]=note
 end
 

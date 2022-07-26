@@ -183,6 +183,30 @@ function init()
     _menu.rebuild_params()
   end)
 
+  -- setup sequencer tracker
+  global_rec_queue={}
+  global_divisions={1/32}
+  manager=manager_:new()
+  beat_num={}
+  for divisioni,division in ipairs(global_divisions) do
+    table.insert(beat_num,-1)
+    lattice:new_pattern{
+      action=function(t)
+        beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
+        manager:beat(beat_num[divisioni],divisioni)
+      end,
+      division=division,
+    }
+  end
+  params.action_write=function(filename,name)
+    print("write",filename,name)
+    manager:save(filename)
+  end
+  params.action_read=function(filename,silent)
+    print("read",filename,silent)
+    manager:load(filename)
+  end
+
   -- collect which files
   for row,v in ipairs(dat.rows) do
     local folder=v.folder
@@ -247,23 +271,26 @@ function init()
   end
 
   -- midi
-  midi_device={}
+  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
   midi_device_list={"disabled"}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
+      local connection=midi.connect(dev.port)
       local name=string.lower(dev.name).." "..i
+      print("adding "..name.." as midi device")
       table.insert(midi_device_list,name)
-      print("adding "..name.." to port "..dev.port)
-      midi_device[name]={
+      table.insert(midi_device,{
         name=name,
-        port=dev.port,
-        midi=midi.connect(dev.port),
-      }
-      midi_device[name].midi.event=function(data)
+        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
+        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
+      })
+      connection.event=function(data)
         local msg=midi.to_msg(data)
-        if msg.type=="clock" then do return end end
--- OP-1 fix for transport
+        if msg.type=="clock" then
+          do return end
+        end
         if msg.type=='start' or msg.type=='continue' then
+          -- OP-1 fix for transport
           reset()
         elseif msg.type=="stop" then
         elseif msg.type=="note_on" then
@@ -399,30 +426,6 @@ function init()
     end,
     division=1/16,
   }
-
-  -- sequencer tracker
-  global_rec_queue={}
-  global_divisions={1/32}
-  manager=manager_:new()
-  beat_num={}
-  for divisioni,division in ipairs(global_divisions) do
-    table.insert(beat_num,-1)
-    lattice:new_pattern{
-      action=function(t)
-        beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
-        manager:beat(beat_num[divisioni],divisioni)
-      end,
-      division=division,
-    }
-  end
-  params.action_write=function(filename,name)
-    print("write",filename,name)
-    manager:save(filename)
-  end
-  params.action_read=function(filename,silent)
-    print("read",filename,silent)
-    manager:load(filename)
-  end
 
   lattice:start()
 

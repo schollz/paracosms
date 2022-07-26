@@ -37,6 +37,8 @@ function Tracker:init()
   params:set_action(self.id.."division",function(x)
     self.beats_per_measure=1/global_divisions[x]
   end)
+
+  params:add_option(self.id.."output","output",self.output_list)
   self:recalculate()
 end
 
@@ -170,10 +172,10 @@ function Tracker:beat(beat_num,division)
         self.note_played={self.measure,col}
         if self.recording or self.playing then
           if note>0 then
-            self.note_off()
-            self.note_on(note)
+            self.note_off(params:get(self.id.."output"))
+            self.note_on(note,params:get(self.id.."output"))
           elseif note==-1 then
-            self.note_off()
+            self.note_off(params:get(self.id.."output"))
           end
         end
       end
@@ -198,7 +200,7 @@ function Tracker:play(on)
   end
   self.playing=on
   if not self.playing then
-    self.note_off()
+    self.note_off(params:get(self.id.."output"))
     self.started_from_beginning=false
   end
 end
@@ -388,7 +390,7 @@ function Tracker:redraw()
   local playing_string=self.playing and "PLAY" or "STOP"
   playing_string=self.recording and "REC" or playing_string
   playing_string=self.recording_queued and "QUEUED" or playing_string
-  return string.format("[%s] %s %s +%d",params:string(self.id.."voice"),playing_string,self.edit_mode and "EDIT" or "PERF",self.octave)
+  return string.format("[%s] %s %s +%d",params:string(self.id.."output"),playing_string,self.edit_mode and "EDIT" or "PERF",self.octave)
 end
 
 return Tracker
