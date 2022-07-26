@@ -51,7 +51,7 @@ function install()
 
   -- download the 3rd part supercollider plugins
   print("downloading 3rd party supercollider plugins...")
-  os.execute("wget -O /home/we/dust/code/paracosms/ignore.zip https://github.com/schollz/supercollider-plugins/releases/download/plugins/ignore.zip")
+  os.execute("wget -q -O /home/we/dust/code/paracosms/ignore.zip https://github.com/schollz/supercollider-plugins/releases/download/plugins/ignore.zip")
   os.execute("cd /home/we/dust/code/paracosms && unzip ignore.zip")
 
   -- find the supercollider plugins to install
@@ -70,11 +70,11 @@ function install()
   end
 
   print("downloading audiowaveform (3MB)...")
-  os.execute("wget -O /home/we/dust/code/paracosms/lib/extra.zip https://github.com/schollz/paracosms/releases/download/release/extra.zip")
+  os.execute("wget -q -O /home/we/dust/code/paracosms/lib/extra.zip https://github.com/schollz/paracosms/releases/download/release/extra.zip")
   os.execute("cd /home/we/dust/code/paracosms/lib && unzip extra.zip")
 
   print("downloading starting audio (19MB)...")
-  os.execute("wget -O /home/we/dust/code/paracosms/lib/row1.zip https://github.com/schollz/paracosms/releases/download/release/row1.zip")
+  os.execute("wget -q -O /home/we/dust/code/paracosms/lib/row1.zip https://github.com/schollz/paracosms/releases/download/release/row1.zip")
   os.execute("cd /home/we/dust/code/paracosms/lib && unzip row1.zip")
 
   has_installed=true
