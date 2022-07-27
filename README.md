@@ -14,6 +14,7 @@
 - each sample has **filters, pan+amp lfos, timestretching**
 - global **tapedeck, greyhole and clouds fx** with per-sample sends 
 - the grid (optional) can **pattern record sample playback**
+- a keyboard (optional) can **sequence external synths with a built-in tracker**
 
 https://vimeo.com/730684724
 
@@ -21,11 +22,11 @@ https://vimeo.com/730684724
 
 between april and june 2022 I made music primarily with [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
 
-eventually I got the itch to make my workflow with samples more interactive, more performable, more *real-time*. so I put together a SuperCollider class I called "[paracosms][]" which is essentially >100 synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
+during this time I put together a SuperCollider class I called "[paracosms][]" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
 
-for awhile now I've been thinking about how to record perfectly seamless loops of audio. I added [a new function to do this easily in sofcut](https://github.com/schollz/softcut-lib/tree/rec-once4). but around the time I was playing with samples I started played around with making a SuperCollider class to make a crossfading stereo recording system (like softcut). this became "[ouroborus][]".
+also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/schollz/softcut-lib/tree/rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus][]" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
 
-without intending, I realized that I could combine ourborous with paracosms together into sampler/looper thing. its basically a thing that excells at recording and playing perfect audio loops. norns became the glue for these two supercollider classes - and it is now this *paracosms* script. 
+without intending, I realized that I could combine ourborous with paracosms together into sampler/looper thing. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
 
 
 </details>

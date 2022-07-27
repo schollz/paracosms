@@ -478,7 +478,9 @@ function debounce_params()
   for k,v in pairs(debounce_fn) do
     if v~=nil and v[1]~=nil and v[1]>0 then
       count=count+1
-      if count>1000 then
+      -- for some reason you can't do too many
+      -- at once without triggering a clock error
+      if count>250 then
         do return end
       end
       v[1]=v[1]-1
@@ -737,12 +739,16 @@ function key(k,z)
     elseif z==1 then
       hold_beats=clock.get_beats()
     elseif z==0 then
-      local hold_time=math.pow((hold_beats-clock.get_beats())*clock.get_beat_sec()*2,2)
+      local hold_time=math.pow((hold_beats-clock.get_beats())*clock.get_beat_sec()*1.5,2)
+      if hold_time<0 or hold_time>100 then
+        hold_time=1
+      end
       if params:get(dat.ti.."play")==1 then
         params:set(dat.ti.."release",hold_time)
       else
         params:set(dat.ti.."attack",hold_time)
       end
+      print(string.format("[%d] %s over %3.2f sec",dat.ti,params:get(dat.ti.."play")==1 and "stop" or "play",hold_time))
       params:set(dat.ti.."play",1-params:get(dat.ti.."play"))
     end
   end
