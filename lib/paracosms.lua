@@ -343,18 +343,8 @@ function init()
       end
       clock.sleep(1/10)
       redraw()
-      for k,v in pairs(debounce_fn) do
-        if v~=nil and v[1]>0 then
-          debounce_fn[k][1]=debounce_fn[k][1]-1
-          if debounce_fn[k][1]~=nil and debounce_fn[k][1]==0 then
-            local status,err=pcall(debounce_fn[k][2])
-            if err~=nil then
-              print(status,err)
-            end
-            debounce_fn[k]=nil
-          end
-        end
-      end
+      debounce_params()
+
     end
   end)
 
@@ -378,6 +368,10 @@ function init()
   params.action_read=function(filename,silent)
     print("read",filename,silent)
     manager:load(filename..".txt")
+    -- turn off all the sounds
+    for i=1,112 do
+      params:set(i.."play",0)
+    end
   end
 
   -- initialize hardcoded parameters
@@ -477,6 +471,30 @@ function clock.transport.start()
     do return end
   end
   reset()
+end
+
+function debounce_params()
+  local count=0
+  for k,v in pairs(debounce_fn) do
+    if v~=nil and v[1]~=nil and v[1]>0 then
+      count=count+1
+      if count>1000 then
+        do return end
+      end
+      v[1]=v[1]-1
+      if v[1]~=nil and v[1]==0 then
+        if v[2]~=nil then
+          local status,err=pcall(v[2])
+          if err~=nil then
+            print(status,err)
+          end
+        end
+        debounce_fn[k]=nil
+      else
+        debounce_fn[k]=v
+      end
+    end
+  end
 end
 
 function params_tapedeck()
