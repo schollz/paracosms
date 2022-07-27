@@ -55,7 +55,7 @@ function Manager:init()
     note_off=function(id,device_id,note) self:note_off(id,device_id,note) end})
   end
 
-  params:add_option("edit_mode","edit_mode",{"EDIT","PERF"},1)
+  params:add_option("edit_mode","edit_mode",{"EDIT","PERF","EDRF"},1)
   params:hide("edit_mode")
 end
 

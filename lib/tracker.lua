@@ -217,8 +217,8 @@ end
 function Tracker:keyboard(code,value)
   print(code,value)
   if code=="ESC" and value>0 then
-    params:set("edit_mode",3-params:get("edit_mode"))
-    show_message(params:get("edit_mode")==1 and "EDIT MODE" or "PERFORMANCE MODE")
+    local val=util.wrap(params:get("edit_mode")+1,1,3)
+    params:set("edit_mode",val)
   elseif code=="CTRL+RIGHTBRACE" and value>0 then
     self.octave=util.clamp(self.octave+1,1,8)
     show_message("octave "..self.octave,0.5)
@@ -268,9 +268,10 @@ function Tracker:keyboard(code,value)
       end
     end
     -- check if we have a new note
-    if new_note>-3 and value>0 and params:get("edit_mode")==1 then
+    if new_note>-3 and value>0 and (params:get("edit_mode")==1 or params:get("edit_mode")==3) then
       self:note_change(new_note,insert,false)
-    elseif new_note>0 and params:get("edit_mode")==2 then
+    end
+    if new_note>0 and (params:get("edit_mode")>1) then
       -- do a perform
       if value==1 then
         show_message("NOTE ON: "..musicutil_.note_num_to_name(new_note,true))
