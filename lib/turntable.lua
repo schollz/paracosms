@@ -343,7 +343,11 @@ function Turntable:emit(beat)
   end
   local i=((beat-1)%#self.sequence)+1
   if self.sequence[i] then
-    self:play(true,true)
+    clock.run(function()
+      params:set(self.id.."play",1)
+      clock.sleep(0.01)
+      params:set(self.id.."play",0)
+    end)
   end
 end
 
