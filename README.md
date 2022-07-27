@@ -130,11 +130,21 @@ C4 - - . . . . .
 
 there are 8 things, so each thing gets 1/8th note. the C4 gets 1/8 note and its tied twice ("`- -`") and doesn't get turned off until the 4th 1/8th note hits, so it lasts only 3/8th notes.
 
-## loading sample banks
+## customization / loading sample banks
 
-you can load in entire folders of samples by using the sample banks.
+paracosms is ready to be customized.
 
-sample banks can be loaded by editing the main script [in these lines][InTheseLines]. there are seven lines that contain information about the folders for each block (one block = 16 samples, or 1 row on the grid), along with any parameters that you want to set for that row. for example, to load the 909 samples on the norns into the first block you could set it to:
+the initial script can be changed to your liking. if you open the starter scripts "sorbo" or "boros" there are several functions that can be edited and the bank loading can be edited.
+
+the functions `substance()` and `style()` run at the start and at the end of loading, respectively. you can use these to trigger certain behaviors or activate parameters once everything is loaded.
+
+the "blocks" allows you to customize the startup samples. you can load up to 16 samples per line per entry, with 7 entries available.
+
+each entry has a folder and all the files in the folder will be loaded. for instance the first line will loaded into slots 1-16. the second line will load into slots 17-32. etc.
+
+you can also create parameters that are shared across each block. any parameter that is available can be updated here. 
+
+for example, say you wanted to load all the 909-samples as one-shots, you could include this line:
 
 ```lua
 {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}}
@@ -167,22 +177,21 @@ all the parameter ids are valid. for instance you can load a block of samples an
 <details><summary>a list of done and doing.</summary>
 
 
-- ~~upload the seamlessloop binary and audiowaveform~~
-- add more install steps for required files
-- "track" -> "cosm"
-- keyboard help
-- ~~add page for sample position~~
-- ~~make test of pages for patterns~~
-- ~~light up when recording~~
 - pattern saving/loading
-- ~~add more patterns~~
 - ui to explain pattern recording
-- ~~keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample~~
-- pattern recording
 - fix bugs
 - logarithm hold length?
 - retrigger option for one-shot playback
 - add record countdown (using Stepper and Phasor bus that overrides the record trig)?
+- ~~pattern recording~~
+- ~~keep track of the longest playing sample and - ~~add more patterns~~
+- ~~upload the seamlessloop binary and audiowaveform~~
+- ~~add more install steps for required files~~
+- ~~keyboard help~~
+- ~~add page for sample position~~
+- ~~make test of pages for patterns~~
+- ~~light up when recording~~
+- ~~keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample~~
 - ~~calculate lcm of all current beats and reset every time lattice hits it (to stay synced)~~
 - ~~show/hide sample~~
 - ~~record beats should be a global parameter that gets imported to the next track when recording~~

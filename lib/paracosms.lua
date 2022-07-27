@@ -412,7 +412,8 @@ function init()
     enc(1,1);enc(1,-1)
     clock.sleep(0.1)
     reset()
-
+    clock.sleep(1)
+    style()
   end)
 
   -- initialize lattice
@@ -452,13 +453,6 @@ function init()
   end
 
   lattice:start()
-
-  --TEST STUFF
-  clock.run(function()
-    clock.sleep(1)
-    style()
-    print("PARACOSMS READY")
-  end)
 end
 
 local ignore_transport=false
