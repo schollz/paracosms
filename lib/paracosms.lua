@@ -128,6 +128,59 @@ end
 function init()
   substance()
 
+  -- globals
+  global_rec_queue={}
+  global_divisions={1/32}
+
+  -- crow
+  params:add_group("CROW",8)
+  for j=1,2 do
+    local i=(j-1)*2+2
+    params:add_control(i.."crow_attack",string.format("crow %d attack",i),controlspec.new(0.01,4,'lin',0.01,0.2,'s',0.01/3.99))
+    params:add_control(i.."crow_sustain",string.format("crow %d sustain",i),controlspec.new(0,10,'lin',0.1,7,'volts',0.1/10))
+    params:add_control(i.."crow_decay",string.format("crow %d decay",i),controlspec.new(0.01,4,'lin',0.01,0.5,'s',0.01/3.99))
+    params:add_control(i.."crow_release",string.format("crow %d release",i),controlspec.new(0.01,4,'lin',0.01,0.2,'s',0.01/3.99))
+    for _,v in ipairs({"attack","sustain","decay","release"}) do
+      params:set_action(i.."crow_"..v,function(x)
+        debounce_fn[i.."crow"]={
+          5,function()
+            crow.output[i].action=string.format("adsr(%3.3f,%3.3f,%3.3f,%3.3f,'linear')",
+            params:get(i.."crow_attack"),params:get(i.."crow_sustain"),params:get(i.."crow_decay"),params:get(i.."crow_release"))
+          end,
+        }
+      end)
+    end
+  end
+
+  -- midi
+  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
+  midi_device_list={"disabled"}
+  for i,dev in pairs(midi.devices) do
+    if dev.port~=nil then
+      local connection=midi.connect(dev.port)
+      local name=string.lower(dev.name).." "..i
+      print("adding "..name.." as midi device")
+      table.insert(midi_device_list,name)
+      table.insert(midi_device,{
+        name=name,
+        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
+        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
+      })
+      connection.event=function(data)
+        local msg=midi.to_msg(data)
+        if msg.type=="clock" then
+          do return end
+        end
+        if msg.type=='start' or msg.type=='continue' then
+          -- OP-1 fix for transport
+          reset()
+        elseif msg.type=="stop" then
+        elseif msg.type=="note_on" then
+        end
+      end
+    end
+  end
+
   -- make sure cache directory exists
   os.execute("mkdir -p /home/we/dust/data/paracosms/cache")
   os.execute("mkdir -p /home/we/dust/audio/paracosms/recordings")
@@ -164,7 +217,7 @@ function init()
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
-  params:add_option("record_over","recording track",{"new","over"},1)
+  params:add_option("record_over","record onto",{"new","existing"},1)
   params:add_number("metronome","metronome",0,100,0)
   params:set_action("metronome",function(x)
     engine.metronome(clock.get_tempo(),x,0.2)
@@ -182,30 +235,6 @@ function init()
     end
     _menu.rebuild_params()
   end)
-
-  -- setup sequencer tracker
-  global_rec_queue={}
-  global_divisions={1/32}
-  manager=manager_:new()
-  beat_num={}
-  for divisioni,division in ipairs(global_divisions) do
-    table.insert(beat_num,-1)
-    lattice:new_pattern{
-      action=function(t)
-        beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
-        manager:beat(beat_num[divisioni],divisioni)
-      end,
-      division=division,
-    }
-  end
-  params.action_write=function(filename,name)
-    print("write",filename,name)
-    manager:save(filename)
-  end
-  params.action_read=function(filename,silent)
-    print("read",filename,silent)
-    manager:load(filename)
-  end
 
   -- collect which files
   for row,v in ipairs(dat.rows) do
@@ -226,7 +255,7 @@ function init()
   osc_fun={
     progress=function(args)
       local id=tonumber(args[1])
-      show_message(string.format("recording track %d: %2.0f%%",id,tonumber(args[2])))
+      show_message(string.format("recording cosm %d: %2.0f%%",id,tonumber(args[2])))
       show_progress(tonumber(args[2]))
     end,
     recorded=function(args)
@@ -234,7 +263,7 @@ function init()
       local filename=args[2]
       if id~=nil and filename~=nil then
         show_progress(100)
-        show_message("recorded track "..id)
+        show_message("recorded cosm "..id)
         dat.tt[id]:recording_finish(filename)
       end
     end,
@@ -267,35 +296,6 @@ function init()
   osc.event=function(path,args,from)
     if osc_fun[path]~=nil then osc_fun[path](args) else
       print("osc.event: "..path.."?")
-    end
-  end
-
-  -- midi
-  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
-  midi_device_list={"disabled"}
-  for i,dev in pairs(midi.devices) do
-    if dev.port~=nil then
-      local connection=midi.connect(dev.port)
-      local name=string.lower(dev.name).." "..i
-      print("adding "..name.." as midi device")
-      table.insert(midi_device_list,name)
-      table.insert(midi_device,{
-        name=name,
-        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
-        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
-      })
-      connection.event=function(data)
-        local msg=midi.to_msg(data)
-        if msg.type=="clock" then
-          do return end
-        end
-        if msg.type=='start' or msg.type=='continue' then
-          -- OP-1 fix for transport
-          reset()
-        elseif msg.type=="stop" then
-        elseif msg.type=="note_on" then
-        end
-      end
     end
   end
 
@@ -350,6 +350,18 @@ function init()
   math.randomseed(dat.seed)
   for i=1,112 do
     table.insert(dat.tt,turntable_:new{id=i})
+  end
+
+  -- setup keyboard manager
+  manager=manager_:new()
+
+  params.action_write=function(filename,name)
+    print("write",filename,name)
+    manager:save(filename)
+  end
+  params.action_read=function(filename,silent)
+    print("read",filename,silent)
+    manager:load(filename)
   end
 
   -- initialize hardcoded parameters
@@ -426,6 +438,18 @@ function init()
     end,
     division=1/16,
   }
+  -- setup sequencer tracker
+  beat_num={}
+  for divisioni,division in ipairs(global_divisions) do
+    table.insert(beat_num,-1)
+    lattice:new_pattern{
+      action=function(t)
+        beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
+        manager:beat(beat_num[divisioni],divisioni)
+      end,
+      division=division,
+    }
+  end
 
   lattice:start()
 

@@ -32,13 +32,12 @@ function Tracker:init()
   for _,v in ipairs(global_divisions) do
     table.insert(divisions,"1/"..math.floor(1/v))
   end
-  params:add_option(self.id.."voice","voice",self.voices)
-  params:add_option(self.id.."division","division",divisions)
+  params:add_option(self.id.."division","tracker division",divisions)
   params:set_action(self.id.."division",function(x)
     self.beats_per_measure=1/global_divisions[x]
   end)
 
-  params:add_option(self.id.."output","output",self.output_list)
+  params:add_option(self.id.."output","tracker output",self.output_list)
   self:recalculate()
 end
 
@@ -109,6 +108,9 @@ function Tracker:note_name_to_num(note)
 end
 
 function Tracker:beat(beat_num,division)
+  -- if self.id==1 then
+  --   print(beat_num,division,params:get(self.id.."division"),(not self.playing and not self.recording_queued and not self.recording))
+  -- end
   if params:get(self.id.."division")~=division or (not self.playing and not self.recording_queued and not self.recording) then
     do return end
   end
@@ -168,14 +170,14 @@ function Tracker:beat(beat_num,division)
     if note~=0 then
       v=v+1
       if util.round(beat_per_note*(v-1)+1)==beat then
-        print("measure",self.measure,"beat",beat,note,v)
+        -- print("measure",self.measure,"beat",beat,note,v)
         self.note_played={self.measure,col}
         if self.recording or self.playing then
           if note>0 then
             self.note_off(params:get(self.id.."output"))
-            self.note_on(note,params:get(self.id.."output"))
+            self.note_on(self.id,params:get(self.id.."output"),note)
           elseif note==-1 then
-            self.note_off(params:get(self.id.."output"))
+            self.note_off(self.id,params:get(self.id.."output"))
           end
         end
       end
@@ -200,7 +202,7 @@ function Tracker:play(on)
   end
   self.playing=on
   if not self.playing then
-    self.note_off(params:get(self.id.."output"))
+    self.note_off(self.id,params:get(self.id.."output"))
     self.started_from_beginning=false
   end
 end
@@ -218,15 +220,25 @@ function Tracker:keyboard(code,value)
   if code=="ESC" and value>0 then
     self.edit_mode=not self.edit_mode
     show_message(self.edit_mode and "EDIT MODE" or "PERFORMANCE MODE")
+  elseif code=="CTRL+RIGHTBRACE" and value>0 then
+    self.octave=util.clamp(self.octave+1,1,8)
+    show_message("octave "..self.octave,0.5)
+  elseif code=="CTRL+LEFTBRACE" and value>0 then
+    self.octave=util.clamp(self.octave-1,1,8)
+    show_message("octave "..self.octave,0.5)
   elseif code=="DOWN" and value>0 then
     self:cursor_move(1,0)
   elseif code=="SPACE" and value>0 then
     self:play()
   elseif code=="UP" and value>0 then
     self:cursor_move(-1,0)
-  elseif (code=="LEFT" or code=="SHIFT+LEFT") and value>0 then
+  elseif (code=="SHIFT+LEFT" or code=="SHIFT+RIGHT") and value>0 then
+    params:delta("sel",string.find(code,"LEFT") and-1 or 1)
+  elseif (code=="SHIFT+UP" or code=="SHIFT+DOWN") and value>0 then
+    params:delta(self.id.."output",string.find(code,"DOWN") and-1 or 1)
+  elseif code=="LEFT" and value>0 then
     self:cursor_move(0,-1)
-  elseif (code=="RIGHT" or code=="SHIFT+RIGHT") and value>0 then
+  elseif code=="RIGHT" and value>0 then
     self:cursor_move(0,1)
   elseif code=="DELETE" and value>0 then
     self:note_change(0,false,true)
@@ -234,13 +246,7 @@ function Tracker:keyboard(code,value)
     print(string.format("%d: queueing recording",self.id))
     table.insert(global_rec_queue,{self.id,false})
     self.recording_queued=true
-  elseif code=="SHIFT+EQUAL" and value>0 then
-    self.octave=util.clamp(self.octave+1,1,8)
-    show_message("octave "..self.octave,0.5)
-  elseif code=="SHIFT+MINUS" and value>0 then
-    self.octave=util.clamp(self.octave-1,1,8)
-    show_message("octave "..self.octave,0.5)
-  else then
+  else
     local p="SHIFT+"
     local insert=string.find(code,p)
     code=(code:sub(0,#p)==p) and code:sub(#p+1) or code
@@ -248,7 +254,7 @@ function Tracker:keyboard(code,value)
     local new_note=-3
     if code=="CAPSLOCK" then
       new_note=-1
-    elseif code=="MINUS" then
+    elseif code=="TAB" then
       new_note=-2
     else
       for i,note in ipairs(self.keyboard_notes) do
@@ -266,9 +272,9 @@ function Tracker:keyboard(code,value)
       self:note_change(new_note,insert,false)
     elseif new_note>0 and not self.edit_mode then
       if value==1 then
-        self.note_on(new_note,params:get(self.id.."output"))
+        self.note_on(self.id,params:get(self.id.."output"),new_note)
       elseif value==0 then
-        self.note_off(params:get(self.id.."output"),new_note)
+        self.note_off(self.id,params:get(self.id.."output"),new_note)
       end
     end
   end
@@ -277,7 +283,6 @@ end
 function Tracker:note_change(note,insert,delete)
   local row=self.view[1]+self.cursor[1]+1
   local col=self.view[2]+self.cursor[2]
-  print("row,col",row,col)
   if row>=1 and row<=#self.notes then
     if col>=1 and col<=#self.notes[row] then
       if insert then
