@@ -220,23 +220,11 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 ## Install
 
-this script is not available on maiden because its install process requires two steps.
-
-first install the 3rd-party engines:
-
-```
-;install https://github.com/schollz/supercollider-plugins
-```
-
-**very important**: it is very important that you now open the supercollider-plugins script and click to install to finish installation.
-
-now install
-
 ```
 ;install https://github.com/schollz/paracosms
 ```
 
-and restart norns to complete!
+the first time you open the script it will ask to install the rest of paracosms.
 
 [DevelopingAnAlbum]: https://infinitedigits.bandcamp.com/album/paracosms
 [here]: https://llllllll.co/t/paracosms/56683
