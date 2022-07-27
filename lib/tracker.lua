@@ -13,7 +13,6 @@ end
 function Tracker:init()
   self.playing=false
   self.recording=false
-  self.edit_mode=true
   self.cursor={1,1}
   self.view={0,0} -- row/col to offset
   self.notes={}
@@ -63,8 +62,8 @@ function Tracker:dump()
   local dump=""
   for row,_ in ipairs(self.notes) do
     for col,v in ipairs(self.notes[row]) do
-      if v~=0 then
-        local note_name=musicutil_.note_num_to_name(v+24,true)
+      if v~=nil and v~=0 then
+        local note_name=musicutil_.note_num_to_name(v,true)
         note_name=v==-1 and "." or note_name
         note_name=v==-2 and "-" or note_name
         dump=dump..note_name.." "
@@ -97,7 +96,7 @@ function Tracker:note_name_to_num(note)
     num=-2
   else
     for num2=1,127 do
-      local note_name=musicutil_.note_num_to_name(num2+24,true)
+      local note_name=musicutil_.note_num_to_name(num2,true)
       if note_name==note then
         num=num2
         break
@@ -174,7 +173,7 @@ function Tracker:beat(beat_num,division)
         self.note_played={self.measure,col}
         if self.recording or self.playing then
           if note>0 then
-            self.note_off(params:get(self.id.."output"))
+            self.note_off(self.id,params:get(self.id.."output"))
             self.note_on(self.id,params:get(self.id.."output"),note)
           elseif note==-1 then
             self.note_off(self.id,params:get(self.id.."output"))
@@ -218,8 +217,8 @@ end
 function Tracker:keyboard(code,value)
   print(code,value)
   if code=="ESC" and value>0 then
-    self.edit_mode=not self.edit_mode
-    show_message(self.edit_mode and "EDIT MODE" or "PERFORMANCE MODE")
+    params:set("edit_mode",3-params:get("edit_mode"))
+    show_message(params:get("edit_mode")==1 and "EDIT MODE" or "PERFORMANCE MODE")
   elseif code=="CTRL+RIGHTBRACE" and value>0 then
     self.octave=util.clamp(self.octave+1,1,8)
     show_message("octave "..self.octave,0.5)
@@ -245,6 +244,7 @@ function Tracker:keyboard(code,value)
   elseif code=="CTRL+R" and value>0 then
     print(string.format("%d: queueing recording",self.id))
     table.insert(global_rec_queue,{self.id,false})
+    params:set("record_over",2)
     self.recording_queued=true
   else
     local p="SHIFT+"
@@ -268,12 +268,15 @@ function Tracker:keyboard(code,value)
       end
     end
     -- check if we have a new note
-    if new_note>-3 and value>0 and self.edit_mode then
+    if new_note>-3 and value>0 and params:get("edit_mode")==1 then
       self:note_change(new_note,insert,false)
-    elseif new_note>0 and not self.edit_mode then
+    elseif new_note>0 and params:get("edit_mode")==2 then
+      -- do a perform
       if value==1 then
+        show_message("NOTE ON: "..musicutil_.note_num_to_name(new_note,true))
         self.note_on(self.id,params:get(self.id.."output"),new_note)
       elseif value==0 then
+        show_message("NOTE OFF: "..musicutil_.note_num_to_name(new_note,true))
         self.note_off(self.id,params:get(self.id.."output"),new_note)
       end
     end
@@ -369,7 +372,7 @@ function Tracker:redraw()
     if row>self.view[1] then
       for col,v in ipairs(self.notes[row]) do
         if col>self.view[2] and v~=0 then
-          local note_name=musicutil_.note_num_to_name(v+24,true)
+          local note_name=musicutil_.note_num_to_name(v,true)
           note_name=v==-1 and "." or note_name
           note_name=v==-2 and "-" or note_name
           screen.level(10)
@@ -396,7 +399,7 @@ function Tracker:redraw()
   local playing_string=self.playing and "PLAY" or "STOP"
   playing_string=self.recording and "REC" or playing_string
   playing_string=self.recording_queued and "QUEUED" or playing_string
-  return string.format("[%s] %s %s +%d",params:string(self.id.."output"),playing_string,self.edit_mode and "EDIT" or "PERF",self.octave)
+  return string.format("[%s] %s %s +%d",params:string(self.id.."output"),playing_string,params:string("edit_mode"),self.octave)
 end
 
 return Tracker

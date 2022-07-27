@@ -6,11 +6,11 @@ function Manager:new(o)
   o=o or {}
   setmetatable(o,self)
   self.__index=self
-  o:init()
+  o:init1()
   return o
 end
 
-function Manager:init()
+function Manager:init1()
   self.tracks={}
   self.num_tracks=112
   self.last_note={}
@@ -45,6 +45,9 @@ function Manager:init()
     table.insert(self.output_list,v.name)
   end
 
+end
+
+function Manager:init()
   -- setup trackers
   for i=1,self.num_tracks do
     table.insert(self.tracks,tracker_:new{id=i,output_list=self.output_list,
@@ -52,10 +55,12 @@ function Manager:init()
     note_off=function(id,device_id,note) self:note_off(id,device_id,note) end})
   end
 
+  params:add_option("edit_mode","edit_mode",{"EDIT","PERF"},1)
+  params:hide("edit_mode")
 end
 
 function Manager:note_off(id,device_id,note)
-  if device_id==1 then
+  if device_id==1 or device_id==nil then
     do return end
   end
   if self.last_note[id]==nil and note==nil then
@@ -88,7 +93,6 @@ function Manager:save(filename)
     dump=dump..track:dump()
     dump=dump.."---\n"
   end
-  filename=filename..".txt"
   local file=io.open(filename,"w+")
   io.output(file)
   io.write(dump)
@@ -96,7 +100,6 @@ function Manager:save(filename)
 end
 
 function Manager:load(filename)
-  filename=filename..".txt"
   local f=io.open(filename,"rb")
   local lines=f:lines()
   local dumps={}

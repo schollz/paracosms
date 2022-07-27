@@ -6,6 +6,15 @@ function utils.lcm(arr)
   elseif #arr==0 then
     do return end
   end
+  local all_nonzero=true
+  for _,v in ipairs(arr) do
+    if v==0 then
+      all_nonzero=false
+    end
+  end
+  if not all_nonzero then
+    do return end
+  end
   local lcm_=function(num1,num2)
     if (num1>num2) then
       num=num1

@@ -222,6 +222,23 @@ function init()
   params:set_action("metronome",function(x)
     engine.metronome(clock.get_tempo(),x,0.2)
   end)
+  -- tracker options
+  manager=manager_:new()
+  params:add_group("TRACKER",2)
+  params:add_file("tracker_file","tracker file",_path.data)
+  params:set_action("tracker_file",function(x)
+    print(x)
+    if util.file_exists(x) and string.sub(x,-1)~="/" then
+      manager:load(x)
+    end
+  end)
+  params:add_option("output_all","output all",manager.output_list)
+  params:set_action("output_all",function(x)
+    for i,_ in ipairs(manager.tracks) do
+      params:set(i.."output",x)
+    end
+  end)
+
   params:add_separator("samples")
   params:add_number("sel","selected sample",1,112,1)
   params:set_action("sel",function(x)
@@ -353,15 +370,14 @@ function init()
   end
 
   -- setup keyboard manager
-  manager=manager_:new()
-
+  manager:init()
   params.action_write=function(filename,name)
     print("write",filename,name)
-    manager:save(filename)
+    manager:save(filename..".txt")
   end
   params.action_read=function(filename,silent)
     print("read",filename,silent)
-    manager:load(filename)
+    manager:load(filename..".txt")
   end
 
   -- initialize hardcoded parameters
