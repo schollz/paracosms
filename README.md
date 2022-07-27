@@ -105,7 +105,30 @@ this tool does one of two things: *if* the number of determined beats is greater
 
 ## the grid
 
+the grid essentially makes it easy to toggle on/off samples. it does give special functionality to create patterns from toggles, and even create patterns from start/stop positions (making it easy to break up samples).
+
 ![images](https://user-images.githubusercontent.com/6550035/180621149-f479edee-53ea-4b89-bdce-48e25d95d0c1.png)
+
+
+
+
+## keyboard
+
+pushing a key on a keyboard opens the tracker. twising an encoder closes the tracker (but it will still be running if you started it).
+
+the keyboard layout closely follows the [renoise layout](https://tutorials.renoise.com/wiki/Playing_Notes_with_the_Computer_Keyboard).
+
+![image](https://user-images.githubusercontent.com/6550035/181161725-57e9875e-e2d7-43c3-b09a-52f445084d84.png)
+
+the keyboard controls a sequencer. the sequencer has two dimensions. each row is a measure of 4 beats. those 4 beats are subdivided evenly across everything put onto a line. so if you put 8 things onto a line, each of those things will occur each 1/8th note. if you put 4 things, each will occur at each 1/4 note. if you put 7 things each will occur at each 1/7th note (approximately).
+
+there are notes, note offs, and note ties. by default, anytime a note changes it will do a note off since each sequence is monophonic (though you can have as many sequences playing as you want). you can use the note ties and note offs to create syncopation. for example, the following is quarter note tied to an eight note:
+
+```
+C4 - - . . . . .
+```
+
+there are 8 things, so each thing gets 1/8th note. the C4 gets 1/8 note and its tied twice ("`- -`") and doesn't get turned off until the 4th 1/8th note hits, so it lasts only 3/8th notes.
 
 ## loading sample banks
 
