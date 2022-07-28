@@ -76,7 +76,7 @@ Paracosms {
 				pos2in=LocalIn.ar(1);
 				pos2trig=Trig.ar(pos2in>framesEnd,0.01);
 				pos1=Phasor.ar(
-					trig:syncTrig+t_manu+Trig.ar(pos2in>framesEnd),
+					trig:syncTrig+t_manu+pos2trig,
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
 					end:frames,
@@ -84,7 +84,7 @@ Paracosms {
 				);
 				pos1trig=Trig.ar(pos1>framesEnd,0.01);
 				pos2=Phasor.ar(
-					trig:syncTrig+t_manu+Trig.ar(pos1>framesEnd),
+					trig:syncTrig+t_manu+pos1trig,
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
 					end:frames,
