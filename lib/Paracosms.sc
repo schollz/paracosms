@@ -54,10 +54,11 @@ Paracosms {
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
-				var snd,pos,seconds,tsWindow;
+				var snd,pos,pos1,pos2,pos2in,seconds,tsWindow;
 
 				// determine constants
-				var frames=BufFrames.ir(bufnum);
+				var framesTotal=BufFrames.ir(bufnum);
+				var framesEnd=sampleEnd*frames;
 				var duration=BufDur.ir(bufnum);
 
 				// determine triggers
@@ -69,17 +70,25 @@ Paracosms {
 				var resetPos=syncPos+manuPos;
 				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
 
-
 				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 				rate=rate*BufRateScale.ir(bufnum);
-				pos=Phasor.ar(
-					trig:syncTrig+t_manu,
+				pos2in=LocalIn.ar(1);
+				pos1=Phasor.ar(
+					trig:syncTrig+t_manu+Trig.ar(pos2in>framesEnd),
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
-					end:sampleEnd*frames,
+					end:framesTotal,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
+				pos2=Phasor.ar(
+					trig:syncTrig+t_manu+Trig.ar(pos1>framesEnd),
+					rate:rate/tsSlow,
+					start:sampleStart*frames,
+					end:framesTotal,
+					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
+				);
+				LocalOut.ar(pos2);
 
 				tsWindow=Phasor.ar(
 					trig:manuTrig+t_manu,
