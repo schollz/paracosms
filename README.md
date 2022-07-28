@@ -24,9 +24,11 @@ between april and june 2022 I made music primarily with [scripts][], SuperCollid
 
 during this time I put together a SuperCollider class I called "[paracosms][]" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
 
-also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/schollz/softcut-lib/tree/rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus][]" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
+also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/monome/softcut-lib/compare/main...schollz:softcut-lib:rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus][]" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
 
-without intending, I realized that I could combine ourborous with paracosms together into sampler/looper thing. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
+without intending, I realized that I could combine ourborous with paracosms together into sampler/looper. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
+
+
 
 
 </details>
@@ -74,7 +76,7 @@ there are three global effects - greyhole, clouds and tapedeck. their parameters
 
 ### automatic warping
 
-imported audio is automatically warped when either the `guess bpm` parameter is activated, or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automatically stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
+imported audio is automatically warped when either the `guess bpm` parameter is activated (i.e. from the startup script), or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automatically stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
 
 _another note:_ if you include "`drum`" in the filename, then warping happens without using pitch-compensation.
 
@@ -88,16 +90,10 @@ you can change the warping at any time by going to the sample and editing the wa
 
 <details><summary>a tutorial on making audio with gapless playback.</summary><br>
 
-I created [a tool to automatically make seamless loops][AToolToAutomaticallyMakeSeamless] out of audio. to use this tool simply rename your file to include `bpmX` in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". then install `seamlessloop` by running this in maiden:
+I created [a tool to automatically make seamless loops][AToolToAutomaticallyMakeSeamless] out of audio. to use this tool simply **rename your file to include `bpmX`** in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". this tool is included with *paracosms* - its called `seamlessloop`. you can run `seamlessloop` on folders or files. for example:
 
 ```
-os.execute("wget -P /tmp/ https://github.com/schollz/seamlessloop/releases/download/v0.1.1/seamlessloop_0.1.1_Linux-RaspberryPi.deb && sudo dpkg --install /tmp/seamlessloop*.deb && seamlessloop --version")
-```
-
-now you can run `seamlessloop` on folders or files. for example:
-
-```
-os.execute("seamlessloop --in-folder ~/dust/audio/loops --out-folder ~/dust/audio/quantized-loops")
+os.execute("/home/we/dust/code/paracosms/lib/seamlessloop --in-folder ~/dust/audio/loops --out-folder ~/dust/audio/quantized-loops")
 ```
 
 this tool does one of two things: *if* the number of determined beats is greater than a multiple of 4 then those extra beats are used to crossfade and make a seamless sample. *otherwise*, if the number determined beats is slightly less than a multiple of 4 then a gap of silence is appended to the end and the endpoints are faded by 5 ms to reduce clicks.

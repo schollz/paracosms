@@ -433,7 +433,7 @@ function init()
     action=function(v)
       dat.beat=dat.beat+1
       -- TODO: make option to change the probability of reset
-      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and math.random(1,100)<10 then
+      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then
         print("resetPhase from lcm beat")
         engine.resetPhase()
       end
