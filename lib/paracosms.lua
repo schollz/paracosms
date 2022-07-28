@@ -665,29 +665,8 @@ function delta_page(d)
   end
 end
 
-function delta_ti(d,is_playing)
-  if is_playing then
-    local available_ti={}
-    for i,v in ipairs(dat.tt) do
-      if v:is_playing() then
-        table.insert(available_ti,i)
-      end
-    end
-    if next(available_ti)==nil then
-      do return end
-    end
-    -- find the closest index for dat.ti
-    local closest={1,10000}
-    for i,ti in ipairs(available_ti) do
-      if math.abs(ti-dat.ti)<closest[2] then
-        closest={i,math.abs(ti-dat.ti)}
-      end
-    end
-    local i=closest[1]
-    i=util.wrap(i+d,1,#available_ti)
-    params:set("sel",available_ti[i])
-  else
-    -- find only the ones that are ready
+function delta_ti(d,is_ready)
+  if is_ready then
     local available_ti={}
     for i,v in ipairs(dat.tt) do
       if v.ready then
@@ -707,7 +686,8 @@ function delta_ti(d,is_playing)
     local i=closest[1]
     i=util.wrap(i+d,1,#available_ti)
     params:set("sel",available_ti[i])
-    -- params:set("sel",util.wrap(dat.ti+d,1,#dat.tt))
+  else
+    params:set("sel",util.wrap(dat.ti+d,1,#dat.tt))
   end
 end
 

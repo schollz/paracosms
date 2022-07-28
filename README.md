@@ -6,8 +6,8 @@
 
 *paracosms* is a sampler that can playback or record synchronized audio. main features:
 
-- can load up to **112 stereo or mono samples**
-- **samples are synchronized** 
+- can load/record up to **112 stereo or mono samples**
+- **sample playback is synchronized** 
 - recorded samples have **gapless playback** by crossfading post-roll
 - imported samples can be **automatically warped** to current bpm
 - **one-shot samples can be sequenced** with euclidean sequencer
@@ -49,7 +49,7 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 ### playing
 
-**E1 will select sample. K1+E1 will select sample *that is playing*.**
+**E1 will select sample. K1+E1 will select sample *that is loaded*.**
 
 **K3 will play a sample.** 
 
@@ -60,7 +60,8 @@ samples in the looping mode will fade with a duration according to how long you 
 
 **K1+K3 will prime a recording.** 
 
-by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the moments right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. also, you can skip waiting and **you can start recording immediately by pressing K1+K3 again.**
+by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the moments right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. generally this latency should be really small (<20 ms). you always can skip waiting and **you can start recording immediately by pressing K1+K3 again.**
+
 
 ### parameters on the go
 
