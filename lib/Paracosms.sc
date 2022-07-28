@@ -40,7 +40,7 @@ Paracosms {
 		watching=0;
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
-			SynthDef("defPlay"++ch,{
+			SynthDef("defPlay2"++ch,{
 				arg amp=1.0,pan=0,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
@@ -128,7 +128,90 @@ Paracosms {
 				// main envelope
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
 
+				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
+				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
+				Out.ar(out1,snd*send1);
+				Out.ar(out2,snd*send2);
+				Out.ar(out3,snd*send3);
+				Out.ar(out4,snd*send4);
+			}).send(server);
+		});
+		(1..2).do({arg ch;
+			SynthDef("defPlay1"++ch,{
+				arg amp=1.0,pan=0,
+				lpf=20000,lpfqr=0.707,
+				hpf=20,hpfqr=0.707,
+				offset=0,t_sync=1,t_manu=0,
+				oneshot=0,cut_fade=0.05,
+				rate=1.0,rateLag=0.0,
+				sampleStart=0,sampleEnd=1.0,
+				ts=0,tsSeconds=0.25,tsSlow=1,
+				pan_period=16,pan_strength=0,
+				amp_period=16,amp_strength=0,
+				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
+				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
+				var snd,pos,pos1,pos2,pos2in,pos1trig,pos2trig,seconds,tsWindow,readHead;
+
+				// determine constants
+				var frames=BufFrames.ir(bufnum);
+				var framesEnd=sampleEnd*frames;
+				var duration=BufDur.ir(bufnum);
+
+				// determine triggers
+				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
+					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
+				var manuTrig=Trig.ar(t_manu);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
+				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
+				var resetPos=syncPos+manuPos;
+				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
+
+				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
+				tsSlow=SelectX.kr(ts,[1,tsSlow]);
+				rate=rate*BufRateScale.ir(bufnum);
+
+				pos=Phasor.ar(
+					trig:syncTrig+t_manu+pos2trig,
+					rate:rate/tsSlow,
+					start:sampleStart*frames,
+					end:frames,
+					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
+				);
+
+				tsWindow=Phasor.ar(
+					trig:manuTrig+t_manu,
+					rate:rate,
+					start:pos,
+					end:pos+(tsSeconds/duration*frames),
+					resetPos:pos,
+				);
+				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
+				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
+
+				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
+					tsWindow,
+					loop:1,
+					interpolation:1
+				));
+
+				// balance the two channels
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
+
+				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
+				snd=snd*amp;
+
+				// one-shot envelope
+				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
+
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
+
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
