@@ -239,13 +239,6 @@ function init()
     end
   end)
 
-  params:add{type="binary",name="UPDATE PARACOSMS",id="update_paracosms",behavior="toggle",action=function(v)
-    if v==1 then
-      os.execute("git --git-dir /home/we/dust/code/paracosms fetch --all")
-      os.execute("git --git-dir /home/we/dust/code/paracosms reset --hard origin/paracosms")
-      os.execute("~/norns/stop.sh && sleep 1 && ~/norns/start.sh")
-    end
-  end}
   params:add_separator("samples")
   params:add_number("sel","selected sample",1,112,1)
   params:set_action("sel",function(x)
