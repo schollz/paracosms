@@ -134,12 +134,21 @@ function Turntable:init()
           end
         end
       end
+      -- special
+      if pram.id=="sampleStart" or pram.id=="sampleEnd" then 
+        debounce_fn[id..pram.id]={
+          pram.response or 3,function()
+            engine.cut(id,params:get(id.."sampleStart"),params:get(id.."sampleEnd"),0.05) -- TODO: make cross-fade time an option
+          end,
+        }  
+      else
+        debounce_fn[id..pram.id]={
+          pram.response or 3,function()
+            engine.set(id,pram.id,params:get(id..pram.id))
+          end,
+        }  
+      end
 
-      debounce_fn[id..pram.id]={
-        pram.response or 3,function()
-          engine.set(id,pram.id,params:get(id..pram.id))
-        end,
-      }
     end)
   end
   params:add_number(id.."next","next",1,112,id,function(v) return v:get() end,true)

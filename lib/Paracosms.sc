@@ -216,6 +216,34 @@ Paracosms {
 		});
 	}
 
+	// cut will crossfade to a new position in the sample
+	// IF the sample is playing
+	cut {
+		arg id,sampleStart,sampleEnd,xfade;
+		if (params.at(id).notNil,{
+			if (bufs.at(id).notNil,{
+				if (syns.at(id).notNil,{
+					if (syns.at(id).isRunning,{
+						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade];
+
+						params.at(id).put(\sampleStart,sampleStart);
+						params.at(id).put(\sampleEnd,sampleEnd);
+						params.at(id).keysValuesDo({ arg pk,pv; 
+							pars=pars++[pk,pv];
+						});
+
+						("cutting synth"+id).postln;
+						syns.at(id).set(\release,xfade,\gate,0);
+						syns.put(id,Synth.after(syns.at("phasor"),
+							"defPlay"++bufs.at(id).numChannels,pars,
+						).onFree({["freed"+id].postln}));
+						NodeWatcher.register(syns.at(id));
+					});
+				});
+			});
+		});
+	}
+
 	play {
 		arg id,fadeIn,forceNew;
 		["play",id,fadeIn].postln;
@@ -307,16 +335,18 @@ Paracosms {
 
 
 	set {
-		arg id,key,val;
+		arg id,key,val,doupdate;
 		if (params.at(id).isNil,{
 			params.put(id,Dictionary.new());
 		});
 		//[id,key,val].postln;
 		// GOTCHA: if not "asString" then it can be manually polled using at("something")
 		params.at(id).put(key.asString,val);
-		if (syns.at(id).notNil,{
-			if (syns.at(id).isRunning,{
-				syns.at(id).set(key,val);
+		if (doupdate>0,{
+			if (syns.at(id).notNil,{
+				if (syns.at(id).isRunning,{
+					syns.at(id).set(key,val);
+				});
 			});
 		});
 	}

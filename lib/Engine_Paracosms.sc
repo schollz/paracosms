@@ -73,11 +73,17 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("play","if", { arg msg;
             paracosms.play(msg[1].asInteger,msg[2],0);
         });
+        this.addCommand("cut","ifff", { arg msg;
+            paracosms.cut(msg[1].asInteger,msg[2],msg[3],msg[4]);
+        });
         this.addCommand("stop","if", { arg msg;
             paracosms.stop(msg[1].asInteger,msg[2]);
         });
         this.addCommand("set","isf", { arg msg;
-            paracosms.set(msg[1].asInteger,msg[2],msg[3]);
+            paracosms.set(msg[1].asInteger,msg[2],msg[3],1);
+        });
+        this.addCommand("set_silent","isf", { arg msg;
+            paracosms.set(msg[1].asInteger,msg[2],msg[3],0);
         });
         this.addCommand("resetPhase","", { arg msg;
             paracosms.resetPhase();
