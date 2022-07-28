@@ -333,7 +333,7 @@ Paracosms {
 						("cutting synth"+id).postln;
 						syns.at(id).set(\release,xfade,\gate,0);
 						syns.put(id,Synth.after(syns.at("phasor"),
-							"defPlay"++bufs.at(id).numChannels,pars,
+							"defPlay2"++bufs.at(id).numChannels,pars,
 						).onFree({["freed"+id].postln}));
 						NodeWatcher.register(syns.at(id));
 					});
@@ -374,7 +374,7 @@ Paracosms {
 				if (makeNew,{
 					("making synth"+id).postln;
 					syns.put(id,Synth.after(syns.at("phasor"),
-						"defPlay"++bufs.at(id).numChannels,pars,
+						"defPlay1"++bufs.at(id).numChannels,pars,
 					).onFree({["freed"+id].postln}));
 					NodeWatcher.register(syns.at(id));
 				},{
