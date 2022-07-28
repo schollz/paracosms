@@ -45,7 +45,7 @@ Paracosms {
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
-				oneshot=0,
+				oneshot=0,cut_fade=0.05,
 				rate=1.0,rateLag=0.0,
 				sampleStart=0,sampleEnd=1.0,
 				ts=0,tsSeconds=0.25,tsSlow=1,
@@ -54,7 +54,7 @@ Paracosms {
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
-				var snd,pos,pos1,pos2,pos2in,seconds,tsWindow;
+				var snd,pos,pos1,pos2,pos2in,pos1trig,pos2trig,seconds,tsWindow,readHead;
 
 				// determine constants
 				var framesTotal=BufFrames.ir(bufnum);
@@ -74,6 +74,7 @@ Paracosms {
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 				rate=rate*BufRateScale.ir(bufnum);
 				pos2in=LocalIn.ar(1);
+				pos2trig=Trig.ar(pos2in>framesEnd,0.01);
 				pos1=Phasor.ar(
 					trig:syncTrig+t_manu+Trig.ar(pos2in>framesEnd),
 					rate:rate/tsSlow,
@@ -81,6 +82,7 @@ Paracosms {
 					end:framesTotal,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
+				pos1trig=Trig.ar(pos1>framesEnd,0.01);
 				pos2=Phasor.ar(
 					trig:syncTrig+t_manu+Trig.ar(pos1>framesEnd),
 					rate:rate/tsSlow,
@@ -89,6 +91,8 @@ Paracosms {
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
 				LocalOut.ar(pos2);
+				readHead=ToggleFF.ar(pos1trig+pos2trig);
+				pos=Select.ar(readHead,[pos1,pos2]);
 
 				tsWindow=Phasor.ar(
 					trig:manuTrig+t_manu,
@@ -97,7 +101,9 @@ Paracosms {
 					end:pos+(tsSeconds/duration*frames),
 					resetPos:pos,
 				);
-				snd=BufRd.ar(ch,bufnum,pos,interpolation:2);
+				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
+				snd=SelectX.ar(Lag.kr(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
+
 				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
 					tsWindow,
 					loop:1,
