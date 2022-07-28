@@ -227,6 +227,15 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 the first time you open the script it will ask to install the rest of paracosms.
 
+## Update
+
+update the screen by deleting and reinstalling or just running this in maiden:
+
+```
+os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
+")
+```
+
 [DevelopingAnAlbum]: https://infinitedigits.bandcamp.com/album/paracosms
 [here]: https://llllllll.co/t/paracosms/56683
 [paracosms]: https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc
