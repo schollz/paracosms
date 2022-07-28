@@ -57,7 +57,7 @@ Paracosms {
 				var snd,pos,pos1,pos2,pos2in,pos1trig,pos2trig,seconds,tsWindow,readHead;
 
 				// determine constants
-				var framesTotal=BufFrames.ir(bufnum);
+				var frames=BufFrames.ir(bufnum);
 				var framesEnd=sampleEnd*frames;
 				var duration=BufDur.ir(bufnum);
 
@@ -79,7 +79,7 @@ Paracosms {
 					trig:syncTrig+t_manu+Trig.ar(pos2in>framesEnd),
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
-					end:framesTotal,
+					end:frames,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
 				pos1trig=Trig.ar(pos1>framesEnd,0.01);
@@ -87,7 +87,7 @@ Paracosms {
 					trig:syncTrig+t_manu+Trig.ar(pos1>framesEnd),
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
-					end:framesTotal,
+					end:frames,
 					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
 				LocalOut.ar(pos2);
@@ -102,7 +102,7 @@ Paracosms {
 					resetPos:pos,
 				);
 				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
-				snd=SelectX.ar(Lag.kr(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
+				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
 
 				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
 					tsWindow,
