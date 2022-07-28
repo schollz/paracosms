@@ -163,6 +163,9 @@ function Tracker:beat(beat_num,division)
   if next(self.notes_in_row)==nil then
     do return end
   end
+  if self.notes_in_row[self.measure]==nil then
+    do return end
+  end
   local beat_per_note=self.beats_per_measure/self.notes_in_row[self.measure]
   v=0
   for col,note in ipairs(self.notes[self.measure]) do
@@ -239,6 +242,10 @@ function Tracker:keyboard(code,value)
     self:cursor_move(0,-1)
   elseif code=="RIGHT" and value>0 then
     self:cursor_move(0,1)
+  elseif code=="CTRL+C" and value>0 then
+    self:copy()
+  elseif code=="CTRL+V" and value>0 then
+    self:paste()
   elseif code=="DELETE" and value>0 then
     self:note_change(0,false,true)
   elseif code=="CTRL+R" and value>0 then
@@ -247,6 +254,13 @@ function Tracker:keyboard(code,value)
     params:set("record_over",2)
     self.recording_queued=true
   else
+    for i=0,9 do
+      local j=i==0 and 10 or i
+      if code==string.format("CTRL+%d",j) then
+        params:set("sel",j)
+        do return end
+      end
+    end
     local p="SHIFT+"
     local insert=string.find(code,p)
     code=(code:sub(0,#p)==p) and code:sub(#p+1) or code
@@ -282,6 +296,29 @@ function Tracker:keyboard(code,value)
       end
     end
   end
+end
+
+function Tracker:copy()
+  local row=self.view[1]+self.cursor[1]+1
+  self.copied={}
+  for _,v in ipairs(self.notes[row]) do
+    table.insert(self.copied,v)
+  end
+end
+
+function Tracker:paste()
+  if self.copied==nil then
+    do return end
+  end
+  local copied={}
+  for _,v in ipairs(self.copied) do
+    table.insert(copied,v)
+  end
+  local row=self.view[1]+self.cursor[1]+1
+  if row<=#self.notes+1 and row>0 then
+    table.insert(self.notes,row,copied)
+  end
+  self:recalculate()
 end
 
 function Tracker:note_change(note,insert,delete)
