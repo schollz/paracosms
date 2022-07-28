@@ -119,7 +119,7 @@ pushing a key on a keyboard opens the tracker. twising an encoder closes the tra
 
 the keyboard layout closely follows the [renoise layout](https://tutorials.renoise.com/wiki/Playing_Notes_with_the_Computer_Keyboard).
 
-![image](https://user-images.githubusercontent.com/6550035/181161725-57e9875e-e2d7-43c3-b09a-52f445084d84.png)
+![image](https://user-images.githubusercontent.com/6550035/181408330-395348fb-3025-4c62-9367-770914790b46.png)
 
 the keyboard controls a sequencer. the sequencer has two dimensions. each row is a measure of 4 beats. those 4 beats are subdivided evenly across everything put onto a line. so if you put 8 things onto a line, each of those things will occur each 1/8th note. if you put 4 things, each will occur at each 1/4 note. if you put 7 things each will occur at each 1/7th note (approximately).
 
