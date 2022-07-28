@@ -344,6 +344,7 @@ Paracosms {
 
 	play {
 		arg id,fadeIn,forceNew;
+		var defPlay=1;
 		["play",id,fadeIn].postln;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
@@ -370,11 +371,21 @@ Paracosms {
 						});
 					});
 				});
+				if (params.at(id).at("sampleStart").notNil,{
+					if (params.at(id).at("sampleStart")>0,{
+						defPlay=2;
+					});
+				});
+				if (params.at(id).at("sampleEnd").notNil,{
+					if (params.at(id).at("sampleEnd")<1,{
+						defPlay=2;
+					});
+				});
 
 				if (makeNew,{
 					("making synth"+id).postln;
 					syns.put(id,Synth.after(syns.at("phasor"),
-						"defPlay1"++bufs.at(id).numChannels,pars,
+						"defPlay"++defPlay++bufs.at(id).numChannels,pars,
 					).onFree({["freed"+id].postln}));
 					NodeWatcher.register(syns.at(id));
 				},{
