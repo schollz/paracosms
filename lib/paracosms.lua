@@ -240,7 +240,7 @@ function init()
   end)
 
   params:add{type="binary",name="UPDATE PARACOSMS",id="update_paracosms",behavior="toggle",action=function(v)
-    if v==2 then
+    if v==1 then
       os.execute("git --git-dir /home/we/dust/code/paracosms fetch --all")
       os.execute("git --git-dir /home/we/dust/code/paracosms reset --hard origin/paracosms")
       os.execute("~/norns/stop.sh && sleep 1 && ~/norns/start.sh")
