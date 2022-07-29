@@ -131,6 +131,7 @@ function init()
   -- globals
   global_rec_queue={}
   global_divisions={1/32}
+  global_reset_needed=0
 
   -- crow
   params:add_group("CROW",8)
@@ -439,7 +440,7 @@ function init()
     action=function(v)
       dat.beat=dat.beat+1
       -- TODO: make option to change the probability of reset
-      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 then
+      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and global_reset_needed>0 then
         print("resetPhase from lcm beat")
         engine.resetPhase()
       end

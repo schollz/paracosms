@@ -160,6 +160,7 @@ function Turntable:init()
   for _,pram in ipairs({"sequencer","n","k","w"}) do
     params:set_action(self.id..pram,function(v)
       if pram=="sequencer" then
+        global_reset_needed=global_reset_needed+(v==2 and 1 or -1)
         dat.sequencing[self.id]=v==2 and true or nil
       end
       self.sequence=er.gen(params:get(self.id.."k"),params:get(self.id.."n"),params:get(self.id.."w"))

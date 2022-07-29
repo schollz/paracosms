@@ -50,6 +50,7 @@ function Pattern:toggle()
   end
   print("patterner: toggle")
   self.playing=not self.playing
+  global_reset_needed=global_reset_needed+(self.playing and 1 or -1)
 end
 
 function Pattern:emit(global_beat)

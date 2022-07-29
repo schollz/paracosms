@@ -207,6 +207,7 @@ function Tracker:play(on)
     self.note_off(self.id,params:get(self.id.."output"))
     self.started_from_beginning=false
   end
+  global_reset_needed=global_reset_needed+(self.playing and 1 or -1)
 end
 
 function Tracker:enc(k,d)
