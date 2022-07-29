@@ -69,8 +69,8 @@ Paracosms {
 
 				// determine triggers
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
-					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
-				var manuTrig=Trig.ar(t_manu);
+					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd),0.01);
+				var manuTrig=Trig.ar(t_manu,0.01);
 				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
@@ -102,8 +102,8 @@ Paracosms {
 				);
 				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01);
 				readHead=ToggleFF.ar(pos1trig+syncOrManuTrig+pos2trig).poll;
-				LocalOut.ar([Changed.ar(readHead),readHead]);
 				pos=Select.ar(readHead,[pos1,pos2]);
+				LocalOut.ar([Changed.ar(readHead),readHead]);
 
 				tsWindow=Phasor.ar(
 					trig:manuTrig+manuTrig,
@@ -356,8 +356,8 @@ Paracosms {
 					if (syns.at(id).isRunning,{
 						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade,\cut_fade,cut_fade];
 
-						params.at(id).put(\sampleStart,sampleStart);
-						params.at(id).put(\sampleEnd,sampleEnd);
+						params.at(id).put("sampleStart",sampleStart);
+						params.at(id).put("sampleEnd",sampleEnd);
 						params.at(id).keysValuesDo({ arg pk,pv; 
 							pars=pars++[pk,pv];
 						});
@@ -408,6 +408,7 @@ Paracosms {
 						});
 					});
 				});
+				params.at(id).at("sampleStart").postln;
 				if (params.at(id).at("sampleStart").notNil,{
 					if (params.at(id).at("sampleStart")>0,{
 						defPlay=2;
@@ -420,7 +421,7 @@ Paracosms {
 				});
 
 				if (makeNew,{
-					("making synth"+id).postln;
+					("making synth"+id+defPlay).postln;
 					syns.put(id,Synth.after(syns.at("phasor"),
 						"defPlay"++defPlay++bufs.at(id).numChannels,pars,
 					).onFree({["freed"+id].postln}));
