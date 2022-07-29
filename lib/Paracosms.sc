@@ -80,7 +80,7 @@ Paracosms {
 
 				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
-				rate=rate*BufRateScale.ir(bufnum);
+				rate=rate*BufRateScale.ir(bufnum)*((sampleStart<sampleEnd)*2-1); // TODO: test whether this works to reverse rate
 				localin_data=LocalIn.ar(2);
 				readHead_changed=localin_data[0];
 				readHead_in=localin_data[1];
