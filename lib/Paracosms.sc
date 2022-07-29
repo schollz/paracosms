@@ -14,6 +14,7 @@ Paracosms {
 	var params;
 	var watching;
 	var group;
+	var cut_fade;
 
 	*new {
 		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
@@ -36,6 +37,7 @@ Paracosms {
 		synsFinished=List.new(300);
 		bufs=Dictionary.new();
 		params=Dictionary.new();
+		cut_fade=0.2;
 
 		watching=0;
 		busPhasor=Bus.audio(server,1);
@@ -332,6 +334,16 @@ Paracosms {
 		});
 	}
 
+	cut_fade {
+		arg val;
+		cut_fade=val;
+		syns.keysValuesDo({ arg note, val;
+			if (val.isRunning,{
+				val.set(\cut_fade,cut_fade);
+			});
+		});
+	}
+
 	// cut will crossfade to a new position in the sample
 	// IF the sample is playing
 	cut {
@@ -341,7 +353,7 @@ Paracosms {
 			if (bufs.at(id).notNil,{
 				if (syns.at(id).notNil,{
 					if (syns.at(id).isRunning,{
-						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade];
+						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade,\cut_fade,cut_fade];
 
 						params.at(id).put(\sampleStart,sampleStart);
 						params.at(id).put(\sampleEnd,sampleEnd);
@@ -373,7 +385,7 @@ Paracosms {
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				var makeNew=true;
-				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,fadeIn];
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,fadeIn,\cut_fade,cut_fade];
 				params.at(id).keysValuesDo({ arg pk,pv; 
 					pars=pars++[pk,pv];
 				});

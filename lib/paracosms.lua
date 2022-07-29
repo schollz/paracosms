@@ -239,6 +239,12 @@ function init()
     end
   end)
 
+  -- cut fade
+  params:add_control("cut_fade","CUT XFADE",controlspec.new(0,500,'lin',1,100,'ms',1/500))
+  params:set_action("cut_fade",function(x)
+    engine.cut_fade(x/1000)
+  end)
+
   params:add_separator("samples")
   params:add_number("sel","selected sample",1,112,1)
   params:set_action("sel",function(x)

@@ -76,6 +76,9 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("cut","ifff", { arg msg;
             paracosms.cut(msg[1].asInteger,msg[2],msg[3],msg[4]);
         });
+        this.addCommand("cut_fade","f", { arg msg;
+            paracosms.cut_fade(msg[1]);
+        });
         this.addCommand("stop","if", { arg msg;
             paracosms.stop(msg[1].asInteger,msg[2]);
         });
