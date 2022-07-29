@@ -57,7 +57,7 @@ Paracosms {
 				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
 				var snd,pos,seconds,tsWindow;
-				var pos1,pos2,pos1trig,pos2trig,pos2trig_in;
+				var pos1,pos2,pos1trig,pos2trig,pos2trig_in,readHead_changed;
 				var readHead=0;
 				var readHead_in=0;
 				var localin_data;
@@ -82,11 +82,11 @@ Paracosms {
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 				rate=rate*BufRateScale.ir(bufnum);
 				localin_data=LocalIn.ar(2);
-				pos2trig_in=localin_data[0];
+				readHead_changed=localin_data[0];
 				readHead_in=localin_data[1];
 				// TODO: is there a way to get syncOrManuTrig to crossfade?
 				pos1=Phasor.ar(
-					trig:syncOrManuTrig+pos2trig_in,
+					trig:readHead_changed*(1-readHead_in),
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
 					end:frames,
@@ -94,15 +94,15 @@ Paracosms {
 				);
 				pos1trig=Trig.ar((pos1>framesEnd)*(1-readHead_in),0.01);
 				pos2=Phasor.ar(
-					trig:pos1trig,
+					trig:readHead_changed*(readHead_in),
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
 					end:frames,
-					resetPos:sampleStart*frames,
+					resetPos:((1-(syncOrManuTrig>0))*sampleStart*frames)+((syncOrManuTrig>0)*resetPos),
 				);
 				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01);
-				readHead=SetResetFF.ar(pos1trig,syncOrManuTrig+pos2trig);
-				LocalOut.ar([pos2trig,readHead]);
+				readHead=ToggleFF.ar(pos1trig+syncOrManuTrig+pos2trig).poll;
+				LocalOut.ar([Changed.ar(readHead),readHead]);
 				pos=Select.ar(readHead,[pos1,pos2]);
 
 				tsWindow=Phasor.ar(
