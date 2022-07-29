@@ -40,12 +40,12 @@ Paracosms {
 		watching=0;
 		busPhasor=Bus.audio(server,1);
 		(1..2).do({arg ch;
-			SynthDef("defPlay2"++ch,{
+			SynthDef("defPlay"++ch,{
 				arg amp=1.0,pan=0,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
-				oneshot=0,cut_fade=0.05,
+				oneshot=0,
 				rate=1.0,rateLag=0.0,
 				sampleStart=0,sampleEnd=1.0,
 				ts=0,tsSeconds=0.25,tsSlow=1,
@@ -54,11 +54,10 @@ Paracosms {
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
 
-				var snd,pos,pos1,pos2,pos2in,pos1trig,pos2trig,seconds,tsWindow,readHead;
+				var snd,pos,seconds,tsWindow;
 
 				// determine constants
 				var frames=BufFrames.ir(bufnum);
-				var framesEnd=sampleEnd*frames;
 				var duration=BufDur.ir(bufnum);
 
 				// determine triggers
@@ -69,43 +68,27 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
-				resetPos=Wrap.kr(resetPos,sampleStart*frames,framesEnd);
+
 
 				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
 				tsSlow=SelectX.kr(ts,[1,tsSlow]);
 				rate=rate*BufRateScale.ir(bufnum);
-				pos2in=LocalIn.ar(2);
-				pos2trig=Trig.ar(pos2in[1]>framesEnd,0.01);
-				resetPos=Select.kr(SetResetFF.ar(pos2trig+pos2in[0],syncTrig+manuTrig),[resetPos,sampleStart*frames]);
-				pos1=Phasor.ar(
-					trig:syncTrig+manuTrig+pos2trig,
+				pos=Phasor.ar(
+					trig:syncTrig+t_manu,
 					rate:rate/tsSlow,
 					start:sampleStart*frames,
-					end:frames,
-					resetPos:resetPos,
+					end:sampleEnd*frames,
+					resetPos:Wrap.kr(resetPos,sampleStart*frames,sampleEnd*frames),
 				);
-				pos1trig=Trig.ar(pos1>framesEnd,0.01);
-				pos2=Phasor.ar(
-					trig:syncTrig+manuTrig+pos1trig,
-					rate:rate/tsSlow,
-					start:sampleStart*frames,
-					end:frames,
-					resetPos:resetPos,
-				);
-				LocalOut.ar([pos1trig,pos2]);
-				readHead=SetResetFF.ar(pos1trig,syncTrig+manuTrig+pos2trig);
-				pos=Select.ar(readHead,[pos1,pos2]);
 
 				tsWindow=Phasor.ar(
-					trig:t_manu,
+					trig:manuTrig+t_manu,
 					rate:rate,
 					start:pos,
 					end:pos+(tsSeconds/duration*frames),
 					resetPos:pos,
 				);
-				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
-				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
-
+				snd=BufRd.ar(ch,bufnum,pos,interpolation:2);
 				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
 					tsWindow,
 					loop:1,
@@ -129,6 +112,8 @@ Paracosms {
 
 				// main envelope
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
+
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
@@ -250,7 +235,7 @@ Paracosms {
 						("cutting synth"+id).postln;
 						syns.at(id).set(\release,xfade,\gate,0);
 						syns.put(id,Synth.after(syns.at("phasor"),
-							"defPlay2"++bufs.at(id).numChannels,pars,
+							"defPlay"++bufs.at(id).numChannels,pars,
 						).onFree({["freed"+id].postln}));
 						NodeWatcher.register(syns.at(id));
 					});
@@ -261,7 +246,6 @@ Paracosms {
 
 	play {
 		arg id,fadeIn,forceNew;
-		var defPlay=2;
 		["play",id,fadeIn].postln;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
@@ -288,21 +272,11 @@ Paracosms {
 						});
 					});
 				});
-				if (params.at(id).at("sampleStart").notNil,{
-					if (params.at(id).at("sampleStart")>0,{
-						defPlay=2;
-					});
-				});
-				if (params.at(id).at("sampleEnd").notNil,{
-					if (params.at(id).at("sampleEnd")<1,{
-						defPlay=2;
-					});
-				});
 
 				if (makeNew,{
 					("making synth"+id).postln;
 					syns.put(id,Synth.after(syns.at("phasor"),
-						"defPlay"++defPlay++bufs.at(id).numChannels,pars,
+						"defPlay"++bufs.at(id).numChannels,pars,
 					).onFree({["freed"+id].postln}));
 					NodeWatcher.register(syns.at(id));
 				},{
