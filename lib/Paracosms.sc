@@ -101,7 +101,7 @@ Paracosms {
 					resetPos:((1-(syncOrManuTrig>0))*sampleStart*frames)+((syncOrManuTrig>0)*resetPos),
 				);
 				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01);
-				readHead=ToggleFF.ar(pos1trig+syncOrManuTrig+pos2trig).poll;
+				readHead=ToggleFF.ar(pos1trig+syncOrManuTrig+pos2trig);
 				pos=Select.ar(readHead,[pos1,pos2]);
 				LocalOut.ar([Changed.ar(readHead),readHead]);
 
