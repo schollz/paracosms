@@ -84,6 +84,7 @@ Paracosms {
 				localin_data=LocalIn.ar(2);
 				pos2trig_in=localin_data[0];
 				readHead_in=localin_data[1];
+				// TODO: is there a way to get syncOrManuTrig to crossfade?
 				pos1=Phasor.ar(
 					trig:syncOrManuTrig+pos2trig_in,
 					rate:rate/tsSlow,
