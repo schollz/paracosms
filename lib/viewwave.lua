@@ -76,9 +76,9 @@ function ViewWave:redraw(x,y,width,height)
   for _,param in ipairs({"sampleStart","sampleEnd"}) do
     if params:get(self.id..param)~=0 and params:get(self.id..param)~=1 then
       local pos=util.linlin(0,1,1,128,params:get(self.id..param))
-      screen.aa(1)
+      screen.aa(0)
       screen.blend_mode(2)
-      screen.level(3)
+      screen.level(15)
       screen.line_cap("square")
       screen.move(pos,9)
       screen.line(pos,60-12)
