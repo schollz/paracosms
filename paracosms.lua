@@ -37,7 +37,7 @@ blocks={
 }
 
 style=function()
-
+  params:set("record_beats",2)
 end
 
 -- do not edit this

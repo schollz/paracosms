@@ -1,4 +1,7 @@
-
+if not string.find(package.cpath,"/home/we/dust/code/paracosms/lib/") then
+  package.cpath=package.cpath..";/home/we/dust/code/paracosms/lib/?.so"
+end
+json=require("cjson")
 utils=include("lib/utils")
 viewwave_=include("lib/viewwave")
 turntable_=include("lib/turntable")
@@ -376,16 +379,21 @@ function init()
     manager:save(filename..".txt")
 
     -- save all the patterns
-    local patterns={}
+    local data={patterns={},patterns_grid={}}
     for i,v in ipairs(dat.tt) do
-      table.insert(patterns,v.sample_pattern:dump())
+      table.insert(data.patterns,v.sample_pattern:dump())
     end
+    for i,v in ipairs(g_.patterns) do
+      table.insert(data.patterns_grid,v:dump())
+    end
+
     filename=filename..".json"
     local file=io.open(filename,"w+")
     io.output(file)
-    io.write(json.encode(patterns))
+    io.write(json.encode(data))
     io.close(file)
   end
+
   params.action_read=function(filename,silent)
     print("read",filename,silent)
     manager:load(filename..".txt")
@@ -405,9 +413,12 @@ function init()
     if content==nil then
       do return end
     end
-    local patterns=json.decode(content)
-    for i,pattern in ipairs(patterns) do
+    local data=json.decode(content)
+    for i,pattern in ipairs(data.patterns) do
       dat.tt[i].sample_pattern:load(pattern)
+    end
+    for i,pattern in ipairs(data.patterns_grid) do
+      g_.patterns[i]:load(pattern)
     end
   end
 

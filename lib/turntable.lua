@@ -43,7 +43,7 @@ function Turntable:init()
     {id="amp",name="amp",min=0,max=5,exp=false,div=0.01,default=1,response=1},
     {id="amp_period",name="amp lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="amp_strength",name="amp lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
-    {id="pan",name="pan",min=-1,max=1,exp=false,div=0.05,default=0,response=1},
+    {id="pan",name="pan",min=-1,max=1,exp=false,div=0.01,default=0,response=1},
     {id="pan_period",name="pan lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="pan_strength",name="pan lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=1,formatter=function(param) return param:get().."x" end},

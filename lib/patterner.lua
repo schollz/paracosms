@@ -19,28 +19,21 @@ function Pattern:init()
 end
 
 function Pattern:dump()
-  -- conver the pattern functions to strings
-  -- TODO see if this works
-  local pattern={}
-  for _, p in ipairs(self.pattern) do 
-    table.insert(pattern,{diff=p.diff,fn=utils.tohex(string.dump(p.fn))})
+  local dump={pattern={},beats=self.beats}
+  for i,p in ipairs(self.pattern) do
+    table.insert(dump.pattern,{diff=p.diff,fn=p.fn})
   end
-  return pattern
+  return dump
 end
 
-function Pattern:load(pattern)
+function Pattern:load(dump)
   self.pattern={}
-  for _, p in ipairs(pattern) do
-    table.insert(self.pattern,{diff=p.diff,played=false,fn=loadstring(utils.fromhex(p.fn))})
+  for i,p in ipairs(dump.pattern) do
+    table.insert(self.pattern,{diff=p.diff,played=false,fn=p.fn})
   end
-end
-
-function Pattern:dump(fname)
-  -- conver the patterns to strings
-  local ptns={}
-  for _, p in ipairs(self.pattern) do 
-    local ptn={diff=p.diff,played=false,fn=utils.tohex(string.dump(p.fn))}
-    table.insert(ptns,ptn)
+  if #self.pattern>0 then
+    self.recorded=true
+    self.beats=dump.beats
   end
 end
 
@@ -56,7 +49,7 @@ function Pattern:add(fn)
     self.beats=params:get("record_beats")
   end
   local beat_diff=clock.get_beats()-self.rec_start
-  print("adding",beat_diff)
+  print("adding",beat_diff,fn)
   table.insert(self.pattern,{diff=beat_diff,fn=fn,played=false})
   self.recorded=true
 end
@@ -76,7 +69,7 @@ function Pattern:toggle()
   end
   print("patterner: toggle")
   self.playing=not self.playing
-  global_reset_needed=global_reset_needed+(self.playing and 1 or -1)
+  global_reset_needed=global_reset_needed+(self.playing and 1 or-1)
 end
 
 function Pattern:emit(global_beat)
@@ -95,8 +88,8 @@ function Pattern:emit(global_beat)
     end
     for i,v in ipairs(self.pattern) do
       if not v.played and math.abs(v.diff-beat)<0.125 then
-        -- print(i,beat,v.diff)
-        v.fn()
+        -- print(i,beat,v.diff,v.fn)
+        load(v.fn)()
         self.pattern[i].played=true
       end
     end

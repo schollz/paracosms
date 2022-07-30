@@ -54,7 +54,10 @@ end
 function GGrid:init()
   self.blink=0
   self.blink2=0
-  self.fader={0,0.04,3}
+  self.fader={}
+  for i=1,16 do
+    table.insert(self.fader,{0,0.75,3})
+  end
   self.page=3
   self.pressed_ids={}
   self.key_press_fn={}
@@ -83,7 +86,7 @@ function GGrid:init()
     end
     if not from_pattern then
       local ti=dat.ti
-      dat.tt[dat.ti].sample_pattern:add(function() g_.key_press_fn[2](row,col,on,id,hold_time,ti) end)
+      dat.tt[dat.ti].sample_pattern:add(("g_.key_press_fn[2]("..row..","..col..","..(on and "true" or "false")..","..id..","..hold_time..","..ti..")"))
     end
   end)
   -- page 3 and beyond: playing
@@ -106,7 +109,7 @@ function GGrid:init()
         params:delta(id.."play",1)
       end
       if from_pattern==nil then
-        self.patterns[i-2]:add(function() g_.key_press_fn[i](row,col,on,id,hold_time,true) end)
+        self.patterns[i-2]:add("g_.key_press_fn["..i.."]("..row..","..col..","..(on and "true" or "false")..","..id..","..hold_time..",true)")
       end
     end)
   end
@@ -231,12 +234,24 @@ function GGrid:get_visual()
   for i,_ in ipairs(self.key_press_fn) do
     self.visual[8][i]=self.page==i and 4 or 1
   end
-  for i,v in ipairs(self.patterns) do
-    self.fader[1]=self.fader[1]+self.fader[2]
-    if self.fader[1]>self.fader[3] or self.fader[1]<-1 then
-      self.fader[2]=-1*self.fader[2]
+  self.fader[1][1]=self.fader[1][1]+self.fader[1][2]
+  if self.fader[1][1]>self.fader[1][3] or self.fader[1][1]<-1 then
+    self.fader[1][2]=-1*self.fader[1][2]
+  end
+  self.visual[8][2]=self.visual[8][2]+(dat.tt[dat.ti].sample_pattern.playing and util.round(self.fader[1][1]) or 0)
+  if dat.tt[dat.ti].sample_pattern.recording or dat.tt[dat.ti].sample_pattern.primed then
+    self.blink2=self.blink2-1
+    if self.blink2<-1 then
+      self.blink2=1
     end
-    self.visual[8][i+2]=self.visual[8][i+2]+(v.playing and util.round(self.fader[1]) or 0)
+    self.visual[8][2]=self.blink2>0 and self.visual[8][2] or 0
+  end
+  for i,v in ipairs(self.patterns) do
+    self.fader[i+1][1]=self.fader[i+1][1]+self.fader[i+1][2]
+    if self.fader[i+1][1]>self.fader[i+1][3] or self.fader[i+1][1]<-1 then
+      self.fader[i+1][2]=-1*self.fader[i+1][2]
+    end
+    self.visual[8][i+2]=self.visual[8][i+2]+(v.playing and util.round(self.fader[i+1][1]) or 0)
     if v.recording or v.primed then
       self.blink2=self.blink2-1
       if self.blink2<-1 then

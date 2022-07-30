@@ -140,6 +140,7 @@ Paracosms {
 				));
 
 				// balance the two channels
+				pan=Lag.kr(pan);
 				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
 				snd=Pan2.ar(snd,0.0);
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
@@ -234,6 +235,7 @@ Paracosms {
 				));
 
 				// balance the two channels
+				pan=Lag.kr(pan);
 				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
 				snd=Pan2.ar(snd,0.0);
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
