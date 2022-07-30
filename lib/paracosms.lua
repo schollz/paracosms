@@ -487,7 +487,7 @@ function init()
   -- setup sequencer tracker
   beat_num={}
   for divisioni,division in ipairs(global_divisions) do
-    table.insert(beat_num,-1)
+    table.insert(beat_num,0)
     lattice:new_pattern{
       action=function(t)
         beat_num[divisioni]=beat_num[divisioni]+1 -- beat % 16 + 1 => [1,16]
@@ -666,6 +666,9 @@ end
 function reset()
   print("paracosms: resetting")
   dat.beat=0
+  for i,_ in ipairs(beat_num) do
+    beat_num[i]=0
+  end
   engine.resetPhase()
   ignore_transport=true
   lattice:hard_restart()

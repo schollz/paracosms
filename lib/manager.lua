@@ -100,11 +100,13 @@ function Manager:save(filename)
 end
 
 function Manager:load(filename)
+  print("manager: loading",filename)
   local f=io.open(filename,"rb")
   local lines=f:lines()
   local dumps={}
   local dump={}
   for line in lines do
+    line=(line:gsub("^%s*(.-)%s*$","%1"))
     if line=="---" then
       if #dump>1 then
         table.insert(dumps,dump)

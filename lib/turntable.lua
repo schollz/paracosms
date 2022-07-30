@@ -160,7 +160,7 @@ function Turntable:init()
   for _,pram in ipairs({"sequencer","n","k","w"}) do
     params:set_action(self.id..pram,function(v)
       if pram=="sequencer" then
-        global_reset_needed=global_reset_needed+(v==2 and 1 or -1)
+        global_reset_needed=global_reset_needed+(v==2 and 1 or-1)
         dat.sequencing[self.id]=v==2 and true or nil
       end
       self.sequence=er.gen(params:get(self.id.."k"),params:get(self.id.."n"),params:get(self.id.."w"))
@@ -198,7 +198,7 @@ function Turntable:init()
     print("record_on",id)
     show_message("ready to record "..id)
     local datetime=util.os_capture("date +%Y%m%d%H%m%S")
-    local filename=string.format("%s_bpm%d.wav",datetime,clock.get_tempo())
+    local filename=string.format("%s_bpm%d.wav",datetime,math.floor(clock.get_tempo()))
     filename=_path.audio.."paracosms/recordings/"..filename
     local seconds=params:get("record_beats")*clock.get_beat_sec()
     local crossfade=params:get("record_crossfade")/16*clock.get_beat_sec()
