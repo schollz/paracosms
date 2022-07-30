@@ -69,7 +69,7 @@ function Turntable:init()
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
-      -- print("loading files "..x)
+      --print("loading files "..x)
       self:load_file(x)
     end
   end)
@@ -197,7 +197,7 @@ function Turntable:init()
     self.recording_primed=true
     print("record_on",id)
     show_message("ready to record "..id)
-    local datetime=util.os_capture("date +%Y%m%d%H%m%S")
+    local datetime=os.date("%Y%m%d%H%M%S")
     local filename=string.format("%s_bpm%d.wav",datetime,math.floor(clock.get_tempo()))
     filename=_path.audio.."paracosms/recordings/"..filename
     local seconds=params:get("record_beats")*clock.get_beat_sec()
@@ -206,6 +206,7 @@ function Turntable:init()
       crossfade=seconds*0.15
     end
     local latency=params:get("record_predelay")/1000
+    print("engine.record",filename)
     engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,params:get(id.."record_immediately")-1,0)
   end)
   params:add_number(id.."normalize","normalize",0,1,0)
@@ -253,7 +254,7 @@ function Turntable:duration()
 end
 
 function Turntable:load_file(path)
-  -- print(string.format("[%d] turntable: loading %s",self.id,path))
+  print(string.format("[%d] turntable: loading %s",self.id,path))
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -313,9 +314,9 @@ function Turntable:retune()
   end
   -- print(string.format("[%d] turntable: retune",self.id))
   -- convert the file
-  local bpm=params:get(self.id.."source_bpm")
+  local bpm=math.floor(params:get(self.id.."source_bpm"))
   local tune=params:get(self.id.."tune")
-  local clock_tempo=clock.get_tempo()
+  local clock_tempo=math.floor(clock.get_tempo())
   self.path=self.path_original
   if bpm~=clock_tempo or tune~=self.last_tune or params:get(self.id.."normalize")==1 then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -376,7 +377,6 @@ function Turntable:redraw()
   else
     screen.move(64,32)
     screen.text_center("<K1+K3 to record>")
-
   end
 end
 

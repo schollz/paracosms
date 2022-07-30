@@ -126,7 +126,9 @@ function shuffle(tbl)
 end
 
 function init()
-  substance()
+  if substance~=nil then
+    substance()
+  end
 
   -- globals
   global_rec_queue={}
@@ -286,6 +288,7 @@ function init()
       local id=tonumber(args[1])
       local filename=args[2]
       if id~=nil and filename~=nil then
+        print("osc_fun: recorded",id,filename)
         show_progress(100)
         show_message("recorded cosm "..id)
         dat.tt[id]:recording_finish(filename)
@@ -360,7 +363,7 @@ function init()
   params:set("sel",1)
   dat.tt={}
   dat.ti=1
-  dat.percent_loaded=0
+  dat.percent_loaded=#dat.files_to_load==0 and 100 or 0
   math.randomseed(dat.seed)
   for i=1,112 do
     table.insert(dat.tt,turntable_:new{id=i})
@@ -458,7 +461,9 @@ function init()
     reset()
     clock.sleep(1)
     global_reset_needed=0
-    style()
+    if style~=nil then
+      style()
+    end
   end)
 
   -- initialize lattice

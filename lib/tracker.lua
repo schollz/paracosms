@@ -207,7 +207,7 @@ function Tracker:play(on)
     self.note_off(self.id,params:get(self.id.."output"))
     self.started_from_beginning=false
   end
-  global_reset_needed=global_reset_needed+(self.playing and 1 or -1)
+  global_reset_needed=global_reset_needed+(self.playing and 1 or-1)
 end
 
 function Tracker:enc(k,d)
@@ -277,7 +277,7 @@ function Tracker:keyboard(code,value)
           if i>17 then
             i=i-5
           end
-          new_note=(i-1)+(self.octave*12)
+          new_note=(i-1)+((self.octave+2)*12)
           break
         end
       end

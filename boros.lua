@@ -23,19 +23,19 @@
 --
 
 
-style=function()
-  params:set("tracker_file","/home/we/dust/data/everything.txt")
-  params:set("output_all",2)
-  global_reset_needed=1
-  
-end
-
 substance=function()
   params:set("clock_tempo",110)
 end
 
+
+style=function()
+  params:set("tracker_file","/home/we/dust/data/everything.txt")
+  params:set("output_all",2)
+  --global_reset_needed=1
+end
+
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row3",params={amp_strength=0.2,amp=0.5,pan_strength=0.3,send1=0,send2=1}},
+  {folder="/home/we/dust/audio/paracosms/row3",params={amp_strength=0.1,amp=1.0,pan_strength=0.2,send1=0.5,send2=0.5}},
   {folder="/home/we/dust/audio/paracosms/row3",params={amp=1.0,send1=0,send2=1}},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},

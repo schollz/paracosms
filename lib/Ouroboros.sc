@@ -152,6 +152,13 @@ Ouroboros {
 								fnXFader.value(buf3,crossfadeFrames,-2,{ arg buf4;
 									["faded",buf4].postln;
 									action.value(buf4);
+									buf1.free;
+									buf2.free;
+									buf3.free;
+									Routine {
+										3.wait;
+										buf4.free;
+									}.play;
 								});
 							});
 						}

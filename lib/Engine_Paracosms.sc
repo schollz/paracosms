@@ -99,7 +99,7 @@ Engine_Paracosms : CroneEngine {
         });
         this.addCommand("record","isffffii", { arg msg;
             var id=msg[1].asInteger;
-            var filename=msg[2];
+            var filename=msg[2].asString;
             var seconds=msg[3];
             var crossfade=msg[4];
             var threshold=msg[5];
@@ -109,7 +109,7 @@ Engine_Paracosms : CroneEngine {
             ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
-                buf.write(filename.asString,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
+                buf.write(filename,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
                     ["wrote",buf].postln;
                     // a small delay is needed for the file to be finished writing
                     Routine {
