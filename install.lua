@@ -7,6 +7,7 @@
 
 has_installed=false
 please_wait=false
+install_message=""
 
 function os_capture(cmd,raw)
   local f=assert(io.popen(cmd,'r'))
@@ -47,9 +48,13 @@ function install()
   redraw()
   -- switch branch to paracosms
   print("checking out paracosms...")
+  install_message="updating paracosms..."
+  redraw()
   os.execute("git -C /home/we/dust/code/paracosms checkout paracosms")
 
   -- download the 3rd part supercollider plugins
+  install_message="installing sc plugins..."
+  redraw()
   print("downloading 3rd party supercollider plugins...")
   os.execute("wget -q -O /home/we/dust/code/paracosms/ignore.zip https://github.com/schollz/supercollider-plugins/releases/download/plugins/ignore.zip")
   os.execute("cd /home/we/dust/code/paracosms && unzip ignore.zip")
@@ -70,12 +75,17 @@ function install()
   end
 
   print("downloading audiowaveform (3MB)...")
+  install_message="downloading audiowaveform..."
+  redraw()
+
   os.execute("wget -q -O /home/we/dust/code/paracosms/lib/extra.zip https://github.com/schollz/paracosms/releases/download/release/extra.zip")
   os.execute("cd /home/we/dust/code/paracosms/lib && unzip extra.zip")
   os.execute("chmod +x /home/we/dust/code/paracosms/lib/audiowaveform")
   os.execute("chmod +x /home/we/dust/code/paracosms/lib/seamlessloop")
 
   print("downloading starting audio (19MB)...")
+  install_message="downloading samples..."
+  redraw()
   os.execute("wget -q -O /home/we/dust/code/paracosms/lib/row1.zip https://github.com/schollz/paracosms/releases/download/release/row1.zip")
   os.execute("cd /home/we/dust/code/paracosms/lib && unzip row1.zip")
 
@@ -123,6 +133,9 @@ function redraw()
   if please_wait then
     screen.move(64,32)
     screen.text_center("please wait...")
+    screen.move(64,52)
+    screen.level(2)
+    screen.text_center(install_message)
   elseif has_installed then
     screen.move(64,32)
     screen.text_center("paracosms is now")
