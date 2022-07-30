@@ -57,9 +57,13 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 ### playing one shots
 
+![oneshot](https://user-images.githubusercontent.com/6550035/181917889-229fdfb0-6e63-484e-b44f-f4c1b0e6e644.jpg)
+
+loops can be placed into "oneshot" mode. press K2 until you reach the screen with "mode", "offset", "start", and "end". then hold K1 and turn E2 to modify the mode to "oneshot" or "loop".
+
 ![oneshot](https://user-images.githubusercontent.com/6550035/181917685-d45c22a0-ed07-4c64-b296-b5f9e0720d06.jpg)
 
-loops can be placed into "oneshot" mode. in this mode, K3 will play them. if you hold K3 it will toggle the euclidean sequencer.
+**K3 plays a sample** in oneshot mode. if you hold K3 it will toggle the euclidean sequencer (which can also be toggled by the parameters menu or in one of the K2 parameter screens).
 
 ### recording
 
