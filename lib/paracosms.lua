@@ -374,7 +374,7 @@ function init()
 
     -- save all the patterns
     local patterns={}
-    for i,v in ipairs(dat.tt) do 
+    for i,v in ipairs(dat.tt) do
       table.insert(patterns,v.sample_pattern:dump())
     end
     filename=filename..".json"
@@ -403,7 +403,7 @@ function init()
       do return end
     end
     local patterns=json.decode(content)
-    for i,pattern in ipairs(patterns) do 
+    for i,pattern in ipairs(patterns) do
       dat.tt[i].sample_pattern:load(pattern)
     end
   end
@@ -457,6 +457,7 @@ function init()
     clock.sleep(0.1)
     reset()
     clock.sleep(1)
+    global_reset_needed=0
     style()
   end)
 
@@ -514,7 +515,7 @@ function debounce_params()
       count=count+1
       -- for some reason you can't do too many
       -- at once without triggering a clock error
-      if count>250 then
+      if count>100 then
         do return end
       end
       v[1]=v[1]-1
@@ -748,12 +749,20 @@ function key(k,z)
       params:delta(dat.ti.."record_on",1)
     end
   elseif k==3 then
+    if z==1 then
+      hold_beats=clock.get_beats()
+    end
+
     if params:get(dat.ti.."oneshot")==2 then
       params:set(dat.ti.."play",z)
-    elseif z==1 then
-      hold_beats=clock.get_beats()
+      if z==0 then
+        local hold_time=(clock.get_beats()-hold_beats)*clock.get_beat_sec()
+        if hold_time>0.5 then
+          params:set(dat.ti.."sequencer",3-params:get(dat.ti.."sequencer"))
+        end
+      end
     elseif z==0 then
-      local hold_time=math.pow((hold_beats-clock.get_beats())*clock.get_beat_sec()*1.5,2)
+      local hold_time=math.pow((clock.get_beats()-hold_beats)*clock.get_beat_sec()*1.5,2)
       if hold_time<0 or hold_time>100 then
         hold_time=1
       end

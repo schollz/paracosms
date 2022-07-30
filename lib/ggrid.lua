@@ -94,6 +94,9 @@ function GGrid:init()
       end
       if params:get(id.."oneshot")==2 then
         params:set(id.."play",on and 1 or 0)
+        if not on and hold_time>0.5 then
+          params:set(id.."sequencer",3-params:get(dat.ti.."sequencer"))
+        end
       elseif hold_time>0.25 then
         if params:get(id.."play")==1 then
           params:set(id.."release",hold_time)

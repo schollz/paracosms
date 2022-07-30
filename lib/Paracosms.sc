@@ -58,13 +58,15 @@ Paracosms {
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in,readHead_changed;
+				var framesEnd,framesStart;
 				var readHead=0;
 				var readHead_in=0;
 				var localin_data;
+				var sampleStartOriginal=sampleStart;
+				var sampleEndOriginal=sampleEnd;
 
 				// determine constants
 				var frames=BufFrames.ir(bufnum);
-				var framesEnd=frames*sampleEnd;
 				var duration=BufDur.ir(bufnum);
 
 				// determine triggers
@@ -75,33 +77,49 @@ Paracosms {
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				var syncOrManuTrig=syncTrig+manuTrig;
-				resetPos=((1-oneshot)*resetPos)+(oneshot*sampleStart*frames); // if one-shot then start at the beginning
-				resetPos=Wrap.ar(resetPos,sampleStart*frames,sampleEnd*frames);
 
-				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
-				tsSlow=SelectX.kr(ts,[1,tsSlow]);
+				// figure out the rate
 				rate=rate*BufRateScale.ir(bufnum)*((sampleStart<sampleEnd)*2-1); // TODO: test whether this works to reverse rate
+				// swap the sample start/end
+				framesEnd=sampleEnd*frames;
+				framesStart=sampleStart*frames;
+
+
+				// determine the reset pos
+				resetPos=((1-oneshot)*resetPos)+(oneshot*framesStart); // if one-shot then start at the beginning
+				resetPos=Wrap.ar(resetPos,framesStart,framesEnd);
+				resetPos=((1-(syncOrManuTrig>0))*framesStart)+((syncOrManuTrig>0)*resetPos);
+
+				// lag the volume
+				amp=(amp*oneshot)+((1-oneshot)*VarLag.kr(amp,0.2,warp:\sine));
+
+				// crossfade the time stretching
+				tsSlow=SelectX.kr(ts,[1,tsSlow]);
+
 				localin_data=LocalIn.ar(2);
 				readHead_changed=localin_data[0];
 				readHead_in=localin_data[1];
-				// TODO: is there a way to get syncOrManuTrig to crossfade?
+
 				pos1=Phasor.ar(
 					trig:readHead_changed*(1-readHead_in),
 					rate:rate/tsSlow,
-					start:sampleStart*frames,
-					end:frames,
-					resetPos:((1-(syncOrManuTrig>0))*sampleStart*frames)+((syncOrManuTrig>0)*resetPos),
+					start:framesStart,
+					end:(rate>0)*frames,
+					resetPos:resetPos,
 				);
-				pos1trig=Trig.ar((pos1>framesEnd)*(1-readHead_in),0.01);
+				pos1trig=Trig.ar((pos1>framesEnd)*(1-readHead_in),0.01)*(rate>0);
+				pos1trig=pos1trig+(Trig.ar((pos1<framesEnd)*(1-readHead_in),0.01)*(rate<0));
 				pos2=Phasor.ar(
 					trig:readHead_changed*(readHead_in),
 					rate:rate/tsSlow,
-					start:sampleStart*frames,
-					end:frames,
-					resetPos:((1-(syncOrManuTrig>0))*sampleStart*frames)+((syncOrManuTrig>0)*resetPos),
+					start:framesStart,
+					end:(rate>0)*frames,
+					resetPos:resetPos,
 				);
-				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01);
+				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01)*(rate>0);
+				pos2trig=pos2trig+(Trig.ar((pos2<framesEnd)*readHead_in,0.01)*(rate<0));
 				readHead=ToggleFF.ar(pos1trig+syncOrManuTrig+pos2trig);
+
 				pos=Select.ar(readHead,[pos1,pos2]);
 				LocalOut.ar([Changed.ar(readHead),readHead]);
 
@@ -372,7 +390,6 @@ Paracosms {
 								defPlay=1;
 							});
 						});
-
 						("cutting synth"+id).postln;
 						syns.at(id).set(\release,xfade,\gate,0);
 						syns.put(id,Synth.after(syns.at("phasor"),
@@ -484,7 +501,6 @@ Paracosms {
 					params.put(id,Dictionary.new());
 				});
 				// fade in the synth
-				fadeIn.postln;
 				if (fadeIn,{ this.play(id,1,1); }); // GOTCHA: this.play is needed instead of just "play"
 			});
 		});
