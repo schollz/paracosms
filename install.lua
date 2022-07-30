@@ -1,7 +1,7 @@
 -- paracosms
 -- installation
 --
--- llllllll.co/t/?
+-- llllllll.co/t/paracosms
 --
 --
 
