@@ -54,7 +54,9 @@ without intending, I realized that I could combine ourborous with paracosms toge
 **K3 will play a sample.** 
 
 
-samples in the looping mode will fade with a duration according to how long you hold K3. samples in the one-shot mode will play instantly.
+samples in the looping mode will fade with a duration according to how long you hold K3. 
+
+samples in the one-shot mode will play instantly when you press K3. if you hold K3 it will toggle the euclidean sequencer.
 
 ### recording
 
