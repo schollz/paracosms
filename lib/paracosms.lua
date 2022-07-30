@@ -371,6 +371,17 @@ function init()
   params.action_write=function(filename,name)
     print("write",filename,name)
     manager:save(filename..".txt")
+
+    -- save all the patterns
+    local patterns={}
+    for i,v in ipairs(dat.tt) do 
+      table.insert(patterns,v.sample_pattern:dump())
+    end
+    filename=filename..".json"
+    local file=io.open(filename,"w+")
+    io.output(file)
+    io.write(json.encode(patterns))
+    io.close(file)
   end
   params.action_read=function(filename,silent)
     print("read",filename,silent)
@@ -378,6 +389,22 @@ function init()
     -- turn off all the sounds
     for i=1,112 do
       params:set(i.."play",0)
+    end
+
+    -- load all the patterns
+    filename=filename..".json"
+    if not util.file_exists(filename) then
+      do return end
+    end
+    local f=io.open(filename,"rb")
+    local content=f:read("*all")
+    f:close()
+    if content==nil then
+      do return end
+    end
+    local patterns=json.decode(content)
+    for i,pattern in ipairs(patterns) do 
+      dat.tt[i].sample_pattern:load(pattern)
     end
   end
 

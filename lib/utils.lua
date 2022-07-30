@@ -1,5 +1,17 @@
 local utils={}
 
+function utils.fromhex(str)
+  return (str:gsub('..',function (cc)
+    return string.char(tonumber(cc,16))
+  end))
+end
+
+function utils.tohex(str)
+  return (str:gsub('.',function (c)
+    return string.format('%02X',string.byte(c))
+  end))
+end
+
 function utils.lcm(arr)
   if #arr==1 then
     do return arr[1] end

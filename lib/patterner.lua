@@ -18,6 +18,32 @@ function Pattern:init()
   self.pattern={}
 end
 
+function Pattern:dump()
+  -- conver the pattern functions to strings
+  -- TODO see if this works
+  local pattern={}
+  for _, p in ipairs(self.pattern) do 
+    table.insert(pattern,{diff=p.diff,fn=utils.tohex(string.dump(p.fn))})
+  end
+  return pattern
+end
+
+function Pattern:load(pattern)
+  self.pattern={}
+  for _, p in ipairs(pattern) do
+    table.insert(self.pattern,{diff=p.diff,played=false,fn=loadstring(utils.fromhex(p.fn))})
+  end
+end
+
+function Pattern:dump(fname)
+  -- conver the patterns to strings
+  local ptns={}
+  for _, p in ipairs(self.pattern) do 
+    local ptn={diff=p.diff,played=false,fn=utils.tohex(string.dump(p.fn))}
+    table.insert(ptns,ptn)
+  end
+end
+
 function Pattern:add(fn)
   if not self.recording and not self.primed then
     do return end

@@ -167,6 +167,7 @@ all the parameter ids are valid. for instance you can load a block of samples an
 ### known bugs
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
+- there is a rare bug where the playback position escapes the start/stop points (maybe fixed)
 - as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 
@@ -175,10 +176,8 @@ all the parameter ids are valid. for instance you can load a block of samples an
 <details><summary>a list of done and doing.</summary>
 
 
-- pattern saving/loading
+- pattern saving/loading TEST
 - ui to explain pattern recording
-- fix bugs
-- logarithm hold length?
 - retrigger option for one-shot playback
 - add record countdown (using Stepper and Phasor bus that overrides the record trig)?
 - ~~pattern recording~~
