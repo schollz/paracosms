@@ -45,20 +45,25 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 ## Documentation
 
-![norns](https://user-images.githubusercontent.com/6550035/179410985-0ee42e5b-49e2-420d-8ef0-8107e49b42eb.jpg)
 
-### playing
+
+### playing loops
+
+![norns](https://user-images.githubusercontent.com/6550035/181917591-51062ba1-773e-49ae-b06f-aba82b34d5f4.jpg)
 
 **E1 will select sample. K1+E1 will select sample *that is loaded*.**
 
-**K3 will play a sample.** 
+**K3 will play a sample.** holding K3 will fade the sample (in or out dependong on whether its playing).
 
+### playing one shots
 
-samples in the looping mode will fade with a duration according to how long you hold K3. 
+![oneshot](https://user-images.githubusercontent.com/6550035/181917685-d45c22a0-ed07-4c64-b296-b5f9e0720d06.jpg)
 
-samples in the one-shot mode will play instantly when you press K3. if you hold K3 it will toggle the euclidean sequencer.
+loops can be placed into "oneshot" mode. in this mode, K3 will play them. if you hold K3 it will toggle the euclidean sequencer.
 
 ### recording
+
+![recording](https://user-images.githubusercontent.com/6550035/181917817-7bf6e49c-f941-4df5-994a-5214a8c19301.jpg)
 
 **K1+K3 will prime a recording.** 
 
@@ -112,7 +117,9 @@ the grid essentially makes it easy to toggle on/off samples. it does give specia
 
 
 
-## keyboard
+## keyboard / tracker
+
+![tracker](https://user-images.githubusercontent.com/6550035/181917589-70709080-8a9c-4f12-bd71-668668f7b20c.jpg)
 
 pushing a key on a keyboard opens the tracker. twising an encoder closes the tracker (but it will still be running if you started it).
 
