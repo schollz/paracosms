@@ -1,7 +1,7 @@
--- paracosms[boros]
+-- paracosms
 --
 --
--- llllllll.co/t/?
+-- llllllll.co/t/paracosms
 --
 --
 --
@@ -12,7 +12,7 @@
 -- (when primed, starts)
 --
 -- E1 select sample
--- K1+E1 select running sample
+-- K1+E1 select loaded sample
 --
 -- K2/K1+K2 selects parameters
 -- E2/E3 modulate parameter
