@@ -60,8 +60,8 @@ function install()
   os.execute("cd /home/we/dust/code/paracosms && unzip ignore.zip")
 
   -- find the supercollider plugins to install
-  local installed_files=os_capture("find /home/we/.local/share/SuperCollider/Extensions -name '*.sc'")
   os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
+  local installed_files=os_capture("find /home/we/.local/share/SuperCollider/Extensions -name '*.sc'")
   for _,folder in ipairs(list_folders("/home/we/dust/code/paracosms/ignore")) do
     local one_file=os_capture("find /home/we/dust/code/paracosms/ignore/"..folder.." -name '*.sc' | head -n1")
     pathname,filename,ext=split_path(one_file)
