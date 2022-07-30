@@ -367,6 +367,12 @@ Paracosms {
 						if (sampleEnd<1,{
 							defPlay=2;
 						});
+						if (params.at(id).at("oneshot").notNil,{
+							if (params.at(id).at("oneshot")>0,{
+								defPlay=1;
+							});
+						});
+
 						("cutting synth"+id).postln;
 						syns.at(id).set(\release,xfade,\gate,0);
 						syns.put(id,Synth.after(syns.at("phasor"),
@@ -408,7 +414,6 @@ Paracosms {
 						});
 					});
 				});
-				params.at(id).at("sampleStart").postln;
 				if (params.at(id).at("sampleStart").notNil,{
 					if (params.at(id).at("sampleStart")>0,{
 						defPlay=2;
@@ -417,6 +422,11 @@ Paracosms {
 				if (params.at(id).at("sampleEnd").notNil,{
 					if (params.at(id).at("sampleEnd")<1,{
 						defPlay=2;
+					});
+				});
+				if (params.at(id).at("oneshot").notNil,{
+					if (params.at(id).at("oneshot")>0,{
+						defPlay=1;
 					});
 				});
 
