@@ -7,14 +7,14 @@
 *paracosms* is a sampler that can playback or record synchronized audio. main features:
 
 - can load/record up to **112 stereo or mono samples**
-- **sample playback is synchronized** 
+- **sample playback is synchronized** by default
 - recorded samples have **gapless playback** by crossfading post-roll
 - imported samples can be **automatically warped** to current bpm
 - **one-shot samples can be sequenced** with euclidean sequencer
-- each sample has **filters, pan+amp lfos, timestretching**
+- each sample has **filters, pan+amp lfos, timestretching, other fx**
 - global **tapedeck, greyhole and clouds fx** with per-sample sends 
-- the grid (optional) can **pattern record sample playback**
-- a keyboard (optional) can **sequence external synths with a built-in tracker**
+- the grid (optional) can **pattern record sample playback or record splicing**
+- a keyboard (optional) opens a **tracker that can sequence and record external synths**
 
 https://vimeo.com/730684724
 
@@ -53,7 +53,9 @@ without intending, I realized that I could combine ourborous with paracosms toge
 
 **E1 will select sample. K1+E1 will select sample *that is loaded*.**
 
-**K3 will play a sample.** holding K3 will fade the sample (in or out dependong on whether its playing).
+**K3 will play a sample.** holding K3 will fade the sample (in or out dependong on whether its playing). 
+
+the start/end points can be changed (press K2 to find the menu or use PARAMS). the loops always try to play in sync no matter the length. with the grid you can sequence the loop positions for chopping things (more below).
 
 ### playing one shots
 
@@ -69,9 +71,9 @@ loops can be placed into "oneshot" mode. press K2 until you reach the screen wit
 
 ![recording](https://user-images.githubusercontent.com/6550035/181917817-7bf6e49c-f941-4df5-994a-5214a8c19301.jpg)
 
-**K1+K3 will prime a recording.** 
+**K1+K3 will prime a recording.** you always can skip waiting and **you can start recording immediately by pressing K1+K3 again.**
 
-by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the moments right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. generally this latency should be really small (<20 ms). you always can skip waiting and **you can start recording immediately by pressing K1+K3 again.**
+by default *paracosms* will wait to record until audio crosses a threshold to start recording. once recording is detected, it records the full length specified by the sample parameters (in beats, plus the crossfade post-roll). *paracosms* uses a latency term to capture the milliseconds right before recording (because there is an inherent delay in starting recording after detecting it) and this can be changed in the parameters. generally this latency should be really small (<20 ms). 
 
 
 ### parameters on the go
@@ -125,7 +127,7 @@ the grid essentially makes it easy to toggle on/off samples. it does give specia
 
 ![tracker](https://user-images.githubusercontent.com/6550035/181917589-70709080-8a9c-4f12-bd71-668668f7b20c.jpg)
 
-pushing a key on a keyboard opens the tracker. twising an encoder closes the tracker (but it will still be running if you started it).
+pushing a key on a keyboard opens the tracker. twisting an encoder closes the tracker (but it will still be running if you started it).
 
 the keyboard layout closely follows the [renoise layout](https://tutorials.renoise.com/wiki/Playing_Notes_with_the_Computer_Keyboard).
 
@@ -147,23 +149,15 @@ paracosms is ready to be customized.
 
 the initial script can be changed to your liking. if you open the starter scripts "sorbo" or "boros" there are several functions that can be edited and the bank loading can be edited.
 
-the functions `substance()` and `style()` run at the start and at the end of loading, respectively. you can use these to trigger certain behaviors or activate parameters once everything is loaded.
+the functions `substance()` and `style()` run at the start and at the end of loading, respectively (*substance* before *style* as they say). you can use these to trigger certain behaviors or activate parameters once everything is loaded. I like to make a script for each track I'm working on where the `substance()` sets the clock speed and `style()` loads specific files into specific banks.
 
-the "blocks" allows you to customize the startup samples. you can load up to 16 samples per line per entry, with 7 entries available.
-
-each entry has a folder and all the files in the folder will be loaded. for instance the first line will loaded into slots 1-16. the second line will load into slots 17-32. etc.
-
-you can also create parameters that are shared across each block. any parameter that is available can be updated here. 
-
-for example, say you wanted to load all the 909-samples as one-shots, you could include this line:
+the "blocks" allows you to customize the startup samples. you can load up to 16 samples per line per entry, with 7 entries available. each entry has a folder and all the files in the folder will be loaded. for instance the first line will loaded into slots 1-16. the second line will load into slots 17-32. etc. you can also create parameters that are shared across each block. any parameter that is available can be updated here. for example, say you wanted to load all the 909-samples as one-shots, you could include this line:
 
 ```lua
 {folder="/home/we/dust/audio/x0x/909",params={oneshot=2}}
 ```
 
-where `oneshot=2` defines the oneshot parameter to be activated for all those samples (as opposed to looping).
-
-or you might want to include some loops and have *paracosms* guess the bpm for them. in this case you can do:
+where `oneshot=2` defines the oneshot parameter to be activated for all those samples (as opposed to looping). or you might want to include some loops and have *paracosms* guess the bpm for them. in this case you can do:
 
 
 ```lua
@@ -181,52 +175,7 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
 - there is a rare bug where the playback position escapes the start/stop points (maybe fixed)
-- as mentioned above, if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
-
-
-### todo
-
-<details><summary>a list of done and doing.</summary>
-
-
-- pattern saving/loading TEST
-- ui to explain pattern recording
-- retrigger option for one-shot playback
-- add record countdown (using Stepper and Phasor bus that overrides the record trig)?
-- ~~pattern recording~~
-- ~~keep track of the longest playing sample and - ~~add more patterns~~
-- ~~upload the seamlessloop binary and audiowaveform~~
-- ~~add more install steps for required files~~
-- ~~keyboard help~~
-- ~~add page for sample position~~
-- ~~make test of pages for patterns~~
-- ~~light up when recording~~
-- ~~keep track of the longest playing sample and reset everything when the current beat exceeds the beat of the longest sample~~
-- ~~calculate lcm of all current beats and reset every time lattice hits it (to stay synced)~~
-- ~~show/hide sample~~
-- ~~record beats should be a global parameter that gets imported to the next track when recording~~
-- ~~add metronome~~
-- ~~add greyhole as another send~~
-- ~~add option to record to a new track each time (available from ui)~~
-- ~~when changing send, untoggle sends~~
-- ~~try to guess bpm based on length of sample~~
-- ~~add midi transports (for syncing)~~
-- ~~load in the 808 kit by default as oneshot into the last row~~
-- ~~add miclouds granulator~~
-- ~~add euclideans~~
-- ~~add global sync (syncs all synths and resets the main phasor)~~
-- ~~add pan~~
-- ~~add recording~~
-- ~~make the first sample a metronome sample (store metronome)~~
-- ~~redo grid~~
-- ~~add option for number of beats to record~~
-- ~~add options in for semitone change~~
-- ~~add options in for speed change~~
-- ~~add option to declare whether it is “drum” or “melodic”~~
-- ~~when adding buf, check to see if syn is running with that id and replace its bufnum~~
-
-</details>
-
+- if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 ## Install
 
@@ -238,7 +187,7 @@ the first time you open the script it will ask to install the rest of paracosms.
 
 ## Update
 
-update the screen by deleting and reinstalling or just running this in maiden:
+update the script by deleting and reinstalling or just running this in maiden:
 
 ```
 os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
