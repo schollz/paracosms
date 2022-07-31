@@ -250,10 +250,29 @@ function Tracker:keyboard(code,value)
   elseif code=="DELETE" and value>0 then
     self:note_change(0,false,true)
   elseif code=="CTRL+R" and value>0 then
-    print(string.format("%d: queueing recording",self.id))
-    table.insert(global_rec_queue,{self.id,false})
-    params:set("record_over",2)
-    self.recording_queued=true
+    if #self.notes==0 then
+      do return end
+    end
+    if self.recording_queued then
+      -- queue all other recordings that aren't queued
+      local queued={}
+      for _,v in ipairs(global_rec_queue) do
+        queued[v]=true
+      end
+      -- unpleasant but yes, I'm calling the global parent manager from the child
+      for i,track in ipairs(manager.tracks) do
+        if #track.notes>0 and queued[i]==nil and track.recording_queued~=true then
+          print(string.format("%d: queueing recording",i))
+          table.insert(global_rec_queue,{i,false})
+          manager.tracks[i].recording_queued=true
+        end
+      end
+    else
+      print(string.format("%d: queueing recording",self.id))
+      table.insert(global_rec_queue,{self.id,false})
+      params:set("record_over",2)
+      self.recording_queued=true
+    end
   else
     for i=0,9 do
       local j=i==0 and 10 or i

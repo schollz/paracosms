@@ -147,7 +147,7 @@ Paracosms {
 				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
-				snd=snd*amp;
+				snd=snd*amp/4;
 
 				// one-shot envelope
 				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
@@ -157,7 +157,6 @@ Paracosms {
 
 				// main envelope
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
-
 
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
@@ -242,7 +241,7 @@ Paracosms {
 				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
-				snd=snd*amp;
+				snd=snd*amp/4;
 
 				// one-shot envelope
 				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);

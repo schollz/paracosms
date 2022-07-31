@@ -271,7 +271,7 @@ function init()
     local possible_files=find_files(folder)
     for col,fname in ipairs(possible_files) do
       table.insert(dat.files_to_load,{fname=fname,id=(row-1)*16+col})
-      if i==16 then
+      if col==16 then
         break
       end
     end
@@ -444,6 +444,9 @@ function init()
         local id=(row-1)*16+col
         params:set(id.."file",file)
         clock.sleep(0.01)
+        if col==16 then
+          break
+        end
       end
     end
     clock.sleep(1)
