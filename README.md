@@ -146,9 +146,9 @@ there are 8 things, so each thing gets 1/8th note. the C4 gets 1/8 note and its 
 
 ## customization / loading sample banks
 
-paracosms is ready to be customized.
+![custom](https://user-images.githubusercontent.com/6550035/182173615-c996238b-3cf9-41b4-8cc7-57ca94fdd794.PNG)
 
-the initial script can be changed to your liking. if you open the starter scripts "sorbo" or "boros" there are several functions that can be edited and the bank loading can be edited.
+paracosms is ready to be customized. the initial script can be changed to your liking. open up `paracosms.lua` in maiden, or copy and paste its contents into a new file.
 
 the functions `substance()` and `style()` run at the start and at the end of loading, respectively (*substance* before *style* as they say). you can use these to trigger certain behaviors or activate parameters once everything is loaded. I like to make a script for each track I'm working on where the `substance()` sets the clock speed and `style()` loads specific files into specific banks.
 
