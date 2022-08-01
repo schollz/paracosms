@@ -54,7 +54,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in,readHead_changed;
@@ -161,10 +161,10 @@ Paracosms {
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				Out.ar(out1,snd*send1);
-				Out.ar(out2,snd*send2);
-				Out.ar(out3,snd*send3);
-				Out.ar(out4,snd*send4);
+				Out.ar(out1,snd*send_main);
+				Out.ar(out2,snd*send_tape);
+				Out.ar(out3,snd*send_clouds);
+				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
 
@@ -181,7 +181,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send1=1.0,send2=0,send3=0,send4=0;
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in;
@@ -256,10 +256,10 @@ Paracosms {
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				Out.ar(out1,snd*send1);
-				Out.ar(out2,snd*send2);
-				Out.ar(out3,snd*send3);
-				Out.ar(out4,snd*send4);
+				Out.ar(out1,snd*send_main);
+				Out.ar(out2,snd*send_tape);
+				Out.ar(out3,snd*send_clouds);
+				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
 		SynthDef("defMetronome",{

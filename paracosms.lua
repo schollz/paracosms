@@ -51,7 +51,7 @@ blocks={
 -- uncommment these to get a demo!
 -- blocks={
 --   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
---   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send1=0,send2=1}},
+--   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=0,send_tape=1}},
 --   -- or you can apply parameters to make a block a set of oneshots
 --   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
 --   {folder="/home/we/dust/audio/paracosms/row3"},

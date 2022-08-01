@@ -168,7 +168,7 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 
 ```lua
-{folder="/home/we/dust/audio/togranulate",params={send1=0,send2=0,send3=100}}
+{folder="/home/we/dust/audio/togranulate",params={send_main=0,send_tape=0,send_clouds=100}}
 ```
 
 ### saving / loading

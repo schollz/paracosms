@@ -87,11 +87,11 @@ table.insert(enc_func,{
 -- page 5
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
-  {function(d) params:delta(dat.ti.."send1",d) end,function() return "main: "..params:string(dat.ti.."send1") end},
-  {function(d) params:delta(dat.ti.."send4",d) end,function() return "greyhole: "..params:string(dat.ti.."send4") end},
+  {function(d) params:delta(dat.ti.."send_main",d) end,function() return "main: "..params:string(dat.ti.."send_main") end},
+  {function(d) params:delta(dat.ti.."send_reverb",d) end,function() return "greyhole: "..params:string(dat.ti.."send_reverb") end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta(dat.ti.."send2",d) end,function() return "tapedeck: "..params:string(dat.ti.."send2") end},
-  {function(d) params:delta(dat.ti.."send3",d) end,function() return "clouds: "..params:string(dat.ti.."send3") end},
+  {function(d) params:delta(dat.ti.."send_tape",d) end,function() return "tapedeck: "..params:string(dat.ti.."send_tape") end},
+  {function(d) params:delta(dat.ti.."send_clouds",d) end,function() return "clouds: "..params:string(dat.ti.."send_clouds") end},
 })
 -- page 4
 table.insert(enc_func,{
