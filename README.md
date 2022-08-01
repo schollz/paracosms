@@ -10,7 +10,7 @@
 - **sample playback is synchronized** by default
 - recorded samples have **gapless playback** by crossfading post-roll
 - imported samples can be **automatically warped** to current bpm
-- **one-shot samples can be sequenced** with euclidean sequencer
+- **one-shot samples can be sequenced** with euclidean sequencer or gestures
 - each sample has **filters, pan+amp lfos, timestretching, other fx**
 - global **tapedeck, greyhole and clouds fx** with per-sample sends 
 - the grid (optional) can **pattern record sample playback or record splicing**
@@ -50,6 +50,7 @@ without intending, I realized that I could combine ourborous with paracosms toge
 ### playing loops
 
 ![norns](https://user-images.githubusercontent.com/6550035/181917591-51062ba1-773e-49ae-b06f-aba82b34d5f4.jpg)
+
 
 **E1 will select sample. K1+E1 will select sample *that is loaded*.**
 
