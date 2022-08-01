@@ -22,13 +22,25 @@
 --
 --
 
+--------------------
+-- EDIT THIS FILE --
+--------------------
+
+-----------------------------------------------
+-- OR, BETTER, COPY THIS FILE INTO A NEW ONE --
+-----------------------------------------------
+
+
 substance=function()
-  params:set("clock_tempo",120)
+  -- things put here will run before startup is initiated
+  -- useful for setting up a specific clock tempo, e.g.:
+  -- params:set("clock_tempo",120)
 end
 
+-- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send1=1,send2=0}},
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
+  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
@@ -36,9 +48,31 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 
+-- uncommment these to get a demo!
+-- blocks={
+--   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
+--   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send1=0,send2=1}},
+--   -- or you can apply parameters to make a block a set of oneshots
+--   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
+--   {folder="/home/we/dust/audio/paracosms/row3"},
+--   {folder="/home/we/dust/audio/paracosms/row4"},
+--   {folder="/home/we/dust/audio/paracosms/row5"},
+--   {folder="/home/we/dust/audio/paracosms/row6"},
+--   {folder="/home/we/dust/audio/paracosms/row7"},
+-- }
+
 style=function()
-  params:set("record_beats",2)
+  -- things put here will run after startup is initiated
+  -- useful to do things like load a specific save
 end
 
--- do not edit this
+
+
+
+
+
+---------------------------------
+-- DO NOT EDIT BELOW THIS LINE --
+---------------------------------
+
 include("lib/paracosms")

@@ -171,6 +171,10 @@ all the parameter ids are valid. for instance you can load a block of samples an
 {folder="/home/we/dust/audio/togranulate",params={send1=0,send2=0,send3=100}}
 ```
 
+### saving / loading
+
+saving and loading is done by writing and reading `PSET`s. the save will store all the current parameters, patterns and references to audio files. since only the audio file reference is stored, if the file is moved then your save may no longer function properly (there is a way to fix this though if it happens).
+
 ### known bugs
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
