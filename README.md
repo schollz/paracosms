@@ -18,7 +18,7 @@
 
 https://vimeo.com/730684724
 
-[throw loops](https://vimeo.com/726814753), [slice loops](https://vimeo.com/735651917), [write and record loops](https://vimeo.com/735651656), etc.
+[throw loops](https://vimeo.com/726814753), [slice loops](https://vimeo.com/735651917), [write and record loops](https://vimeo.com/735651656).
 
 <details><summary><strong>why?</strong></summary><br>
 
@@ -59,6 +59,8 @@ without intending, I realized that I could combine ourborous with paracosms toge
 **K3 will play a sample.** holding K3 will fade the sample (in or out dependong on whether its playing). 
 
 the start/end points can be changed (press K2 to find the menu or use PARAMS). the loops always try to play in sync no matter the length. with the grid you can sequence the loop positions for chopping things (more below).
+
+_note:_ loops appear on the screen as single channel even if they are stereo.
 
 ### playing one shots
 
