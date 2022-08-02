@@ -208,3 +208,6 @@ update the script by deleting and reinstalling or just running this in maiden:
 os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
 ")
 ```
+
+
+
