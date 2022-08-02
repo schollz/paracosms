@@ -4,7 +4,7 @@
 
 ![image](https://user-images.githubusercontent.com/6550035/179411170-6295d18b-ab4c-44a7-a2ae-e313dd24c0ba.png)
 
-*paracosms* is a sampler that can playback or record synchronized audio. main features:
+*paracosms* is a sampler+tracker that can [throw loops](https://vimeo.com/726814753), [slice loops](https://vimeo.com/735651917), [write and record loops](https://vimeo.com/735651656). main features:
 
 - can load/record up to **112 stereo or mono samples**
 - **sample playback is synchronized** by default
@@ -18,7 +18,7 @@
 
 https://vimeo.com/730684724
 
-[throw loops](https://vimeo.com/726814753), [slice loops](https://vimeo.com/735651917), [write and record loops](https://vimeo.com/735651656).
+.
 
 <details><summary><strong>why?</strong></summary><br>
 
@@ -28,9 +28,7 @@ during this time I put together a SuperCollider class I called "[paracosms](http
 
 also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/monome/softcut-lib/compare/main...schollz:softcut-lib:rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus](https://github.com/schollz/paracosms/blob/main/lib/Ouroboros.sc)" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
 
-without intending, I realized that I could combine ourborous with paracosms together into sampler/looper. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
-
-
+I realized that I could combine ourborous with paracosms together into sampler/looper. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
 
 
 </details>
