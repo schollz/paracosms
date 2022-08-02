@@ -22,11 +22,11 @@ https://vimeo.com/730684724
 
 <details><summary><strong>why?</strong></summary><br>
 
-between april and june 2022 I made music primarily with [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
+between april and june 2022 I made music primarily with [scripts](https://github.com/schollz/raw), SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs](https://infinitedigits.bandcamp.com/album/paracosms). (more on that [here](https://llllllll.co/t/paracosms/56683)).
 
-during this time I put together a SuperCollider class I called "[paracosms][]" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun][VeryFun]. 
+during this time I put together a SuperCollider class I called "[paracosms](https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc)" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun](https://www.instagram.com/p/CfogWyBFZ-V/). 
 
-also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/monome/softcut-lib/compare/main...schollz:softcut-lib:rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus][]" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
+also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/monome/softcut-lib/compare/main...schollz:softcut-lib:rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus](https://github.com/schollz/paracosms/blob/main/lib/Ouroboros.sc)" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
 
 without intending, I realized that I could combine ourborous with paracosms together into sampler/looper. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
 
@@ -109,7 +109,7 @@ you can change the warping at any time by going to the sample and editing the wa
 
 <details><summary>a tutorial on making audio with gapless playback.</summary><br>
 
-I created [a tool to automatically make seamless loops][AToolToAutomaticallyMakeSeamless] out of audio. to use this tool simply **rename your file to include `bpmX`** in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". this tool is included with *paracosms* - its called `seamlessloop`. you can run `seamlessloop` on folders or files. for example:
+I created [a tool to automatically make seamless loops](https://github.com/schollz/seamlessloop) out of audio. to use this tool simply **rename your file to include `bpmX`** in the filename (where `X` is the source bpm of the file). for example, a 120 bpm file, "`drums.wav`" would be renamed "`drums_bpm120.wav`". this tool is included with *paracosms* - its called `seamlessloop`. you can run `seamlessloop` on folders or files. for example:
 
 ```
 os.execute("/home/we/dust/code/paracosms/lib/seamlessloop --in-folder ~/dust/audio/loops --out-folder ~/dust/audio/quantized-loops")
@@ -210,12 +210,3 @@ update the script by deleting and reinstalling or just running this in maiden:
 os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
 ")
 ```
-
-[DevelopingAnAlbum]: https://infinitedigits.bandcamp.com/album/paracosms
-[here]: https://llllllll.co/t/paracosms/56683
-[paracosms]: https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc
-[VeryFun]: https://www.instagram.com/p/CfogWyBFZ-V/
-[ouroborus]: https://github.com/schollz/paracosms/blob/main/lib/Ouroboros.sc
-[AToolToAutomaticallyMakeSeamless]: https://github.com/schollz/seamlessloop
-[scripts]: https://github.com/schollz/raw
-[InTheseLines]: https://github.com/schollz/paracosms/blob/4338e7306809f3051c482e87a62fd55aadf4c594/paracosms.lua#L24-L30
