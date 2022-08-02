@@ -13,7 +13,7 @@
 - **one-shot samples can be sequenced** with euclidean sequencer or gestures
 - each sample has **filters, pan+amp lfos, timestretching, other fx**
 - global **tapedeck, greyhole and clouds fx** with per-sample sends 
-- the grid (optional) can **pattern record sample playback or record splicing**
+- the grid (optional) can **record gestures for toggling playback or splicing**
 - a keyboard (optional) opens a **tracker that can sequence and record external synths**
 
 https://vimeo.com/730684724
@@ -22,19 +22,18 @@ https://vimeo.com/730684724
 
 <details><summary><strong>why?</strong></summary><br>
 
-between april and june 2022 I made music primarily with [scripts](https://github.com/schollz/raw), SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs](https://infinitedigits.bandcamp.com/album/paracosms). (more on that [here](https://llllllll.co/t/paracosms/56683)).
+between april and june 2022 I made music primarily with [scripts](https://github.com/schollz/raw), SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs](https://infinitedigits.bandcamp.com/album/paracosms). (more on that [here](https://llllllll.co/t/paracosms-album)).
 
-during this time I put together a SuperCollider class I called "[paracosms](https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc)" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. initially I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun](https://www.instagram.com/p/CfogWyBFZ-V/). 
+during this time I put together a SuperCollider class I called "[paracosms](https://github.com/schollz/paracosms/blob/main/lib/Paracosms.sc)" which is essentially allowed unlimited synchronized turntables that can be switched between one-shots and synchronized loops. I used this to remix songs from the album I had made by performing them. i.e. I took a bunch of samples I collected and threw them into the grid with a thin norns wrapper around this SuperCollider paracosms class. it was [very fun](https://www.instagram.com/p/CfogWyBFZ-V/). 
 
 also during this time I was thinking about recording perfectly seamless loops of audio. I added [a new function to do this easily in softcut](https://github.com/monome/softcut-lib/compare/main...schollz:softcut-lib:rec-once4). but I realized I wanted to do it with SuperCollider too. I ended up making "[ouroborus](https://github.com/schollz/paracosms/blob/main/lib/Ouroboros.sc)" which allows recording of seamless loops directly to disk by [fading in a post-roll](https://fredrikolofsson.com/f0blog/buffer-xfader/) to the beginning of a recording.
 
 I realized that I could combine ourborous with paracosms together into sampler/looper. its basically a thing that excels at recording and playing perfect audio loops. norns became the glue for these two supercollider classes which is now this *paracosms* script. 
 
-
 </details>
 <br>
 
-this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jasknighter, @tyleretters, @dndrks, @yams, @license who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - all my classes are based off the ones I learned from their code.
+this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jaseknighter, @tyleretters, @dan_derks, @yams, @license who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - namely class-based designs.
 
 ## Requirements
 
@@ -184,12 +183,14 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
+- utilize @sixolet's more canonical syncing [between sc](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/engine/Engine_NotYourDreamLooper.sc#L470) [and lua](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/nydl.lua#L1475)
 
 
-### possible bugs
+### bugs
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
 - there is a rare bug where the playback position escapes the start/stop points (maybe fixed)
+- the cpu will be overloaded if you play too many samples simultaneously (this limit depends on your cpu) or if you activate all the fx (tape + clouds + greyhole, simultaneously). 
 - if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 ## Install
@@ -208,6 +209,9 @@ update the script by deleting and reinstalling or just running this in maiden:
 os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
 ")
 ```
+
+
+https://github.com/schollz/paracosms
 
 
 
