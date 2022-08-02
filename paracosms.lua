@@ -121,7 +121,7 @@ function key(k,z)
       os.execute("rm -rf /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
     else
       install()
-      os.execute("sudo systemctl restart norns-sclang.service")
+      --os.execute("sudo systemctl restart norns-sclang.service")
     end
     has_installed=is_installed()
   end
