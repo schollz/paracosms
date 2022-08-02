@@ -28,7 +28,7 @@ TapedeckFX {
 
 		SynthDef("defTapedeck",{
 			arg outBus=0,inBus,amp=0.5,tape_wet=0.8,tape_bias=0.8,saturation=0.8,drive=0.8,
-			tape_oversample=2,mode=0,
+			tape_oversample=1,mode=0,
 			dist_wet=0,drivegain=0.5,dist_bias=0,lowgain=0.1,highgain=0.1,
 			shelvingfreq=600,dist_oversample=1,
 			wowflu=1.0,
