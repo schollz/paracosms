@@ -30,7 +30,6 @@
 -- OR, BETTER, COPY THIS FILE INTO A NEW ONE --
 -----------------------------------------------
 
-
 substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
@@ -48,7 +47,7 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 
--- uncommment these to get a demo!
+-- uncommment these to get a demo from when you first start
 -- blocks={
 --   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
 --   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=0,send_tape=1}},
@@ -65,11 +64,6 @@ style=function()
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
 end
-
-
-
-
-
 
 ---------------------------------
 -- DO NOT EDIT BELOW THIS LINE --
