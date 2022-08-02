@@ -180,7 +180,15 @@ all the parameter ids are valid. for instance you can load a block of samples an
 
 saving and loading is done by writing and reading `PSET`s. the save will store all the current parameters, patterns and references to audio files. since only the audio file reference is stored, if the file is moved then your save may no longer function properly (there is a way to fix this though if it happens).
 
-### known bugs
+## todo
+
+### future
+
+- rain on a windowpane thing for composing songs from loops
+- more fx (strobe)
+
+
+### possible bugs
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
 - there is a rare bug where the playback position escapes the start/stop points (maybe fixed)
