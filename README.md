@@ -36,7 +36,7 @@ without intending, I realized that I could combine ourborous with paracosms toge
 </details>
 <br>
 
-
+this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jasknighter, @tyleretters, @dndrks, @yams, @license who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - all my classes are based off the ones I learned from their code.
 
 ## Requirements
 
