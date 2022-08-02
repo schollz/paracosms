@@ -18,6 +18,8 @@
 
 https://vimeo.com/730684724
 
+[throw loops](https://vimeo.com/726814753), [slice loops](https://vimeo.com/735651917), [write and record loops](https://vimeo.com/735651656), etc.
+
 <details><summary><strong>why?</strong></summary><br>
 
 between april and june 2022 I made music primarily with [scripts][], SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs][DevelopingAnAlbum]. (more on that [here][]).
