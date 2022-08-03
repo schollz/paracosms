@@ -123,21 +123,12 @@ Paracosms {
 				pos=Select.ar(readHead,[pos1,pos2]);
 				LocalOut.ar([Changed.ar(readHead),readHead]);
 
-				tsWindow=Phasor.ar(
-					trig:manuTrig+manuTrig,
-					rate:rate,
-					start:pos,
-					end:pos+(tsSeconds/duration*frames),
-					resetPos:pos,
-				);
+
 				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
 				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(ch,bufnum,pos2,interpolation:2)]);
 
-				snd=((1-ts)*snd)+(ts*BufRd.ar(ch,bufnum,
-					tsWindow,
-					loop:1,
-					interpolation:1
-				));
+				// time stretching
+				snd=((1-ts)*snd)+(ts*PlayBuf.ar(ch,bufnum,rate,Impulse.kr(1/tsSeconds),pos,1)*EnvGen.ar(Env.new([0,1,1,0],[0.005,tsSeconds-0.01,0.005]),Impulse.kr(1/tsSeconds)));
 
 				// balance the two channels
 				pan=Lag.kr(pan);
@@ -217,9 +208,9 @@ Paracosms {
 					resetPos:resetPos,
 				);
 				
-
 				snd=BufRd.ar(ch,bufnum,pos,interpolation:2);
 
+				// time stretching
 				snd=((1-ts)*snd)+(ts*PlayBuf.ar(ch,bufnum,rate,Impulse.kr(1/tsSeconds),pos,1)*EnvGen.ar(Env.new([0,1,1,0],[0.005,tsSeconds-0.01,0.005]),Impulse.kr(1/tsSeconds)));
 
 				// balance the two channels
