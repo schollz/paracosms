@@ -129,6 +129,8 @@ function shuffle(tbl)
 end
 
 function init()
+  norns.enc.sens(1,7)
+  
   if substance~=nil then
     substance()
   end
