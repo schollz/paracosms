@@ -46,6 +46,13 @@ end
 function install()
   please_wait=true
   redraw()
+
+  -- install sox if not already
+  print("checking sox...")
+  install_message="checking sox..."
+  redraw()
+  os.execute("sudo apt-get install -y sox")
+
   -- switch branch to paracosms
   print("checking out paracosms...")
   install_message="updating paracosms..."
