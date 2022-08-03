@@ -101,18 +101,6 @@ function install()
   has_installed=true
 end
 
-function is_installed()
-  local installed_files=os_capture("find /home/we/.local/share/SuperCollider/Extensions -name '*.sc'")
-  for _,folder in ipairs(list_folders("/home/we/dust/code/paracosms/ignore")) do
-    local one_file=os_capture("find /home/we/dust/code/paracosms/ignore/"..folder.." -name '*.sc' | head -n1")
-    pathname,filename,ext=split_path(one_file)
-    if string.find(installed_files,filename) then
-    else
-      do return false end
-    end
-  end
-  return true
-end
 
 function init()
   clock.run(function()
@@ -125,13 +113,9 @@ end
 
 function key(k,z)
   if k==3 and z==1 then
-    if has_installed then
-      os.execute("rm -rf /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
-    else
+    if not has_installed and not please_wait then
       install()
-      --os.execute("sudo systemctl restart norns-sclang.service")
     end
-    has_installed=is_installed()
   end
 end
 
