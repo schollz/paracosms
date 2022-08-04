@@ -21,9 +21,6 @@ function Manager:init1()
     name="smpl-pos",
     note_on=function(id,note,vel,ch)
       -- make sure it is in oneshot mode
-      if params:get(id.."oneshot")==1 then
-        params:set(id.."oneshot",2)
-      end
       if params:get("edit_mode")==2 then
         show_manager=false
       end
