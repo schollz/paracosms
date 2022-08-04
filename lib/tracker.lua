@@ -16,7 +16,7 @@ function Tracker:init()
   self.cursor={1,1}
   self.view={0,0} -- row/col to offset
   self.notes={}
-  self.octave=4
+  self.octave=3
   self.beats_per_measure=4
   self.measure=#self.notes
   self.note_played=nil

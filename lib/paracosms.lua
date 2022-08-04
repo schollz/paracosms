@@ -832,7 +832,9 @@ show_manager=false
 local ctl_code=false
 local shift_code=false
 function keyboard.code(code,value)
-  show_manager=true
+  if value>0 then
+    show_manager=true
+  end
   if string.find(code,"CTRL") then
     ctl_code=value>0
     do return end
