@@ -285,7 +285,9 @@ function Turntable:load_file(path)
     bpm=clock.get_tempo()
   end
   params:set(self.id.."source_bpm",bpm,true)
-  params:set(self.id.."type",string.find(self.path,"drum") and 2 or 1,true)
+  if string.find(self.path,"drum") then
+    params:set(self.id.."type",2,true)
+  end
   params:set(self.id.."oneshot",string.find(self.path,"oneshot") and 2 or 1)
   self:retune()
   local ch,samples,samplerate=audio.file_info(self.path)
