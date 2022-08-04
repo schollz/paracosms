@@ -158,7 +158,7 @@ function Turntable:init()
       else
         debounce_fn[id..pram.id]={
           pram.response or 3,function()
-            engine.set(id,pram.id,params:get(id..pram.id))
+            engine[params:get(id.."oneshot")==1 and "set" or "set_silent"](id,pram.id,params:get(id..pram.id))
           end,
         }
       end
@@ -195,6 +195,8 @@ function Turntable:init()
       }
     end)
   end
+  params:add{type="number",id=id.."source_note",name="source note",
+  min=0,max=127,default=60,formatter=function(param) return musicutil_.note_num_to_name(param:get(),true) end}
 
   params:add_option(id.."record_immediately","immediate",{"no","yes"})
   params:hide(id.."record_immediately")

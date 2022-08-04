@@ -32,6 +32,22 @@ function Manager:init1()
     end,
     mono=true,
   })
+  table.insert(self.outputs,{
+    name="smpl-pitch",
+    note_on=function(id,note,vel,ch)
+      -- make sure it is in oneshot mode
+      if params:get("edit_mode")==2 then
+        show_manager=false
+      end
+      local new_rate=musicutil_.note_num_to_freq(note)/musicutil_.note_num_to_freq(params:get(id.."source_note"))
+      params:set(id.."rate",new_rate)
+      params:set(id.."play",1)
+    end,
+    note_off=function(id,note)
+      params:set(id.."play",0)
+    end,
+    mono=true,
+  })
   -- TODO: do similar for sample pitch?
   for _,v in ipairs(midi_device) do
     table.insert(self.outputs,{

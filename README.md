@@ -183,6 +183,7 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
+- clouds -> granular
 - tutorial video
 - sample repitching
 - mute groups for one shots
