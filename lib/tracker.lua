@@ -176,10 +176,10 @@ function Tracker:beat(beat_num,division)
         self.note_played={self.measure,col}
         if self.recording or self.playing then
           if note>0 then
-            self.note_off(self.id,params:get(self.id.."output"))
-            self.note_on(self.id,params:get(self.id.."output"),note)
+            self.note_off(self.id)
+            self.note_on(self.id,note)
           elseif note==-1 then
-            self.note_off(self.id,params:get(self.id.."output"))
+            self.note_off(self.id)
           end
         end
       end
@@ -204,7 +204,7 @@ function Tracker:play(on)
   end
   self.playing=on
   if not self.playing then
-    self.note_off(self.id,params:get(self.id.."output"))
+    self.note_off(self.id)
     self.started_from_beginning=false
   end
   global_reset_needed=global_reset_needed+(self.playing and 1 or-1)
@@ -309,10 +309,10 @@ function Tracker:keyboard(code,value)
       -- do a perform
       if value==1 then
         show_message("NOTE ON: "..musicutil_.note_num_to_name(new_note,true))
-        self.note_on(self.id,params:get(self.id.."output"),new_note)
+        self.note_on(self.id,new_note)
       elseif value==0 then
         show_message("NOTE OFF: "..musicutil_.note_num_to_name(new_note,true))
-        self.note_off(self.id,params:get(self.id.."output"),new_note)
+        self.note_off(self.id,new_note)
       end
     end
   end

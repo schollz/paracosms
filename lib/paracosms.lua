@@ -130,7 +130,7 @@ end
 
 function init()
   norns.enc.sens(1,7)
-  
+
   if substance~=nil then
     substance()
   end
@@ -161,8 +161,8 @@ function init()
   end
 
   -- midi
-  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
-  midi_device_list={"disabled"}
+  midi_device={}
+  midi_device_list={}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local connection=midi.connect(dev.port)
@@ -171,8 +171,8 @@ function init()
       table.insert(midi_device_list,name)
       table.insert(midi_device,{
         name=name,
-        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
-        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
+        note_on=function(id_,note,vel,ch) connection:note_on(note,vel,ch) end,
+        note_off=function(id_,note,vel,ch) connection:note_off(note,vel,ch) end,
       })
       connection.event=function(data)
         local msg=midi.to_msg(data)
