@@ -65,7 +65,7 @@ function ViewWave:redraw(x,y,width,height)
     screen.level(15)
     local cursor=self.show_pos
     local pos=util.linlin(0,self.duration,1,128,cursor)
-    screen.aa(1)
+    screen.aa(0)
     screen.level(15)
     screen.move(pos,9)
     screen.line(pos,60-12)

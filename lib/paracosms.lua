@@ -367,7 +367,6 @@ function init()
       clock.sleep(1/10)
       redraw()
       debounce_params()
-
     end
   end)
 
@@ -480,14 +479,35 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    enc(1,1);enc(1,-1)
-    clock.sleep(0.1)
+    show_message(util.os_capture("gzip -c -d /home/we/dust/code/paracosms/lib/mystery.txt | shuf | head -n1"))
+    enc(1,1)
+    clock.sleep(0.2)
+    enc(1,-1)
+    clock.sleep(0.2)
     reset()
-    clock.sleep(1)
     global_reset_needed=0
     if style~=nil then
       style()
     end
+    print([[
+ 
+ ____   ____  ____    ____    __   ___   _____ ___ ___  _____
+|    \ /    ||    \  /    |  /  ] /   \ / ___/|   |   |/ ___/
+|  o  )  o  ||  D  )|  o  | /  / |     (   \_ | _   _ (   \_ 
+|   _/|     ||    / |     |/  /  |  O  |\__  ||  \_/  |\__  |
+|  |  |  _  ||    \ |  _  /   \_ |     |/  \ ||   |   |/  \ |
+|  |  |  |  ||  .  \|  |  \     ||     |\    ||   |   |\    |
+|__|  |__|__||__|\_||__|__|\____| \___/  \___||___|___| \___|
+                                                             
+  ____     ___   ____  ___    __ __ 
+|    \   /  _] /    ||   \  |  |  |
+|  D  ) /  [_ |  o  ||    \ |  |  |
+|    / |    _]|     ||  D  ||  ~  |
+|    \ |   [_ |  _  ||     ||___, |
+|  .  \|     ||  |  ||     ||     |
+|__|\_||_____||__|__||_____||____/ 
+                                   
+]])
   end)
 
   -- initialize lattice
@@ -832,7 +852,7 @@ show_manager=false
 local ctl_code=false
 local shift_code=false
 function keyboard.code(code,value)
-  if value>0 then
+  if value==1 then
     show_manager=true
   end
   if string.find(code,"CTRL") then
