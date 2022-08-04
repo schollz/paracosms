@@ -38,7 +38,7 @@ end
 
 -- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002,send_main=0,send_tape=1}},
   {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row4"},
