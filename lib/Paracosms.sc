@@ -17,12 +17,12 @@ Paracosms {
 	var cut_fade;
 
 	*new {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
-		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
+		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		^super.new.init(serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
 
 		// set arguments
 		server=serverName;
@@ -40,7 +40,7 @@ Paracosms {
 		cut_fade=0.2;
 
 		watching=0;
-		busPhasor=Bus.audio(server,1);
+		busPhasor=argBusPhasor;
 		(1..2).do({arg ch;
 			SynthDef("defPlay2"++ch,{
 				arg amp=1.0,pan=0,
@@ -528,11 +528,10 @@ Paracosms {
 		synsFinished.do({ arg item, i;
 			item.free;
 		});
-		busPhasor.free;
-		busOut1.free;
-		busOut2.free;
-		busOut3.free;
-		busOut4.free;
+		// busOut1.free;
+		// busOut2.free;
+		// busOut3.free;
+		// busOut4.free;
 		synMetronome.free;
 		syns.free;
 		bufs.free;

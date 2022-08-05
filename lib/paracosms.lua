@@ -230,7 +230,7 @@ function init()
   -- setup parameters
   params:add_group("RECORDING",6)
   params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4)/(128-0.25)))
-  params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
+  params:add_number("record_threshold","rec threshold (dB)",-96,0,-30)
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
   params:add_number("record_predelay","rec latency (ms)",0,100,2)
   params:add_option("record_over","record onto",{"new","existing"},2)
@@ -949,4 +949,8 @@ function draw_paracosms()
     screen.text_right(enc_func[ui_page][6][2]())
   end
 
+  local x=util.linlin(0,params:get("record_beats")*4,0,128,(dat.beat-1)%(params:get("record_beats")*4))
+  screen.level(15)
+  screen.pixel(x,10)
+  screen.fill()
 end

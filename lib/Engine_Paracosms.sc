@@ -12,6 +12,7 @@ Engine_Paracosms : CroneEngine {
     var fnOSC;
     var startup;
     var startupNum;
+    var busPhasor;
     var busTapedeck;
     var busClouds;
     var busGreyhole;
@@ -25,6 +26,7 @@ Engine_Paracosms : CroneEngine {
 
     alloc {
         // Paracosms specific v0.0.1
+        busPhasor=Bus.audio(context.server,1);
         busTapedeck=Bus.audio(context.server,2);
         busClouds=Bus.audio(context.server,2);
         busGreyhole=Bus.audio(context.server,2);
@@ -49,8 +51,8 @@ Engine_Paracosms : CroneEngine {
             });
         },'/tr', context.server.addr);
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,busGreyhole,"/home/we/dust/data/paracosms/cache");
-        ouroboros=Ouroboros.new(context.server,0);
+        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busClouds,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
+        ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
         clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
         greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
@@ -175,6 +177,7 @@ Engine_Paracosms : CroneEngine {
         busGreyhole.free;
         busClouds.free;
         busTapedeck.free;
+        busPhasor.free;
         // ^ Paracosms specific
     }
 }
