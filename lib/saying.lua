@@ -6037,6 +6037,7 @@ saying.sayings={
 }
 
 function saying.get()
+  math.randomseed(os.time())
   return saying.sayings[math.random(#saying.sayings)]
 end
 

@@ -17,6 +17,7 @@ saying=include("lib/saying")
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows=blocks
+local ignore_transport=0
 
 global_startup=false
 debounce_fn={}
@@ -492,11 +493,11 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    show_message(saying.get(),1)
-    enc(1,1)
+    show_message(saying.get(),2)
+    -- enc(1,1)
+    -- enc(1,-1)
+    -- clock.sleep(0.2)
     clock.sleep(0.2)
-    enc(1,-1)
-    clock.sleep(1)
     reset()
     global_reset_needed=0
     if style~=nil then
@@ -528,6 +529,9 @@ function init()
   dat.beat=0
   pattern_qn=lattice:new_pattern{
     action=function(v)
+      if ignore_transport>0 then
+        ignore_transport=ignore_transport-1
+      end
       dat.beat=dat.beat+1
       -- TODO: make option to change the probability of reset
       if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and global_reset_needed>0 then
@@ -562,9 +566,8 @@ function init()
   lattice:start()
 end
 
-local ignore_transport=false
 function clock.transport.start()
-  if ignore_transport then
+  if ignore_transport>0 then
     do return end
   end
   reset()
@@ -732,12 +735,8 @@ function reset()
     beat_num[i]=0
   end
   engine.resetPhase()
-  ignore_transport=true
+  ignore_transport=30
   lattice:hard_restart()
-  clock.run(function()
-    clock.sleep(1)
-    ignore_transport=false
-  end)
 end
 
 function startup(on)
