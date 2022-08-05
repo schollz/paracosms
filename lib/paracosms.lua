@@ -231,9 +231,9 @@ function init()
   -- setup parameters
   params:add_group("RECORDING",6)
   params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4)/(128-0.25)))
-  params:add_number("record_threshold","rec threshold (dB)",-96,0,-30)
-  params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
-  params:add_number("record_predelay","rec latency (ms)",0,100,2)
+  params:add_number("record_threshold","rec threshold (dB)",-96,0,-40)
+  params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,8)
+  params:add_number("record_predelay","rec latency (ms)",0,100,10)
   params:add_option("record_over","record onto",{"new","existing"},2)
   params:add_number("metronome","metronome",0,100,0)
   params:set_action("metronome",function(x)
@@ -822,7 +822,7 @@ function key(k,z)
       params:set(dat.ti.."play",z)
       if z==0 then
         local hold_time=(clock.get_beats()-hold_beats)*clock.get_beat_sec()
-        if hold_time>0.5 then
+        if hold_time>2.5 then
           params:set(dat.ti.."sequencer",3-params:get(dat.ti.."sequencer"))
         end
       end
