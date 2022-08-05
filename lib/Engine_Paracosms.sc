@@ -10,6 +10,7 @@ Engine_Paracosms : CroneEngine {
     var greyhole;
     var clouds;
     var fnOSC;
+    var oscPhase;
     var startup;
     var startupNum;
     var busPhasor;
@@ -50,6 +51,11 @@ Engine_Paracosms : CroneEngine {
                 });
             });
         },'/tr', context.server.addr);
+
+        oscPhase=OSCFunc({ |msg| 
+            NetAddr("127.0.0.1", 10111).sendMsg("phase",msg[3],msg[3]);            
+        },'/phase');
+
         context.server.sync;
         paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busClouds,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
@@ -178,6 +184,7 @@ Engine_Paracosms : CroneEngine {
         busClouds.free;
         busTapedeck.free;
         busPhasor.free;
+        oscPhase.free;
         // ^ Paracosms specific
     }
 }

@@ -28,7 +28,7 @@ table.insert(enc_func,{
   {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta("offset",d)end,function() return "offset: "..params:string("offset") end},
+  {function(d) params:delta(dat.ti.."offset",d)end,function() return "offset: "..params:string(dat.ti.."offset") end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
 })
 
@@ -292,6 +292,14 @@ function init()
 
   -- osc
   osc_fun={
+    -- phase=function(args)
+    --   local phase_seconds=tonumber(args[1])
+    --   local total_time=params:get("record_beats")*clock.get_beat_sec()
+    --   while phase_seconds>total_time do
+    --     phase_seconds=phase_seconds-total_time
+    --   end
+    --   dat.phase=phase_seconds/total_time
+    -- end,
     progress=function(args)
       local id=tonumber(args[1])
       show_message(string.format("recording cosm %d: %2.0f%%",id,tonumber(args[2])))
@@ -339,6 +347,10 @@ function init()
     end
   end
 
+  local sleep_time=clock.get_beat_sec()/16
+  while sleep_time<0.1 do
+    sleep_time=sleep_time+clock.get_beat_sec()/16
+  end
   clock.run(function()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<99.9 then
@@ -364,7 +376,7 @@ function init()
           end
         end
       end
-      clock.sleep(1/10)
+      clock.sleep(sleep_time)
       redraw()
       debounce_params()
     end
@@ -479,7 +491,7 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    show_message(util.os_capture("gzip -c -d /home/we/dust/code/paracosms/lib/mystery.txt | shuf | head -n1"))
+    -- show_message(util.os_capture("gzip -c -d /home/we/dust/code/paracosms/lib/mystery.txt | shuf | head -n1"))
     enc(1,1)
     clock.sleep(0.2)
     enc(1,-1)
@@ -912,6 +924,7 @@ function draw_message()
     end
   end
 end
+
 function draw_paracosms()
 
   local topleft=dat.tt[dat.ti]:redraw()
@@ -949,8 +962,19 @@ function draw_paracosms()
     screen.text_right(enc_func[ui_page][6][2]())
   end
 
-  local x=util.linlin(0,params:get("record_beats")*4,0,128,(dat.beat-1)%(params:get("record_beats")*4))
-  screen.level(15)
-  screen.pixel(x,10)
-  screen.fill()
+  if ui_page==1 then
+    local beat=(dat.beat-1)%(params:get("record_beats")*4)
+    local x=util.linlin(0,params:get("record_beats")*4,0,128,beat)
+    screen.level(beat%4==0 and 15 or 5)
+    screen.aa(1)
+    local size=2
+    if beat%16==0 then
+      size=8
+    elseif beat%4==0 then
+      size=5
+    end
+    screen.rect(x,10,size,size)
+    screen.aa(0)
+    screen.fill()
+  end
 end

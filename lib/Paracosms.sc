@@ -259,7 +259,9 @@ Paracosms {
 
 		SynthDef("defPhasor",{
 			arg out,rate=1.0,rateLag=0.2,t_sync=0;
-			Out.ar(out,Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
+			var phase=Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0);
+			// SendReply.kr(Impulse.kr(8),"/phase",[phase]);
+			Out.ar(out,phase);
 		}).send(server);
 
 		SynthDef("defPattern",{
@@ -528,10 +530,6 @@ Paracosms {
 		synsFinished.do({ arg item, i;
 			item.free;
 		});
-		// busOut1.free;
-		// busOut2.free;
-		// busOut3.free;
-		// busOut4.free;
 		synMetronome.free;
 		syns.free;
 		bufs.free;
