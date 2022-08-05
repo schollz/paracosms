@@ -77,6 +77,15 @@ Ouroboros {
 				bufnum:bufnum,
 				phase:pos,
 			);
+			// TODO: USE SENDREPLY INSTEAD
+// (
+// {
+//     SendReply.kr(Impulse.kr(3), '/the_answer', [40, 41, 42, 43] + MouseX.kr, 1905);
+// }.play(s);
+// )
+
+// o = OSCFunc({ |msg| msg.postln }, '/the_answer');
+
 			// send the startFrame
 			Out.kr(startFrameBus,startFrame);
 			// send the endFrame
