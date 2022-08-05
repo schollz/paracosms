@@ -1,4 +1,4 @@
--- paracosms
+-- paracosms v0.2.0
 --
 --
 -- llllllll.co/t/paracosms
@@ -34,16 +34,17 @@ substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
   -- params:set("clock_tempo",120)
+  params:set("clock_tempo",136)
 end
 
 -- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row7"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row2",params={oneshot=2,attack=0.002,send_main=0,send_tape=1,release=0.2}},
+  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002,send_main=0,send_tape=1,release=0.2}},
+  {folder="/home/we/dust/audio/paracosms/row3"},
+  {folder="/home/we/dust/audio/paracosms/row4"},
+  {folder="/home/we/dust/audio/paracosms/row5"},
+  {folder="/home/we/dust/audio/paracosms/row6"},
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 

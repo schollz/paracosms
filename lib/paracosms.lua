@@ -28,7 +28,7 @@ table.insert(enc_func,{
   {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
+  {function(d) params:delta("offset",d)end,function() return "offset: "..params:string("offset") end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
 })
 
@@ -161,8 +161,8 @@ function init()
   end
 
   -- midi
-  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
-  midi_device_list={"disabled"}
+  midi_device={}
+  midi_device_list={}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local connection=midi.connect(dev.port)
@@ -171,8 +171,8 @@ function init()
       table.insert(midi_device_list,name)
       table.insert(midi_device,{
         name=name,
-        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
-        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
+        note_on=function(id_,note,vel,ch) connection:note_on(note,vel,ch) end,
+        note_off=function(id_,note,vel,ch) connection:note_off(note,vel,ch) end,
       })
       connection.event=function(data)
         local msg=midi.to_msg(data)
@@ -367,7 +367,6 @@ function init()
       clock.sleep(1/10)
       redraw()
       debounce_params()
-
     end
   end)
 
@@ -480,13 +479,35 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    enc(1,1);enc(1,-1)
-    clock.sleep(1)
+    show_message(util.os_capture("gzip -c -d /home/we/dust/code/paracosms/lib/mystery.txt | shuf | head -n1"))
+    enc(1,1)
+    clock.sleep(0.2)
+    enc(1,-1)
+    clock.sleep(0.2)
     reset()
     global_reset_needed=0
     if style~=nil then
       style()
     end
+    print([[
+ 
+ ____   ____  ____    ____    __   ___   _____ ___ ___  _____
+|    \ /    ||    \  /    |  /  ] /   \ / ___/|   |   |/ ___/
+|  o  )  o  ||  D  )|  o  | /  / |     (   \_ | _   _ (   \_ 
+|   _/|     ||    / |     |/  /  |  O  |\__  ||  \_/  |\__  |
+|  |  |  _  ||    \ |  _  /   \_ |     |/  \ ||   |   |/  \ |
+|  |  |  |  ||  .  \|  |  \     ||     |\    ||   |   |\    |
+|__|  |__|__||__|\_||__|__|\____| \___/  \___||___|___| \___|
+                                                             
+  ____     ___   ____  ___    __ __ 
+|    \   /  _] /    ||   \  |  |  |
+|  D  ) /  [_ |  o  ||    \ |  |  |
+|    / |    _]|     ||  D  ||  ~  |
+|    \ |   [_ |  _  ||     ||___, |
+|  .  \|     ||  |  ||     ||     |
+|__|\_||_____||__|__||_____||____/ 
+                                   
+]])
   end)
 
   -- initialize lattice
@@ -831,7 +852,9 @@ show_manager=false
 local ctl_code=false
 local shift_code=false
 function keyboard.code(code,value)
-  show_manager=true
+  if value==1 then
+    show_manager=true
+  end
   if string.find(code,"CTRL") then
     ctl_code=value>0
     do return end
