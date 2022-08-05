@@ -111,7 +111,7 @@ function Turntable:init()
     engine.stop(id,params:get(id.."release"))
     engine.set(id,"oneshot",v-1)
   end)
-  params:add_number(id.."mute_group","mute_group",1,112,id)
+  params:add_number(id.."mute_group","mute group",1,112,id)
   for _,pram in ipairs(params_menu) do
     table.insert(self.all_params,pram.id)
     params:add{
