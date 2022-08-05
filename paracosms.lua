@@ -38,12 +38,12 @@ end
 
 -- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row1"},
-  {folder="/home/we/dust/audio/paracosms/row2"},
-  {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row4"},
-  {folder="/home/we/dust/audio/paracosms/row5"},
-  {folder="/home/we/dust/audio/paracosms/row6"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
+  {folder="/home/we/dust/audio/paracosms/row7"},
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 

@@ -70,7 +70,7 @@ Ouroboros {
 				end:28800000, // 10 minutes
 			);
 			var startFrame=Latch.kr(pos,recordTrig);
-			var phaseOffset=Latch.ar(In.ar(busPhase).mod(duration)/duration,recordTrig);
+			var phaseOffset=Latch.ar(In.ar(busPhase).mod(duration),recordTrig);
 			var endFrame=(recordTrig*(startFrame+recordingFrames))+((1-recordTrig)*28800000);
 			BufWr.ar(
 				inputArray: input*EnvGen.ar(Env.new([0,1],[0.05])),
@@ -100,7 +100,7 @@ Ouroboros {
 
 
 		// https://fredrikolofsson.com/f0blog/buffer-xfader/
-		fnXFader ={|inBuffer, frames= 2, curve= -2, action|
+		fnXFader ={|inBuffer, frames= 2, curve= -2, rotation=0, action|
 			if(frames>inBuffer.numFrames, {
 				"xfader: crossfade duration longer than half buffer - clipped.".warn;
 			});
@@ -111,12 +111,21 @@ Ouroboros {
 					var startArr= arr.copyRange(0, interleavedFrames-1);
 					var endArr= arr.copyRange(arr.size-interleavedFrames, arr.size-1);
 					var result= arr.copyRange(0, arr.size-1-interleavedFrames);
+					var resultFinal= arr.copyRange(0, arr.size-1-interleavedFrames);
 					interleavedFrames.do{|i|
 						var fadeIn= i.lincurve(0, interleavedFrames-1, 0, 1, curve);
 						var fadeOut= i.lincurve(0, interleavedFrames-1, 1, 0, 0-curve);
 						result[i]= (startArr[i]*fadeIn)+(endArr[i]*fadeOut);
 					};
-					outBuffer.loadCollection(result, 0, action);
+					["rotation",rotation,"frames",frames].postln;
+					(arr.size-interleavedFrames).do{|i|
+						var j=i+(rotation*inBuffer.numChannels);
+						if (j>(arr.size-interleavedFrames-1),{
+							j=j-(arr.size-interleavedFrames);
+						});
+						resultFinal[j]=result[i];
+					};
+					outBuffer.loadCollection(resultFinal, 0, action);
 				});
 			});
 		};
@@ -169,25 +178,19 @@ Ouroboros {
 							buf2.loadCollection(arr,0,action:{ arg buf3;
 								var crossfadeFrames=frameTotal-((argSeconds*server.sampleRate).round.asInteger);
 								["frameTotal",frameTotal,"((argSeconds*server.sampleRate).round.asInteger)",((argSeconds*server.sampleRate).round.asInteger)].postln;
+								["frameOffset",frameOffset].postln;
 								["loaded",buf3].postln;
 								["argSeconds",argSeconds,"argCrossfade",argCrossfade,"crossfadeFrames",crossfadeFrames].postln;
-								fnXFader.value(buf3,crossfadeFrames,-2,{ arg buf4;
+								fnXFader.value(buf3,crossfadeFrames,-2,frameOffset,{ arg buf4;
 									["faded",buf4].postln;
-									buf4.loadToFloatArray(action:{|arr2|
-										["rotating array by +",frameOffset/server.sampleRate,"seconds"].postln;
-										arr2=arr2.rotate(frameOffset);
-										buf4.loadCollection(arr2,action:{ arg buf5;
-											action.value(buf5);
-											buf1.free;
-											buf2.free;
-											buf3.free;
-											Routine {
-												3.wait;
-												buf4.free;
-												buf5.free;
-											}.play;
-										});
-									});
+									action.value(buf4);
+									buf1.free;
+									buf2.free;
+									buf3.free;
+									Routine {
+										3.wait;
+										buf4.free;
+									}.play;
 								});
 							});
 						}
