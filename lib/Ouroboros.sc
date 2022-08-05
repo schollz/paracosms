@@ -58,7 +58,7 @@ Ouroboros {
 
 		SynthDef("defRecord",{
 			arg id, busPhase,bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
-			startFrameBus,endFrameBus,phaseOffsetBus,t_record=0,threshold=60.neg;
+			startFrameBus,endFrameBus,phaseOffsetBus,t_record=0,threshold=60.neg,duration=1;
 			var input=SoundIn.ar([0,1]);
 			var inputForTrigger=Mix.new(input)*EnvGen.ar(Env.new([0,1],[0.2]));
 			var coyoteTrig=Trig.kr(Coyote.kr(inputForTrigger,fastLag:0.05,fastMul:0.9,thresh:threshold.dbamp,minDur:0.05));
@@ -70,7 +70,7 @@ Ouroboros {
 				end:28800000, // 10 minutes
 			);
 			var startFrame=Latch.kr(pos,recordTrig);
-			var phaseOffset=Latch.ar((In.ar(busPhase)*context.server.sampleRate).mod(recordingFrames),recordTrig);
+			var phaseOffset=Latch.ar(In.ar(busPhase).mod(duration)/duration,recordTrig);
 			var endFrame=(recordTrig*(startFrame+recordingFrames))+((1-recordTrig)*28800000);
 			BufWr.ar(
 				inputArray: input*EnvGen.ar(Env.new([0,1],[0.05])),
@@ -137,13 +137,13 @@ Ouroboros {
 			synRecord=Synth.tail(group,"defRecord",
 				[\busPhase,busPhasor,\id,id,\bufnum,buf1,
 				\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
-				\phaseOffsetBus,busPhaseOffset,\t_record,argStart,
+				\phaseOffsetBus,busPhaseOffset,\t_record,argStart,\duration,argSeconds,
 				\recordingFrames,(argSeconds+argCrossfade)*server.sampleRate,\threshold,argThreshold]
 			).onFree({
 				arg syn;
 				var frameStart=busStartFrame.getSynchronous-(preDelay*server.sampleRate).round; 
 				var frameEnd=busEndFrame.getSynchronous;
-				var frameOffset=busPhaseOffset.getSynchronous;
+				var frameOffset=(busPhaseOffset.getSynchronous*server.sampleRate).round;
 				var frameTotal=(frameEnd-frameStart).round.asInteger;
 				if (frameStart<0,{
 					frameStart=0;
@@ -165,7 +165,7 @@ Ouroboros {
 								fnXFader.value(buf3,crossfadeFrames,-2,{ arg buf4;
 									["faded",buf4].postln;
 									buf4.loadToFloatArray(action:{|arr2|
-										["rotating array by +",frameOffset/context.server.sampleRate,"seconds"].postln;
+										["rotating array by +",frameOffset/server.sampleRate,"seconds"].postln;
 										arr2=arr2.rotate(frameOffset);
 										buf4.loadCollection(arr2,action:{ arg buf5;
 											action.value(buf5);
