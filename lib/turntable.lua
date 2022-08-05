@@ -65,7 +65,7 @@ function Turntable:init()
     {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","output","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","output","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -96,7 +96,7 @@ function Turntable:init()
         if v==1 then
           -- mute everything in mute group
           for i=1,112 do
-            if params:get(i.."mute_group")==params:get(id.."mute_group") and params:get(i.."play")==1 then
+            if i~=id and params:get(i.."mute_group")==params:get(id.."mute_group") and params:get(i.."play")==1 then
               params:set(i.."play",0,true)
               engine.stop(i,params:get(i.."release"))
             end

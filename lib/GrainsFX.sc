@@ -38,7 +38,7 @@ GrainsFX {
 			fbMin=0,fbMax=1,fbPer=120,
 			grainMin=0.5,grainMax=4,grainPer=120;
 			var snd;
-			snd=MiGrains.ar(In.ar(inBus,2),
+			snd=MiClouds.ar(In.ar(inBus,2),
 				pit:SinOsc.kr(1/pitPer,rrand(0,3),(pitMax-pitMin)/2,(pitMax-pitMin)/2+pitMin),
 				pos:SinOsc.kr(1/posPer,rrand(0,3),(posMax-pitMin)/2,(posMax-posMin)/2+posMin),
 				size:SinOsc.kr(1/sizePer,rrand(0,3),(sizeMax-sizeMin)/2,(sizeMax-sizeMin)/2+sizeMin),
