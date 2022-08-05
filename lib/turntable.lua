@@ -371,13 +371,18 @@ function Turntable:emit(beat)
   if params:get(self.id.."oneshot")==1 or params:get(self.id.."sequencer")==1 or self.sequence==nil or (not self.ready) then
     do return end
   end
+  local ct=clock.get_beat_sec()*clock.get_beats()
+  if self.emit_played~=nil and (ct-self.emit_played)>=self:duration() then
+    params:set(self.id.."play",0)
+    self.emit_played=nil
+  end
   local i=((beat-1)%#self.sequence)+1
   if self.sequence[i] then
-    clock.run(function()
-      params:set(self.id.."play",1)
-      clock.sleep(0.01)
+    if params:get(self.id.."play")==1 then
       params:set(self.id.."play",0)
-    end)
+    end
+    self.emit_played=ct
+    params:set(self.id.."play",1)
   end
 end
 
