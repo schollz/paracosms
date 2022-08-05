@@ -12,6 +12,7 @@ patterner=include("lib/patterner")
 musicutil_=require("musicutil")
 tracker_=include("lib/tracker")
 manager_=include("lib/manager")
+saying=include("lib/saying")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
@@ -491,11 +492,11 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    -- show_message(util.os_capture("gzip -c -d /home/we/dust/code/paracosms/lib/mystery.txt | shuf | head -n1"))
+    show_message(saying.get(),1)
     enc(1,1)
     clock.sleep(0.2)
     enc(1,-1)
-    clock.sleep(0.2)
+    clock.sleep(1)
     reset()
     global_reset_needed=0
     if style~=nil then
