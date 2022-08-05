@@ -7,20 +7,26 @@ Ouroboros {
 	var preDelay;
 	var busStartFrame;
 	var busEndFrame;
+	var busPhaseOffset;
+	var busPhasor;
+	var group;
 
 	*new {
-		arg argServer,argBusOut;
-		^super.new.init(argServer,argBusOut);
+		arg argServer,argGroup,argBusPhasor,argBusOut;
+		^super.new.init(argServer,argGroup,argBusPhasor,argBusOut);
 	}
 
 	init {
-		arg argServer,argBusOut;
+		arg argServer,argGroup,argBusPhasor,argBusOut;
+		group=argGroup;
+		busPhasor=argBusPhasor;
 		server=argServer;
 		busOut=argBusOut;
 		preDelay=0;
 
 		busStartFrame=Bus.control(server,1);
 		busEndFrame=Bus.control(server,1);
+		busPhaseOffset=Bus.control(server,1);
 
 		SynthDef("defRecordTrigger",{
 			arg threshold=(-60), volume=0.0, id=0;
@@ -51,8 +57,8 @@ Ouroboros {
 
 
 		SynthDef("defRecord",{
-			arg id, bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
-			startFrameBus,endFrameBus,t_record=0,threshold=60.neg;
+			arg id, busPhase,bufnum, delayTime=0.01, recLevel=1.0, preLevel=0.0,t_trig=0,run=0,loop=1,recordingFrames=0,
+			startFrameBus,endFrameBus,phaseOffsetBus,t_record=0,threshold=60.neg;
 			var input=SoundIn.ar([0,1]);
 			var inputForTrigger=Mix.new(input)*EnvGen.ar(Env.new([0,1],[0.2]));
 			var coyoteTrig=Trig.kr(Coyote.kr(inputForTrigger,fastLag:0.05,fastMul:0.9,thresh:threshold.dbamp,minDur:0.05));
@@ -64,6 +70,7 @@ Ouroboros {
 				end:28800000, // 10 minutes
 			);
 			var startFrame=Latch.kr(pos,recordTrig);
+			var phaseOffset=Latch.ar((In.ar(busPhase)*context.server.sampleRate).mod(recordingFrames),recordTrig);
 			var endFrame=(recordTrig*(startFrame+recordingFrames))+((1-recordTrig)*28800000);
 			BufWr.ar(
 				inputArray: input*EnvGen.ar(Env.new([0,1],[0.05])),
@@ -74,6 +81,8 @@ Ouroboros {
 			Out.kr(startFrameBus,startFrame);
 			// send the endFrame
 			Out.kr(endFrameBus,endFrame);
+			// send the offset 
+			Out.kr(phaseOffsetBus,phaseOffset);
 			// send the current position in the recording
 			SendTrig.kr(imp,2000+id,(pos-startFrame)/(endFrame-startFrame)*100);
 			// free self when the position passes the end frame
@@ -125,13 +134,16 @@ Ouroboros {
 			arg buf1;
 			"ouroborous: buffer ready".postln;
 			// start the recording
-			synRecord=Synth("defRecord",
-				[\id,id,\bufnum,buf1,\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,\t_record,argStart,
+			synRecord=Synth.tail(group,"defRecord",
+				[\busPhase,busPhasor,\id,id,\bufnum,buf1,
+				\startFrameBus,busStartFrame,\endFrameBus,busEndFrame,
+				\phaseOffsetBus,busPhaseOffset,\t_record,argStart,
 				\recordingFrames,(argSeconds+argCrossfade)*server.sampleRate,\threshold,argThreshold]
 			).onFree({
 				arg syn;
 				var frameStart=busStartFrame.getSynchronous-(preDelay*server.sampleRate).round; 
 				var frameEnd=busEndFrame.getSynchronous;
+				var frameOffset=busPhaseOffset.getSynchronous;
 				var frameTotal=(frameEnd-frameStart).round.asInteger;
 				if (frameStart<0,{
 					frameStart=0;
@@ -144,6 +156,7 @@ Ouroboros {
 						index:frameStart,
 						count:frameTotal,
 						action:{|arr|
+							// try to rotate the array?
 							buf2.loadCollection(arr,0,action:{ arg buf3;
 								var crossfadeFrames=frameTotal-((argSeconds*server.sampleRate).round.asInteger);
 								["frameTotal",frameTotal,"((argSeconds*server.sampleRate).round.asInteger)",((argSeconds*server.sampleRate).round.asInteger)].postln;
@@ -151,14 +164,21 @@ Ouroboros {
 								["argSeconds",argSeconds,"argCrossfade",argCrossfade,"crossfadeFrames",crossfadeFrames].postln;
 								fnXFader.value(buf3,crossfadeFrames,-2,{ arg buf4;
 									["faded",buf4].postln;
-									action.value(buf4);
-									buf1.free;
-									buf2.free;
-									buf3.free;
-									Routine {
-										3.wait;
-										buf4.free;
-									}.play;
+									buf4.loadToFloatArray(action:{|arr2|
+										["rotating array by +",frameOffset/context.server.sampleRate,"seconds"].postln;
+										arr2=arr2.rotate(frameOffset);
+										buf4.loadCollection(arr2,action:{ arg buf5;
+											action.value(buf5);
+											buf1.free;
+											buf2.free;
+											buf3.free;
+											Routine {
+												3.wait;
+												buf4.free;
+												buf5.free;
+											}.play;
+										});
+									});
 								});
 							});
 						}
@@ -185,5 +205,6 @@ Ouroboros {
         busOut.free;
         busStartFrame.free;
         busEndFrame.free;
+        busPhaseOffset.free;
 	}
 }
