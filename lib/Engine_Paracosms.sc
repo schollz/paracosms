@@ -8,14 +8,14 @@ Engine_Paracosms : CroneEngine {
     var ouroboros;
     var tapedeck;
     var greyhole;
-    var clouds;
+    var grains;
     var fnOSC;
     var oscPhase;
     var startup;
     var startupNum;
     var busPhasor;
     var busTapedeck;
-    var busClouds;
+    var busGrains;
     var busGreyhole;
     var groupSynths;
     var groupEffects;
@@ -29,7 +29,7 @@ Engine_Paracosms : CroneEngine {
         // Paracosms specific v0.0.1
         busPhasor=Bus.audio(context.server,1);
         busTapedeck=Bus.audio(context.server,2);
-        busClouds=Bus.audio(context.server,2);
+        busGrains=Bus.audio(context.server,2);
         busGreyhole=Bus.audio(context.server,2);
         groupSynths=Group.new;
         context.server.sync;
@@ -57,10 +57,10 @@ Engine_Paracosms : CroneEngine {
         },'/phase');
 
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busClouds,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busGrains,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
-        clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
+        grains=GrainsFX.new(context.server,groupEffects,busGrains,0);
         greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
         context.server.sync;
 
@@ -143,12 +143,12 @@ Engine_Paracosms : CroneEngine {
             tapedeck.set(msg[1],msg[2]);
         });
 
-        // clouds
-        this.addCommand("clouds_toggle","i",{arg msg;
-            clouds.toggle(msg[1]);
+        // grains
+        this.addCommand("grains_toggle","i",{arg msg;
+            grains.toggle(msg[1]);
         });
-        this.addCommand("clouds_set","sf",{arg msg;
-            clouds.set(msg[1],msg[2]);
+        this.addCommand("grains_set","sf",{arg msg;
+            grains.set(msg[1],msg[2]);
         });
 
         // greyhole
@@ -178,10 +178,10 @@ Engine_Paracosms : CroneEngine {
         ouroboros.free;
         tapedeck.free;
         greyhole.free;
-        clouds.free;
+        grains.free;
         fnOSC.free;
         busGreyhole.free;
-        busClouds.free;
+        busGrains.free;
         busTapedeck.free;
         busPhasor.free;
         oscPhase.free;

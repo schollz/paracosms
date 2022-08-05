@@ -1,4 +1,4 @@
-CloudsFX {
+GrainsFX {
 
 	var server;
 	var busIn;
@@ -24,7 +24,7 @@ CloudsFX {
 
 		params=Dictionary.new();
 
-		SynthDef("defClouds",{
+		SynthDef("defGrains",{
 			arg outBus=0,inBus,amp=0.5,
 			pitMin=0,pitMax=1,pitPer=120,
 			posMin=0,posMax=1,posPer=120,
@@ -38,7 +38,7 @@ CloudsFX {
 			fbMin=0,fbMax=1,fbPer=120,
 			grainMin=0.5,grainMax=4,grainPer=120;
 			var snd;
-			snd=MiClouds.ar(In.ar(inBus,2),
+			snd=MiGrains.ar(In.ar(inBus,2),
 				pit:SinOsc.kr(1/pitPer,rrand(0,3),(pitMax-pitMin)/2,(pitMax-pitMin)/2+pitMin),
 				pos:SinOsc.kr(1/posPer,rrand(0,3),(posMax-pitMin)/2,(posMax-posMin)/2+posMin),
 				size:SinOsc.kr(1/sizePer,rrand(0,3),(sizeMax-sizeMin)/2,(sizeMax-sizeMin)/2+sizeMin),
@@ -63,14 +63,14 @@ CloudsFX {
 				pars=pars++[pk,pv];
 			});
 			pars.postln;
-			syn=Synth.tail(group,"defClouds",pars);
+			syn=Synth.tail(group,"defGrains",pars);
 			NodeWatcher.register(syn);
-			"clouds: running".postln;
+			"grains: running".postln;
 		},{
-			["clouds: stopped"].postln;
+			["grains: stopped"].postln;
 			if (syn.notNil,{
 				if (syn.isRunning,{
-					["clouds: freed"].postln;
+					["grains: freed"].postln;
 					syn.free;
 				});
 			});
@@ -79,11 +79,11 @@ CloudsFX {
 
 	set {
 		arg k,v;
-		["clouds: putting",k,v].postln;
+		["grains: putting",k,v].postln;
 		params.put(k,v);
 		if (syn.notNil,{
 			if (syn.isRunning,{
-				["clouds: setting",k,v].postln;
+				["grains: setting",k,v].postln;
 				syn.set(k,v)
 			});
 		});

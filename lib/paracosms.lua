@@ -91,7 +91,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."send_reverb",d) end,function() return "greyhole: "..params:string(dat.ti.."send_reverb") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."send_tape",d) end,function() return "tapedeck: "..params:string(dat.ti.."send_tape") end},
-  {function(d) params:delta(dat.ti.."send_clouds",d) end,function() return "clouds: "..params:string(dat.ti.."send_clouds") end},
+  {function(d) params:delta(dat.ti.."send_grains",d) end,function() return "grains: "..params:string(dat.ti.."send_grains") end},
 })
 -- page 4
 table.insert(enc_func,{
@@ -224,7 +224,7 @@ function init()
 
   -- setup effects parameters
   params_greyhole()
-  params_clouds()
+  params_grains()
   params_tapedeck()
 
   -- setup parameters
@@ -668,7 +668,7 @@ function params_greyhole()
   end
 end
 
-function params_clouds()
+function params_grains()
   local params_menu={
     {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
     {id="pitMin",name="pit min",min=-48,max=48,exp=false,div=0.1,default=-0.1},
@@ -706,20 +706,20 @@ function params_clouds()
     {id="grainPer",name="grain freq per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
   }
   params:add_group("CLOUDS",1+#params_menu)
-  params:add_option("clouds_activate","include effect",{"no","yes"},1)
-  params:set_action("clouds_activate",function(v)
-    engine.clouds_toggle(v-1)
+  params:add_option("grains_activate","include effect",{"no","yes"},1)
+  params:set_action("grains_activate",function(v)
+    engine.grains_toggle(v-1)
   end)
   for _,pram in ipairs(params_menu) do
     params:add{
       type="control",
-      id="clouds_"..pram.id,
+      id="grains_"..pram.id,
       name=pram.name,
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    params:set_action("clouds_"..pram.id,function(v)
-      engine.clouds_set(pram.id,v)
+    params:set_action("grains_"..pram.id,function(v)
+      engine.grains_set(pram.id,v)
     end)
   end
 end

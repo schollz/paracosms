@@ -62,7 +62,7 @@ function Turntable:init()
     {id="offset",name="sample offset",min=-1,max=1,exp=false,div=0.002,default=0,response=1,formatter=function(param) return string.format("%2.0f ms",param:get()*1000) end},
     {id="send_main",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_tape",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
-    {id="send_clouds",name="clouds send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
   self.all_params={"file","output","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
@@ -125,7 +125,7 @@ function Turntable:init()
       if pram.dontsend~=nil then
         do return end
       end
-      for _,vv in ipairs({{"send_tape","tapedeck"},{"send_clouds","clouds"},{"send_reverb","greyhole"}}) do
+      for _,vv in ipairs({{"send_tape","tapedeck"},{"send_grains","grains"},{"send_reverb","greyhole"}}) do
         if pram.id==vv[1] then
           if v>0 then
             if params:get(vv[2].."_activate")==1 then
