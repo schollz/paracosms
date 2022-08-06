@@ -18,8 +18,6 @@
 
 https://vimeo.com/730684724
 
-.
-
 <details><summary><strong>why?</strong></summary><br>
 
 between april and june 2022 I made music primarily with [scripts](https://github.com/schollz/raw), SuperCollider, sox and random pre-recorded samples from other musicians. this endeavor culminated in [an album of 100 songs](https://infinitedigits.bandcamp.com/album/paracosms). (more on that [here](https://llllllll.co/t/paracosms-album)).
@@ -33,7 +31,7 @@ I realized that I could combine ourborous with paracosms together into sampler/l
 </details>
 <br>
 
-this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jaseknighter, @tyleretters, @dan_derks, @yams, @license who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - namely class-based designs.
+this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jaseknighter, @tyleretters, @dan_derks, @yams, @license, and others who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - namely class-based designs.
 
 ## Requirements
 
@@ -68,8 +66,6 @@ loops can be placed into "oneshot" mode. press K2 until you reach the screen wit
 ![oneshot](https://user-images.githubusercontent.com/6550035/181917685-d45c22a0-ed07-4c64-b296-b5f9e0720d06.jpg)
 
 **K3 plays a sample** in oneshot mode. if you hold K3 it will toggle the euclidean sequencer (which can also be toggled by the parameters menu or in one of the K2 parameter screens).
-
-oneshots will also obey the "mute group" they are set at. when a oneshot is played, any other sound in the same mute group that is playing will be stopped.
 
 ### recording
 
@@ -158,10 +154,10 @@ the functions `substance()` and `style()` run at the start and at the end of loa
 the "blocks" allows you to customize the startup samples. you can load up to 16 samples per line per entry, with 7 entries available. each entry has a folder and all the files in the folder will be loaded. for instance the first line will loaded into slots 1-16. the second line will load into slots 17-32. etc. you can also create parameters that are shared across each block. any parameter that is available can be updated here. for example, say you wanted to load all the 909-samples as one-shots, you could include this line:
 
 ```lua
-{folder="/home/we/dust/audio/x0x/909",params={oneshot=2,mute_group=1}}
+{folder="/home/we/dust/audio/x0x/909",params={oneshot=2}}
 ```
 
-where `oneshot=2` defines the oneshot parameter to be activated for all those samples (as opposed to looping). the `mute_group=1` sets all of these samples to the same mute group so they can cut each other off when playing. or you might want to include some loops and have *paracosms* guess the bpm for them. in this case you can do:
+where `oneshot=2` defines the oneshot parameter to be activated for all those samples (as opposed to looping). or you might want to include some loops and have *paracosms* guess the bpm for them. in this case you can do:
 
 
 ```lua
@@ -183,11 +179,9 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
-- grains -> granular
 - countdown for recording manually
 - tutorial video
 - sample repitching
-- mute groups for one shots
 - midi input (for tracker?)
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
@@ -220,6 +214,3 @@ os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/du
 
 
 https://github.com/schollz/paracosms
-
-
-
