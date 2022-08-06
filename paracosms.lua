@@ -1,4 +1,4 @@
--- paracosms v0.2.0
+-- paracosms v1.0.0
 --
 --
 -- llllllll.co/t/paracosms
