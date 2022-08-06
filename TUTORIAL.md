@@ -5,7 +5,7 @@ paracosms is a sample player, recorder, and sequencer.
 
 you can manipulate up to 112 samples. 
 
-each sample can be used as a loop or as a one-shot that plays until it reaches the end. 
+each sample can be used as a loop or as a "oneshot". a oneshot plays until it reaches the end setpoint.
 
 one of the main features of paracosms is that it tries to keep everything in synchrony.
 
@@ -29,8 +29,9 @@ once the threshold is past, then recording starts. however, it usually takes 5-2
 
 if your recording is primed, you can play to start recording. you can also start recording immediately by pressing K1+K3 again. 
 
+after recording, the file is automatically loaded. 
 
-after recording, the file is automatically loaded. the start of the recording is aligned to the start and will play in sync. if the recording doesn't start in sync, then it won't be in sync. this can happen if you manually start the recording by pressing K1+K3, twice.
+the start of the recording occurs where in the number of the beats you are. this can be seen with the little bouncing square. you can also edit a parameter "RECORDING > rec start beat 1" which will produce a recording with the first transients aligned with the first beat.
 
 
 #### fix synchronizing + metronome
@@ -46,11 +47,11 @@ if your recording is not in sync, you can also change how the recording aligns w
 
 you can load a file directly into paracosms through the `PARAMS` menu. any `wav` or `flac` file can be loaded. 
 
-loading a file will activate another nice feature of paracosms - automatic warping. warping audio in this context means changing the tempo of the audio without affecting the pitch. 
+loading a file will activate another feature of paracosms - automatic warping. warping audio in this context means changing the tempo of the audio without affecting the pitch. 
 
 audio files are *only* warped in two scenarios. 
 
-first scenario: the filename. if the filename has `bpm<number>` somewhere. the tempo is extracted from the filename and then used to warp the audio to the new tempo.
+first scenario: magic in the filename. if the filename has `bpm<number>` somewhere then the tempo is extracted from the filename and then used to warp the audio to the new tempo.
 
 second scenario: the parameter "guess bpm" is activated. "guess bpm" needs to be activated *before* loading the file to work. if "guess bpm" is activated, then the tempo of the file is guessed based on the length of the file and assumptions about the number of beats in the file. this doesn't always work, but if you have audio loops that clipped to multiples of 4 beats than it works pretty well.
 
