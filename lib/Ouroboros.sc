@@ -76,7 +76,7 @@ Ouroboros {
 				phase:pos,
 			);
 			// send the current data
-			SendReply.kr(recordTrig,"/ouroborousRecordInfo",[id,startFrame,endFrame,phaseOffset])
+			SendReply.kr(recordTrig,"/ouroborousRecordInfo",[id,startFrame,endFrame,phaseOffset]);
 			// send the current position in the recording
 			SendTrig.kr(imp,2000+id,(pos-startFrame)/(endFrame-startFrame)*100);
 			// free self when the position passes the end frame
@@ -106,7 +106,6 @@ Ouroboros {
 						var fadeOut= i.lincurve(0, interleavedFrames-1, 1, 0, 0-curve);
 						result[i]= (startArr[i]*fadeIn)+(endArr[i]*fadeOut);
 					};
-					["rotation",rotation,"frames",frames].postln;
 					(arr.size-interleavedFrames).do{|i|
 						var j=i+(rotation*inBuffer.numChannels);
 						if (j>(arr.size-interleavedFrames-1),{
@@ -132,7 +131,7 @@ Ouroboros {
 	}
 
 	record {
-		arg argID,argSeconds, argCrossfade, argThreshold, argPreDelay, argStart, actionStart, action;
+		arg argID,argSeconds, argCrossfade, argThreshold, argPreDelay, argStart, argRotation, actionStart, action;
 		var id=argID;
 	    var valStartTime=0;
     	var valTriggerTime=0;
@@ -141,6 +140,7 @@ Ouroboros {
 		Buffer.alloc(server,server.sampleRate*180,2,{
 			arg buf1;
 			"ouroborous: buffer ready".postln;
+			["argRotation",argRotation].postln;
 			// start the recording
 			synRecord.put(id,Synth.tail(group,"defRecord",
 				[\busPhase,busPhasor,\id,id,\bufnum,buf1,
@@ -150,7 +150,7 @@ Ouroboros {
 				arg syn;
 				var frameStart=dataRecord.at(id)[0]-(preDelay*server.sampleRate).round; 
 				var frameEnd=dataRecord.at(id)[1];
-				var frameOffset=(dataRecord.at(id)[2]*server.sampleRate).round;
+				var frameOffset=(dataRecord.at(id)[2]*server.sampleRate).round*argRotation;
 				var frameTotal=(frameEnd-frameStart).round.asInteger;
 				if (frameStart<0,{
 					frameStart=0;

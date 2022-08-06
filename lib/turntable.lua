@@ -222,7 +222,8 @@ function Turntable:init()
     end
     local latency=params:get("record_predelay")/1000
     print("engine.record",filename)
-    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,params:get(id.."record_immediately")-1,0)
+    local do_rotation=1-(params:get("record_firstbeat")-1)
+    engine.record(id,filename,seconds,crossfade,params:get("record_threshold"),latency,params:get(id.."record_immediately")-1,0,do_rotation)
   end)
   params:add_number(id.."normalize","normalize",0,1,0)
   params:hide(id.."normalize")

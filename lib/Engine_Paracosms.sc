@@ -106,7 +106,7 @@ Engine_Paracosms : CroneEngine {
             var id=msg[1].asInteger;
             ouroboros.recordStart(id);
         });
-        this.addCommand("record","isffffii", { arg msg;
+        this.addCommand("record","isffffiif", { arg msg;
             var id=msg[1].asInteger;
             var filename=msg[2].asString;
             var seconds=msg[3];
@@ -115,7 +115,8 @@ Engine_Paracosms : CroneEngine {
             var preDelay=msg[6];
             var startImmedietly=msg[7];
             var playWhenFinished=msg[8];
-            ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
+            var allowRotation=msg[9];
+            ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,allowRotation,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename,headerFormat: "wav", sampleFormat: "int16", completionMessage:{

@@ -230,9 +230,10 @@ function init()
   params_tapedeck()
 
   -- setup parameters
-  params:add_group("RECORDING",6)
+  params:add_group("RECORDING",7)
   params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4)/(128-0.25)))
   params:add_number("record_threshold","rec threshold (dB)",-96,0,-40)
+  params:add_option("record_firstbeat","rec start to beat 1",{"no","yes"})
   params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,8)
   params:add_number("record_predelay","rec latency (ms)",0,100,10)
   params:add_option("record_over","record onto",{"new","existing"},2)
