@@ -179,6 +179,7 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
+- fix: ouroborous buses -> sendreply
 - countdown for recording manually
 - tutorial video
 - sample repitching

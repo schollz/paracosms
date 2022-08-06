@@ -102,8 +102,9 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("pattern","if", { arg msg;
             paracosms.pattern(msg[1].asInteger,msg[2].asFloat);
         });
-        this.addCommand("record_start","",{ arg msg;
-            ouroboros.recordStart();
+        this.addCommand("record_start","i",{ arg msg;
+            var id=msg[1].asInteger;
+            ouroboros.recordStart(id);
         });
         this.addCommand("record","isffffii", { arg msg;
             var id=msg[1].asInteger;

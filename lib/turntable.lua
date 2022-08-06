@@ -206,7 +206,7 @@ function Turntable:init()
       do return end
     end
     if self.recording_primed then
-      engine.record_start()
+      engine.record_start(id)
       do return end
     end
     self.recording_primed=true
