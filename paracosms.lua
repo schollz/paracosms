@@ -39,24 +39,10 @@ end
 
 -- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row2",params={oneshot=2,attack=0.002,send_main=0,send_tape=1,release=0.2}},
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002,send_main=0,send_tape=1,release=0.2}},
+  {folder="/home/we/dust/audio/paracosms/row3",params={amp=2.0,amp_strength=0.25,pan_strength=0.5}},
   {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row4"},
-  {folder="/home/we/dust/audio/paracosms/row5"},
-  {folder="/home/we/dust/audio/paracosms/row6"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-}
-
--- uncommment these to get a demo from when you first start
-blocks={
-  -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002,release=0.1,mute_group=1}},
-  -- or you can apply parameters to make a block a set of oneshots
   {folder="/home/we/dust/audio/paracosms/row3"},
-  -- {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
   {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
   {folder="/home/we/dust/audio/paracosms/row7"},
@@ -65,6 +51,9 @@ blocks={
 style=function()
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
+  params:set("tracker_file","/home/we/dust/data/song3.txt")
+  params:set("output_all",4)
+  params:set("record_firstbeat",2)
 end
 
 ---------------------------------

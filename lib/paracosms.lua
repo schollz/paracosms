@@ -502,6 +502,7 @@ function init()
     reset()
     global_reset_needed=0
     if style~=nil then
+      clock.sleep(1)
       style()
     end
     print([[
