@@ -143,6 +143,7 @@ function Tracker:beat(beat_num,division)
       global_rec_queue[1][2]=true
       self.recording=true
       self.recording_queued=false
+      params:set("record_firstbeat",2)
       params:set(self.id.."record_immediately",2)
       params:set("record_beats",#self.notes*4)
       params:set("record_crossfade",32)

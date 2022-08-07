@@ -34,13 +34,11 @@ substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
   -- params:set("clock_tempo",120)
-  params:set("clock_tempo",120)
 end
 
--- specify a folder for each block of 16 samples to load
 blocks={
-  {folder="/home/we/dust/audio/paracosms/row3",params={amp=2.0,amp_strength=0.25,pan_strength=0.5}},
-  {folder="/home/we/dust/audio/paracosms/row3"},
+  {folder="/home/we/dust/audio/paracosms/row1"},
+  {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row5"},
@@ -48,12 +46,34 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 
+-- -- uncommment these to get a demo from when you first start
+-- blocks={
+--   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
+--   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=1,send_tape=0}},
+--   -- or you can apply parameters to make a block a set of oneshots
+--   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
+--   {folder="/home/we/dust/audio/paracosms/row3"},
+--   {folder="/home/we/dust/audio/paracosms/row4"},
+--   {folder="/home/we/dust/audio/paracosms/row5"},
+--   {folder="/home/we/dust/audio/paracosms/row6"},
+--   {folder="/home/we/dust/audio/paracosms/row7"},
+-- }
+
 style=function()
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
   params:set("tracker_file","/home/we/dust/data/song3.txt")
   params:set("output_all",4)
   params:set("record_firstbeat",2)
+
+  --- oooooo mode: lfo's in amp+pan
+  ---              recording happens on first beat
+  params:set("record_firstbeat",2)
+  for i=1,16 do
+    params:set(i.."amp",1)
+    params:set(i.."amp_strength",0.25)
+    params:set(i.."pan_strength",0.5)
+  end
 end
 
 ---------------------------------

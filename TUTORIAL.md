@@ -9,11 +9,11 @@ each sample can be used as a loop or as a "oneshot". a oneshot plays until it re
 
 one of the main features of paracosms is that it tries to keep everything in synchrony.
 
-## loading a sample /// three methods
+# loading a sample /// three methods
 
 no matter how the sample is used, it can be loaded three different ways.
 
-### 1. recording
+## 1. recording
 
 paracosms can record samples directly.
 
@@ -34,7 +34,7 @@ after recording, the file is automatically loaded.
 the start of the recording occurs where in the number of the beats you are. this can be seen with the little bouncing square. you can also edit a parameter "RECORDING > rec start beat 1" which will produce a recording with the first transients aligned with the first beat.
 
 
-#### fix synchronizing + metronome
+### fix synchronizing + metronome
 
 
 the recording is guaranteed to be the correct length (whatever length you set it to) but it is not guaranteed to start in the perfect start position.
@@ -43,7 +43,7 @@ if your recording is not in sync it is possible you might want to re-record it -
 
 if your recording is not in sync, you can also change how the recording aligns with others by modifying one parameter - the `offset`. the `offset` is found in the `PARAMS` and also on the recording screen. you can modulate this and it will nudge the recording into sync. to check against a constant source, you can use the metronome.
 
-### 2. load a file / automatic warping
+## 2. load a file / automatic warping
 
 you can load a file directly into paracosms through the `PARAMS` menu. any `wav` or `flac` file can be loaded. 
 
@@ -56,7 +56,7 @@ first scenario: magic in the filename. if the filename has `bpm<number>` somewhe
 second scenario: the parameter "guess bpm" is activated. "guess bpm" needs to be activated *before* loading the file to work. if "guess bpm" is activated, then the tempo of the file is guessed based on the length of the file and assumptions about the number of beats in the file. this doesn't always work, but if you have audio loops that clipped to multiples of 4 beats than it works pretty well.
 
 
-### 3. load a bank
+## 3. load a bank
 
 there is one final way of loading samples. this is the way to load samples in bulk, at startup. this is especially useful to create preset banks of samples.
 
