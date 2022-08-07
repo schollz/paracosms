@@ -31,11 +31,10 @@ if your recording is primed, you can play to start recording. you can also start
 
 after recording, the file is automatically loaded. 
 
-the start of the recording occurs where in the number of the beats you are. this can be seen with the little bouncing square. you can also edit a parameter "RECORDING > rec start beat 1" which will produce a recording with the first transients aligned with the first beat.
+the start of the recording occurs where in the number of the beats you are. this can be seen with the little bouncing square. you can also edit a parameter "RECORDING > rec start to beat 1" which will produce a recording with the first transients aligned with the first beat.
 
 
 ### fix synchronizing + metronome
-
 
 the recording is guaranteed to be the correct length (whatever length you set it to) but it is not guaranteed to start in the perfect start position.
 
@@ -49,18 +48,18 @@ you can load a file directly into paracosms through the `PARAMS` menu. any `wav`
 
 loading a file will activate another feature of paracosms - automatic warping. warping audio in this context means changing the tempo of the audio without affecting the pitch. 
 
-audio files are *only* warped in two scenarios. 
+audio files are *only* warped in two scenarios: 
 
-first scenario: magic in the filename. if the filename has `bpm<number>` somewhere then the tempo is extracted from the filename and then used to warp the audio to the new tempo.
+first scenario: magic filenames. if the filename has `bpm<number>` in the name then the tempo is extracted from the filename and then used to warp the audio to the new tempo.
 
-second scenario: the parameter "guess bpm" is activated. "guess bpm" needs to be activated *before* loading the file to work. if "guess bpm" is activated, then the tempo of the file is guessed based on the length of the file and assumptions about the number of beats in the file. this doesn't always work, but if you have audio loops that clipped to multiples of 4 beats than it works pretty well.
+second scenario: the parameter "`PARAMS > guess bpm?`" is activated. "guess bpm" needs to be activated *before* loading the file to work. if "guess bpm" is activated, then the tempo of the file is guessed based on the length of the file and assumptions about the number of beats in the file. this doesn't always work, but if you have audio loops that clipped to multiples of 4 beats than it works pretty well.
 
 
 ## 3. load a bank
 
-there is one final way of loading samples. this is the way to load samples in bulk, at startup. this is especially useful to create preset banks of samples.
+this is the best way to load samples in bulk, by loading them when the script starts. this is especially useful to create preset banks of samples.
 
-to do this you should open up maiden and load `paracosms.lua`.
+to do this you should open up maiden and load `paracosms/paracosms.lua`.
 
 you can edit this file directly, or copy everything in the file and paste it into a new one. 
 
@@ -84,3 +83,7 @@ we can load up another row and have them guess the bpm. in this second row we wi
 ```lua
 {folder="/home/we/dust/audio/tehn",params={type=2,guess=2}}
 ```
+
+
+# playing a sample
+
