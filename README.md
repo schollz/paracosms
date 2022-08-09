@@ -43,7 +43,6 @@ this script wouldn't exist without the ceasless inspiration from the likes of @s
 ## Documentation
 
 
-
 ### playing loops
 
 ![norns](https://user-images.githubusercontent.com/6550035/181917591-51062ba1-773e-49ae-b06f-aba82b34d5f4.jpg)
@@ -179,14 +178,14 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
-- fix: ouroborous buses -> sendreply
 - countdown for recording manually
 - tutorial video
-- sample repitching
 - midi input (for tracker?)
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
 - utilize @sixolet's more canonical syncing [between sc](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/engine/Engine_NotYourDreamLooper.sc#L470) [and lua](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/nydl.lua#L1475)
+- ~~fix: ouroborous buses -> sendreply~~
+- ~~sample repitching~~
 
 
 ### bugs
@@ -209,7 +208,7 @@ the first time you open the script it will ask to install the rest of paracosms.
 update the script by deleting and reinstalling or just running this in maiden:
 
 ```
-os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/dust/code/paracosms && git reset --hard origin/paracosms
+os.execute("cd /home/we/dust/code/paracosms && git fetch --all && git reset --hard origin/paracosms
 ")
 ```
 
