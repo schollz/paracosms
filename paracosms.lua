@@ -47,8 +47,8 @@ blocks={
 }
 
 -- blocks={
---   {folder="/home/we/dust/audio/seamlessloops/synth-arp-a/140"},
 --   {folder="/home/we/dust/audio/seamlessloops/drums-dnb/136"},
+--   {folder="/home/we/dust/audio/seamlessloops/synth-arp-a/140"},
 --   {folder="/home/we/dust/audio/seamlessloops/pad-synth-am/140"},
 --   {folder="/home/we/dust/audio/paracosms/row3"},
 --   {folder="/home/we/dust/audio/paracosms/row5"},

@@ -24,6 +24,9 @@ function Manager:init1()
       if params:get("edit_mode")==2 then
         show_manager=false
       end
+      if params:get(id.."output")<3 and params:get(id.."oneshot")==1 then
+        params:set(id.."oneshot",2)
+      end
       params:set(id.."sampleStart",(note%params:get(id.."tracker_slices"))/params:get(id.."tracker_slices"))
       params:set(id.."play",1)
     end,
