@@ -70,7 +70,7 @@ function install()
   os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
   local installed_files=os_capture("find /home/we/.local/share/SuperCollider/Extensions -name '*.sc'")
   installed_files=installed_files.."\n"..os_capture("find /home/we/dust/code -name '*.sc' -not -path '/home/we/dust/code/paracosms/*'")
-  installed_files=installed_files.."\n"..os_capture("find /usr/share/SuperCollider/Extensions -name '*.sc'")
+  installed_files=installed_files.."\n"..os_capture("find /usr/local/share/SuperCollider/Extensions -name '*.sc'")
   for _,folder in ipairs(list_folders("/home/we/dust/code/paracosms/ignore")) do
     local one_file=os_capture("find /home/we/dust/code/paracosms/ignore/"..folder.." -name '*.sc' | head -n1")
     pathname,filename,ext=split_path(one_file)
