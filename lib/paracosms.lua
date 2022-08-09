@@ -200,7 +200,7 @@ function init()
   end
   if first_time then
     dat.rows={
-      {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=0,send_tape=1}},
+      {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100}},
       {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
       {folder="/home/we/dust/audio/paracosms/row3"},
       {folder="/home/we/dust/audio/paracosms/row4"},
