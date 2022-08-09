@@ -1,4 +1,4 @@
--- paracosms
+-- paracosms v1.0.0
 --
 --
 -- llllllll.co/t/paracosms
@@ -33,19 +33,28 @@
 substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
-  -- params:set("clock_tempo",120)
+  -- params:set("clock_tempo",140)
 end
 
--- specify a folder for each block of 16 samples to load
 blocks={
   {folder="/home/we/dust/audio/paracosms/row1"},
   {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row4"},
+  {folder="/home/we/dust/audio/paracosms/row3"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
+
+-- blocks={
+--   {folder="/home/we/dust/audio/seamlessloops/drums-dnb/136"},
+--   {folder="/home/we/dust/audio/seamlessloops/synth-arp-a/140"},
+--   {folder="/home/we/dust/audio/seamlessloops/pad-synth-am/140"},
+--   {folder="/home/we/dust/audio/paracosms/row3"},
+--   {folder="/home/we/dust/audio/paracosms/row5"},
+--   {folder="/home/we/dust/audio/paracosms/row6"},
+--   {folder="/home/we/dust/audio/paracosms/row7"},
+-- }
 
 -- -- uncommment these to get a demo from when you first start
 -- blocks={
@@ -63,6 +72,17 @@ blocks={
 style=function()
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
+  -- params:set("tracker_file","/home/we/dust/data/everything.txt")
+  -- params:set("output_all",3)
+
+  --- oooooo mode: lfo's in amp+pan
+  ---              recording happens on first beat
+  -- for i=1,16 do
+  --   params:set(i.."amp",1)
+  --   params:set(i.."amp_strength",0.25)
+  --   params:set(i.."pan_strength",0.5)
+  -- end
+
 end
 
 ---------------------------------

@@ -12,13 +12,11 @@
 - imported samples can be **automatically warped** to current bpm
 - **one-shot samples can be sequenced** with euclidean sequencer or gestures
 - each sample has **filters, pan+amp lfos, timestretching, other fx**
-- global **tapedeck, greyhole and clouds fx** with per-sample sends 
+- global **tapedeck, greyhole and grains fx** with per-sample sends 
 - the grid (optional) can **record gestures for toggling playback or splicing**
 - a keyboard (optional) opens a **tracker that can sequence and record external synths**
 
 https://vimeo.com/730684724
-
-.
 
 <details><summary><strong>why?</strong></summary><br>
 
@@ -33,7 +31,7 @@ I realized that I could combine ourborous with paracosms together into sampler/l
 </details>
 <br>
 
-this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jaseknighter, @tyleretters, @dan_derks, @yams, @license who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - namely class-based designs.
+this script wouldn't exist without the ceasless inspiration from the likes of @sixolet, @jaseknighter, @tyleretters, @dan_derks, @yams, @license, and others who are all pushing the boundaries of what norns can do. also thanks to Ezra who showed me the art of SuperCollider - namely class-based designs.
 
 ## Requirements
 
@@ -88,7 +86,7 @@ there are a bunch of sample-specific parameters: volume (+lfo), panning (+lfo), 
 
 ### effects
 
-there are three global effects - greyhole, clouds and tapedeck. their parameters are editable in the main parameters menu. every parameter for clouds is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
+there are three global effects - greyhole, grains and tapedeck. their parameters are editable in the main parameters menu. every parameter for grains is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
 
 ### automatic warping
 
@@ -166,11 +164,11 @@ where `oneshot=2` defines the oneshot parameter to be activated for all those sa
 {folder="/home/we/dust/audio/myloops",params={guess=2}}
 ```
 
-all the parameter ids are valid. for instance you can load a block of samples and have them all be used for the clouds fx:
+all the parameter ids are valid. for instance you can load a block of samples and have them all be used for the grains fx:
 
 
 ```lua
-{folder="/home/we/dust/audio/togranulate",params={send_main=0,send_tape=0,send_clouds=100}}
+{folder="/home/we/dust/audio/togranulate",params={send_main=0,send_tape=0,send_grains=100}}
 ```
 
 ### saving / loading
@@ -181,6 +179,11 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
+- fix: ouroborous buses -> sendreply
+- countdown for recording manually
+- tutorial video
+- sample repitching
+- midi input (for tracker?)
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
 - utilize @sixolet's more canonical syncing [between sc](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/engine/Engine_NotYourDreamLooper.sc#L470) [and lua](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/nydl.lua#L1475)
@@ -190,7 +193,7 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 - ~~rarely a bug occurs where SuperCollider does not free all the synths when exiting.~~ (fixed, I think)
 - there is a rare bug where the playback position escapes the start/stop points (maybe fixed)
-- the cpu will be overloaded if you play too many samples simultaneously (this limit depends on your cpu) or if you activate all the fx (tape + clouds + greyhole, simultaneously). 
+- the cpu will be overloaded if you play too many samples simultaneously (this limit depends on your cpu) or if you activate all the fx (tape + grains + greyhole, simultaneously). 
 - if you change the norns clock then samples will continue to play at the rate according to the clock that they were initialized with. until there is a fix for this, I suggest reloading the script after you change the norns clock, or simply goto the sample individually and modify something in its warping parameters.
 
 ## Install
@@ -212,6 +215,3 @@ os.execute("cd /home/we/dust/code/paracosms && git fetch --all && cd /home/we/du
 
 
 https://github.com/schollz/paracosms
-
-
-

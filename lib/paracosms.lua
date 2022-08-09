@@ -12,10 +12,12 @@ patterner=include("lib/patterner")
 musicutil_=require("musicutil")
 tracker_=include("lib/tracker")
 manager_=include("lib/manager")
+saying=include("lib/saying")
 
 engine.name="Paracosms"
 dat={percent_loaded=0,tt={},files_to_load={},playing={},recording=false,recording_primed=false,beat=0,sequencing={}}
 dat.rows=blocks
+local ignore_transport=0
 
 global_startup=false
 debounce_fn={}
@@ -28,7 +30,7 @@ table.insert(enc_func,{
   {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
   {function(d) delta_ti(d,true) end},
-  {function(d) params:delta("record_over",d)end,function() return "K1+K3 record "..params:string("record_over") end},
+  {function(d) params:delta(dat.ti.."offset",d)end,function() return "offset: "..params:string(dat.ti.."offset") end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
 })
 
@@ -91,7 +93,7 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."send_reverb",d) end,function() return "greyhole: "..params:string(dat.ti.."send_reverb") end},
   {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."send_tape",d) end,function() return "tapedeck: "..params:string(dat.ti.."send_tape") end},
-  {function(d) params:delta(dat.ti.."send_clouds",d) end,function() return "clouds: "..params:string(dat.ti.."send_clouds") end},
+  {function(d) params:delta(dat.ti.."send_grains",d) end,function() return "grains: "..params:string(dat.ti.."send_grains") end},
 })
 -- page 4
 table.insert(enc_func,{
@@ -130,7 +132,7 @@ end
 
 function init()
   norns.enc.sens(1,7)
-  
+
   if substance~=nil then
     substance()
   end
@@ -161,8 +163,8 @@ function init()
   end
 
   -- midi
-  midi_device={{name="disabled",note_on=function(note,vel,ch) end,note_off=function(note,vel,ch) end}}
-  midi_device_list={"disabled"}
+  midi_device={}
+  midi_device_list={}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local connection=midi.connect(dev.port)
@@ -171,8 +173,8 @@ function init()
       table.insert(midi_device_list,name)
       table.insert(midi_device,{
         name=name,
-        note_on=function(note,vel,ch) connection:note_on(note,vel,ch) end,
-        note_off=function(note,vel,ch) connection:note_off(note,vel,ch) end,
+        note_on=function(id_,note,vel,ch) connection:note_on(note,vel,ch) end,
+        note_off=function(id_,note,vel,ch) connection:note_off(note,vel,ch) end,
       })
       connection.event=function(data)
         local msg=midi.to_msg(data)
@@ -224,15 +226,16 @@ function init()
 
   -- setup effects parameters
   params_greyhole()
-  params_clouds()
+  params_grains()
   params_tapedeck()
 
   -- setup parameters
-  params:add_group("RECORDING",6)
+  params:add_group("RECORDING",7)
   params:add_control("record_beats","recording length",controlspec.new(1/4,128,'lin',1/4,8.0,'beats',(1/4)/(128-0.25)))
-  params:add_number("record_threshold","rec threshold (dB)",-96,0,-50)
-  params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,16)
-  params:add_number("record_predelay","rec latency (ms)",0,100,2)
+  params:add_number("record_threshold","rec threshold (dB)",-96,0,-40)
+  params:add_option("record_firstbeat","rec start to beat 1",{"no","yes"},2)
+  params:add_number("record_crossfade","rec xfade (1/16th beat)",1,64,8)
+  params:add_number("record_predelay","rec latency (ms)",0,100,10)
   params:add_option("record_over","record onto",{"new","existing"},2)
   params:add_number("metronome","metronome",0,100,0)
   params:set_action("metronome",function(x)
@@ -292,6 +295,14 @@ function init()
 
   -- osc
   osc_fun={
+    -- phase=function(args)
+    --   local phase_seconds=tonumber(args[1])
+    --   local total_time=params:get("record_beats")*clock.get_beat_sec()
+    --   while phase_seconds>total_time do
+    --     phase_seconds=phase_seconds-total_time
+    --   end
+    --   dat.phase=phase_seconds/total_time
+    -- end,
     progress=function(args)
       local id=tonumber(args[1])
       show_message(string.format("recording cosm %d: %2.0f%%",id,tonumber(args[2])))
@@ -339,6 +350,10 @@ function init()
     end
   end
 
+  local sleep_time=clock.get_beat_sec()/16
+  while sleep_time<0.1 do
+    sleep_time=sleep_time+clock.get_beat_sec()/16
+  end
   clock.run(function()
     while true do
       if #dat.files_to_load>1 and dat.percent_loaded<99.9 then
@@ -364,10 +379,9 @@ function init()
           end
         end
       end
-      clock.sleep(1/10)
+      clock.sleep(sleep_time)
       redraw()
       debounce_params()
-
     end
   end)
 
@@ -480,14 +494,36 @@ function init()
       end
     end
     -- make sure we are on the actual first if the first row has nothing
-    enc(1,1);enc(1,-1)
-    clock.sleep(0.1)
+    show_message(saying.get(),2)
+    -- enc(1,1)
+    -- enc(1,-1)
+    -- clock.sleep(0.2)
+    clock.sleep(0.2)
     reset()
-    clock.sleep(1)
     global_reset_needed=0
     if style~=nil then
+      clock.sleep(1)
       style()
     end
+    print([[
+ 
+ ____   ____  ____    ____    __   ___   _____ ___ ___  _____
+|    \ /    ||    \  /    |  /  ] /   \ / ___/|   |   |/ ___/
+|  o  )  o  ||  D  )|  o  | /  / |     (   \_ | _   _ (   \_ 
+|   _/|     ||    / |     |/  /  |  O  |\__  ||  \_/  |\__  |
+|  |  |  _  ||    \ |  _  /   \_ |     |/  \ ||   |   |/  \ |
+|  |  |  |  ||  .  \|  |  \     ||     |\    ||   |   |\    |
+|__|  |__|__||__|\_||__|__|\____| \___/  \___||___|___| \___|
+                                                             
+  ____     ___   ____  ___    __ __ 
+|    \   /  _] /    ||   \  |  |  |
+|  D  ) /  [_ |  o  ||    \ |  |  |
+|    / |    _]|     ||  D  ||  ~  |
+|    \ |   [_ |  _  ||     ||___, |
+|  .  \|     ||  |  ||     ||     |
+|__|\_||_____||__|__||_____||____/ 
+                                   
+]])
   end)
 
   -- initialize lattice
@@ -495,6 +531,9 @@ function init()
   dat.beat=0
   pattern_qn=lattice:new_pattern{
     action=function(v)
+      if ignore_transport>0 then
+        ignore_transport=ignore_transport-1
+      end
       dat.beat=dat.beat+1
       -- TODO: make option to change the probability of reset
       if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and global_reset_needed>0 then
@@ -529,9 +568,8 @@ function init()
   lattice:start()
 end
 
-local ignore_transport=false
 function clock.transport.start()
-  if ignore_transport then
+  if ignore_transport>0 then
     do return end
   end
   reset()
@@ -636,7 +674,7 @@ function params_greyhole()
   end
 end
 
-function params_clouds()
+function params_grains()
   local params_menu={
     {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
     {id="pitMin",name="pit min",min=-48,max=48,exp=false,div=0.1,default=-0.1},
@@ -674,20 +712,20 @@ function params_clouds()
     {id="grainPer",name="grain freq per",min=0.1,max=180,exp=true,div=0.1,default=math.random(5,30)},
   }
   params:add_group("CLOUDS",1+#params_menu)
-  params:add_option("clouds_activate","include effect",{"no","yes"},1)
-  params:set_action("clouds_activate",function(v)
-    engine.clouds_toggle(v-1)
+  params:add_option("grains_activate","include effect",{"no","yes"},1)
+  params:set_action("grains_activate",function(v)
+    engine.grains_toggle(v-1)
   end)
   for _,pram in ipairs(params_menu) do
     params:add{
       type="control",
-      id="clouds_"..pram.id,
+      id="grains_"..pram.id,
       name=pram.name,
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    params:set_action("clouds_"..pram.id,function(v)
-      engine.clouds_set(pram.id,v)
+    params:set_action("grains_"..pram.id,function(v)
+      engine.grains_set(pram.id,v)
     end)
   end
 end
@@ -699,12 +737,8 @@ function reset()
     beat_num[i]=0
   end
   engine.resetPhase()
-  ignore_transport=true
+  ignore_transport=30
   lattice:hard_restart()
-  clock.run(function()
-    clock.sleep(1)
-    ignore_transport=false
-  end)
 end
 
 function startup(on)
@@ -789,7 +823,7 @@ function key(k,z)
       params:set(dat.ti.."play",z)
       if z==0 then
         local hold_time=(clock.get_beats()-hold_beats)*clock.get_beat_sec()
-        if hold_time>0.5 then
+        if hold_time>2.5 then
           params:set(dat.ti.."sequencer",3-params:get(dat.ti.."sequencer"))
         end
       end
@@ -832,7 +866,9 @@ show_manager=false
 local ctl_code=false
 local shift_code=false
 function keyboard.code(code,value)
-  show_manager=true
+  if value==1 then
+    show_manager=true
+  end
   if string.find(code,"CTRL") then
     ctl_code=value>0
     do return end
@@ -890,6 +926,7 @@ function draw_message()
     end
   end
 end
+
 function draw_paracosms()
 
   local topleft=dat.tt[dat.ti]:redraw()
@@ -927,4 +964,19 @@ function draw_paracosms()
     screen.text_right(enc_func[ui_page][6][2]())
   end
 
+  if params:get("record_firstbeat")==1 then
+    local beat=(dat.beat-1)%(params:get("record_beats")*4)
+    local x=util.linlin(0,params:get("record_beats")*4,0,128,beat)
+    screen.level(beat%4==0 and 15 or 5)
+    screen.aa(1)
+    local size=2
+    if beat%16==0 then
+      size=8
+    elseif beat%4==0 then
+      size=5
+    end
+    screen.rect(x,10,size,size)
+    screen.aa(0)
+    screen.fill()
+  end
 end

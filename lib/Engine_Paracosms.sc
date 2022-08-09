@@ -8,12 +8,14 @@ Engine_Paracosms : CroneEngine {
     var ouroboros;
     var tapedeck;
     var greyhole;
-    var clouds;
+    var grains;
     var fnOSC;
+    var oscPhase;
     var startup;
     var startupNum;
+    var busPhasor;
     var busTapedeck;
-    var busClouds;
+    var busGrains;
     var busGreyhole;
     var groupSynths;
     var groupEffects;
@@ -25,8 +27,9 @@ Engine_Paracosms : CroneEngine {
 
     alloc {
         // Paracosms specific v0.0.1
+        busPhasor=Bus.audio(context.server,1);
         busTapedeck=Bus.audio(context.server,2);
-        busClouds=Bus.audio(context.server,2);
+        busGrains=Bus.audio(context.server,2);
         busGreyhole=Bus.audio(context.server,2);
         groupSynths=Group.new;
         context.server.sync;
@@ -48,11 +51,16 @@ Engine_Paracosms : CroneEngine {
                 });
             });
         },'/tr', context.server.addr);
+
+        oscPhase=OSCFunc({ |msg| 
+            NetAddr("127.0.0.1", 10111).sendMsg("phase",msg[3],msg[3]);            
+        },'/phase');
+
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,0,busTapedeck,busClouds,busGreyhole,"/home/we/dust/data/paracosms/cache");
-        ouroboros=Ouroboros.new(context.server,0);
+        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busGrains,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
+        ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
-        clouds=CloudsFX.new(context.server,groupEffects,busClouds,0);
+        grains=GrainsFX.new(context.server,groupEffects,busGrains,0);
         greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
         context.server.sync;
 
@@ -94,10 +102,11 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("pattern","if", { arg msg;
             paracosms.pattern(msg[1].asInteger,msg[2].asFloat);
         });
-        this.addCommand("record_start","",{ arg msg;
-            ouroboros.recordStart();
+        this.addCommand("record_start","i",{ arg msg;
+            var id=msg[1].asInteger;
+            ouroboros.recordStart(id);
         });
-        this.addCommand("record","isffffii", { arg msg;
+        this.addCommand("record","isffffiif", { arg msg;
             var id=msg[1].asInteger;
             var filename=msg[2].asString;
             var seconds=msg[3];
@@ -106,7 +115,8 @@ Engine_Paracosms : CroneEngine {
             var preDelay=msg[6];
             var startImmedietly=msg[7];
             var playWhenFinished=msg[8];
-            ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,{
+            var allowRotation=msg[9];
+            ouroboros.record(id,seconds,crossfade,threshold,preDelay,startImmedietly,allowRotation,{
             },{ arg buf;
                 ["done",buf,"writing",filename].postln;
                 buf.write(filename,headerFormat: "wav", sampleFormat: "int16", completionMessage:{
@@ -135,12 +145,12 @@ Engine_Paracosms : CroneEngine {
             tapedeck.set(msg[1],msg[2]);
         });
 
-        // clouds
-        this.addCommand("clouds_toggle","i",{arg msg;
-            clouds.toggle(msg[1]);
+        // grains
+        this.addCommand("grains_toggle","i",{arg msg;
+            grains.toggle(msg[1]);
         });
-        this.addCommand("clouds_set","sf",{arg msg;
-            clouds.set(msg[1],msg[2]);
+        this.addCommand("grains_set","sf",{arg msg;
+            grains.set(msg[1],msg[2]);
         });
 
         // greyhole
@@ -170,11 +180,13 @@ Engine_Paracosms : CroneEngine {
         ouroboros.free;
         tapedeck.free;
         greyhole.free;
-        clouds.free;
+        grains.free;
         fnOSC.free;
         busGreyhole.free;
-        busClouds.free;
+        busGrains.free;
         busTapedeck.free;
+        busPhasor.free;
+        oscPhase.free;
         // ^ Paracosms specific
     }
 }

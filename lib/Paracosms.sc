@@ -17,12 +17,12 @@ Paracosms {
 	var cut_fade;
 
 	*new {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
-		^super.new.init(serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
+		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		^super.new.init(serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
 
 		// set arguments
 		server=serverName;
@@ -40,7 +40,7 @@ Paracosms {
 		cut_fade=0.2;
 
 		watching=0;
-		busPhasor=Bus.audio(server,1);
+		busPhasor=argBusPhasor;
 		(1..2).do({arg ch;
 			SynthDef("defPlay2"++ch,{
 				arg amp=1.0,pan=0,
@@ -54,7 +54,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in,readHead_changed;
@@ -154,7 +154,7 @@ Paracosms {
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				Out.ar(out1,snd*send_main);
 				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_clouds);
+				Out.ar(out3,snd*send_grains);
 				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
@@ -172,7 +172,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in;
@@ -238,7 +238,7 @@ Paracosms {
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				Out.ar(out1,snd*send_main);
 				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_clouds);
+				Out.ar(out3,snd*send_grains);
 				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
@@ -259,7 +259,9 @@ Paracosms {
 
 		SynthDef("defPhasor",{
 			arg out,rate=1.0,rateLag=0.2,t_sync=0;
-			Out.ar(out,Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0));
+			var phase=Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0);
+			// SendReply.kr(Impulse.kr(8),"/phase",[phase]);
+			Out.ar(out,phase);
 		}).send(server);
 
 		SynthDef("defPattern",{
@@ -528,11 +530,6 @@ Paracosms {
 		synsFinished.do({ arg item, i;
 			item.free;
 		});
-		busPhasor.free;
-		busOut1.free;
-		busOut2.free;
-		busOut3.free;
-		busOut4.free;
 		synMetronome.free;
 		syns.free;
 		bufs.free;
