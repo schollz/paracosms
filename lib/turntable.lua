@@ -65,7 +65,7 @@ function Turntable:init()
     {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","output","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","output","load_channels","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -181,9 +181,10 @@ function Turntable:init()
   end
   params:add_option(id.."guess","guess bpm?",{"no","yes"},1)
   params:add_option(id.."type","type",{"melodic","drums"},1)
+  params:add_option(id.."load_channels","load channels",{"mono","source"},2)
   params:add_number(id.."tune","tune (notes)",-24,24,0)
   params:add_number(id.."source_bpm","sample bpm",20,320,clock.get_tempo())
-  for _,pram in ipairs({"type","tune","source_bpm"}) do
+  for _,pram in ipairs({"type","tune","source_bpm","load_channels"}) do
     params:set_action(id..pram,function(v)
       if global_startup then
         do return end
@@ -337,9 +338,12 @@ function Turntable:retune()
   local tune=params:get(self.id.."tune")
   local clock_tempo=math.floor(clock.get_tempo())
   self.path=self.path_original
-  if bpm~=clock_tempo or tune~=self.last_tune or params:get(self.id.."normalize")==1 then
+  local channels,_,_=audio.file_info(self.path)
+  if bpm~=clock_tempo or tune~=self.last_tune or
+    params:get(self.id.."normalize")==1 or
+    (params:get(self.id.."load_channels")==1 and channels==2) then
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
-    local newpath=string.format("%s%s_%d_pitch%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),math.floor(clock.get_tempo()))
+    local newpath=string.format("%s%s_%d_pitch%d_%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),params:get(self.id.."load_channels"),math.floor(clock.get_tempo()))
     if not util.file_exists(newpath) then
       print(string.format("turntable%d: retuning %s",self.id,self.path_original))
       local cmd=string.format("sox %s %s ",self.path,newpath)
@@ -352,6 +356,9 @@ function Turntable:retune()
       end
       if tune~=0 then
         cmd=string.format("%s pitch %d",cmd,tune*100)
+      end
+      if (params:get(self.id.."load_channels")==1 and channels==2) then
+        cmd=string.format("%s remix 1,2",cmd)
       end
       cmd=cmd.." rate -v 48k"
       print(cmd)
