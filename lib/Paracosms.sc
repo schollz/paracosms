@@ -43,7 +43,7 @@ Paracosms {
 		busPhasor=argBusPhasor;
 		(1..2).do({arg ch;
 			SynthDef("defPlay2"++ch,{
-				arg amp=1.0,pan=0,
+				arg amp=1.0,pan=0,mute=0,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
@@ -148,6 +148,8 @@ Paracosms {
 
 				// main envelope
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+				// mute
+				snd=snd*Lag.kr(1-mute,0.1);
 
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
@@ -161,7 +163,7 @@ Paracosms {
 
 		(1..2).do({arg ch;
 			SynthDef("defPlay1"++ch,{
-				arg amp=1.0,pan=0,
+				arg amp=1.0,pan=0,mute=0,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
@@ -231,6 +233,8 @@ Paracosms {
 
 				// main envelope
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+				// mute
+				snd=snd*Lag.kr(1-mute,0.1);
 
 
 
@@ -242,6 +246,58 @@ Paracosms {
 				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
+
+
+		(1..2).do({arg ch;
+			SynthDef("defStutter"++ch,{
+				arg bufnum,busPhase,offset,loopStart=0,loopEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+				var snd, localin_data, readHead_changed, readHead_in, readHead, pos1,pos2,pos1trig,pos2trig,frames,framesStart,framesEnd;
+				var line=Line.kr(0,1,totalTime);
+				var bufDuration=BufDur.ir(bufnum);
+				loopStart=Latch.ar((In.ar(busPhase)+offset).mod(bufDuration)/bufDuration,Impulse.ar(0));
+				loopEnd=loopStart+loopLength;
+				
+				rate=rate*BufRateScale.ir(bufnum)*((loopStart<loopEnd)*2-1);
+				frames=BufFrames.ir(bufnum);
+				framesEnd=frames*loopEnd;
+				framesStart=frames*loopStart;
+				
+				localin_data=LocalIn.ar(2);
+				readHead_changed=localin_data[0];
+				readHead_in=localin_data[1];
+				pos1=Phasor.ar(
+					trig:readHead_changed*(1-readHead_in),
+					rate:rate,
+					start:framesStart,
+					end:(rate>0)*frames,
+					resetPos:framesStart,
+				);
+				pos1trig=Trig.ar((pos1>framesEnd)*(1-readHead_in),0.01)*(rate>0);
+				pos1trig=pos1trig+(Trig.ar((pos1<framesEnd)*(1-readHead_in),0.01)*(rate<0));
+				pos2=Phasor.ar(
+					trig:readHead_changed*(readHead_in),
+					rate:rate,
+					start:framesStart,
+					end:(rate>0)*frames,
+					resetPos:framesStart,
+				);
+				pos2trig=Trig.ar((pos2>framesEnd)*readHead_in,0.01)*(rate>0);
+				pos2trig=pos2trig+(Trig.ar((pos2<framesEnd)*readHead_in,0.01)*(rate<0));
+				readHead=ToggleFF.ar(pos1trig+pos2trig);
+				LocalOut.ar([Changed.ar(readHead),readHead]);
+				snd=BufRd.ar(ch,bufnum,pos1.poll,interpolation:2);
+				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(2,bufnum,pos2,interpolation:2)]);
+				snd=RLPF.ar(snd,LinExp.kr(line,1-direction,direction,100,20000),0.707);
+				snd=snd*EnvGen.ar(Env.new([0,1,1,0],[xfade,totalTime-xfade,xfade],\sine),doneAction:2);
+				snd=Pan2.ar(snd,pan)*amp/4;
+				Out.ar(out1,snd*send_main);
+				Out.ar(out2,snd*send_tape);
+				Out.ar(out3,snd*send_clouds);
+				Out.ar(out4,snd*send_reverb);
+			}).send(server);
+		});
+
 		SynthDef("defMetronome",{
 			arg bpm=120,busPhase,note=60,amp=1.0,t_free=0;
 			var snd,pos,phase,phaseMeasure,freq;
@@ -379,6 +435,38 @@ Paracosms {
 							"defPlay"++defPlay++bufs.at(id).numChannels,pars,
 						).onFree({["freed"+id].postln}));
 						NodeWatcher.register(syns.at(id));
+					});
+				});
+			});
+		});
+	}
+
+	// stutter will only work if the sample is playing
+	stutter {
+		arg id,repeats,repeatTime;
+		if (params.at(id).notNil,{
+			if (bufs.at(id).notNil,{
+				if (syns.at(id).notNil,{
+					if (syns.at(id).isRunning,{
+						var totalTime=repeatTime*repeats;
+
+						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id)];
+						params.at(id).keysValuesDo({ arg pk,pv; 
+							pars=pars++[pk,pv];
+						});
+						pars++[\totalTime,totalTime];
+						pars++[\direction,1];
+						pars++[\cut_fade,repeatTime/8];
+						pars++[\loopLength,repeatTime/bufs.at(id).duration];
+
+						Routine {
+							[id,"muting"].postln;
+							syns.at(id).set(\mute,1);
+							Synth.after(syns.at("phasor"),"defStutter"++bufs.at(id).numChannels,pars).onFree({"freed".postln;});
+							(totalTime-0.2).wait;
+							[id,"unumting"].postln;
+							syns.at(id).set(\mute,0);
+						}.play;
 					});
 				});
 			});

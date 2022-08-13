@@ -82,7 +82,19 @@ style=function()
   --   params:set(i.."amp_strength",0.25)
   --   params:set(i.."pan_strength",0.5)
   -- end
-
+  -- things put here will run after startup is initiated
+  -- useful to do things like load a specific save
+  params:set("1play",1)
+  clock.run(function()
+    clock.sleep(1)
+    engine.stutter(1,12,clock.get_beat_sec()/4)
+    clock.sleep(3)
+    engine.stutter(1,12,clock.get_beat_sec()/4)
+    clock.sleep(3)
+    engine.stutter(1,12,clock.get_beat_sec()/4)
+    -- clock.sleep(3)
+    -- params:set("1play",0)
+  end)
 end
 
 ---------------------------------
