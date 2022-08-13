@@ -15,6 +15,7 @@ Paracosms {
 	var watching;
 	var group;
 	var cut_fade;
+	var oscMute;
 
 	*new {
 		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
@@ -250,19 +251,22 @@ Paracosms {
 
 		(1..2).do({arg ch;
 			SynthDef("defStutter"++ch,{
-				arg bufnum,busPhase,offset,loopStart=0,loopEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
+				arg id,bufnum,busPhase,offset,loopStart=0,loopEnd=1,sampleStart=0,sampleEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
+				lpf=20000,lpfqr=0.707,
 				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
 				var snd, localin_data, readHead_changed, readHead_in, readHead, pos1,pos2,pos1trig,pos2trig,frames,framesStart,framesEnd;
 				var line=Line.kr(0,1,totalTime);
 				var bufDuration=BufDur.ir(bufnum);
-				loopStart=Latch.ar((In.ar(busPhase)+offset).mod(bufDuration)/bufDuration,Impulse.ar(0));
+				loopStart=Latch.ar((In.ar(busPhase)+offset).mod(bufDuration)/bufDuration,Impulse.ar(0)).poll;
+				loopStart=Wrap.ar(loopStart,sampleStart,sampleEnd);
+
 				loopEnd=loopStart+loopLength;
 				
 				rate=rate*BufRateScale.ir(bufnum)*((loopStart<loopEnd)*2-1);
 				frames=BufFrames.ir(bufnum);
 				framesEnd=frames*loopEnd;
 				framesStart=frames*loopStart;
-				
+
 				localin_data=LocalIn.ar(2);
 				readHead_changed=localin_data[0];
 				readHead_in=localin_data[1];
@@ -286,11 +290,15 @@ Paracosms {
 				pos2trig=pos2trig+(Trig.ar((pos2<framesEnd)*readHead_in,0.01)*(rate<0));
 				readHead=ToggleFF.ar(pos1trig+pos2trig);
 				LocalOut.ar([Changed.ar(readHead),readHead]);
-				snd=BufRd.ar(ch,bufnum,pos1.poll,interpolation:2);
+				snd=BufRd.ar(ch,bufnum,pos1,interpolation:2);
 				snd=SelectX.ar(Lag.ar(readHead,cut_fade),[snd,BufRd.ar(2,bufnum,pos2,interpolation:2)]);
-				snd=RLPF.ar(snd,LinExp.kr(line,1-direction,direction,100,20000),0.707);
-				snd=snd*EnvGen.ar(Env.new([0,1,1,0],[xfade,totalTime-xfade,xfade],\sine),doneAction:2);
-				snd=Pan2.ar(snd,pan)*amp/4;
+				snd=RLPF.ar(snd,LinExp.kr(line,1-direction,direction,lpf/100,lpf),lpfqr);
+				snd=snd*EnvGen.ar(Env.new([0,1,1,0],[xfade,totalTime-xfade-xfade,xfade],\sine),doneAction:2);
+				snd=Pan2.ar(snd,0.0);
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
+				snd=snd*amp/4;
+				SendReply.kr(TDelay.kr(Impulse.kr(0),totalTime-xfade),"/paracosmsMute",[id,0]);
 				Out.ar(out1,snd*send_main);
 				Out.ar(out2,snd*send_tape);
 				Out.ar(out3,snd*send_clouds);
@@ -331,6 +339,15 @@ Paracosms {
 			SendTrig.ar(Changed.ar(pos>syncPos)*(pos>syncPos),444,pos);
 		}).send(server);
 
+		oscMute = OSCFunc({ |msg| 
+			var id=msg[3];
+			if (syns.at(id).notNil,{
+				if (syns.at(id).isRunning,{
+					[id,"mute",msg[4]].postln;
+					syns.at(id).set(\mute,msg[4]);
+				});
+			});
+		}, '/paracosmsMute');
 
 		server.sync;
 
@@ -443,30 +460,23 @@ Paracosms {
 
 	// stutter will only work if the sample is playing
 	stutter {
-		arg id,repeats,repeatTime;
+		arg id,repeats,repeatTime,direction;
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				if (syns.at(id).notNil,{
 					if (syns.at(id).isRunning,{
 						var totalTime=repeatTime*repeats;
-
 						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id)];
 						params.at(id).keysValuesDo({ arg pk,pv; 
 							pars=pars++[pk,pv];
 						});
-						pars++[\totalTime,totalTime];
-						pars++[\direction,1];
-						pars++[\cut_fade,repeatTime/8];
-						pars++[\loopLength,repeatTime/bufs.at(id).duration];
-
-						Routine {
-							[id,"muting"].postln;
-							syns.at(id).set(\mute,1);
-							Synth.after(syns.at("phasor"),"defStutter"++bufs.at(id).numChannels,pars).onFree({"freed".postln;});
-							(totalTime-0.2).wait;
-							[id,"unumting"].postln;
-							syns.at(id).set(\mute,0);
-						}.play;
+						pars=pars++[\totalTime,totalTime];
+						pars=pars++[\direction,direction];
+						pars=pars++[\cut_fade,repeatTime/2];
+						pars=pars++[\loopLength,repeatTime/bufs.at(id).duration];
+						[id,"stutter","repeats",repeats,"repeatTime",repeatTime,"totalTime",totalTime].postln;
+						syns.at(id).set(\mute,1);
+						Synth.after(syns.at("phasor"),"defStutter"++bufs.at(id).numChannels,pars).onFree({"freed".postln;});
 					});
 				});
 			});
@@ -621,6 +631,7 @@ Paracosms {
 		synMetronome.free;
 		syns.free;
 		bufs.free;
+		oscMute.free;
 	}
 
 }

@@ -81,8 +81,8 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("play","if", { arg msg;
             paracosms.play(msg[1].asInteger,msg[2],0);
         });
-        this.addCommand("stutter","iff", { arg msg;
-            paracosms.stutter(msg[1].asInteger,msg[2],msg[3]);
+        this.addCommand("stutter","ifff", { arg msg;
+            paracosms.stutter(msg[1].asInteger,msg[2],msg[3],msg[4]);
         });
         this.addCommand("cut","ifff", { arg msg;
             paracosms.cut(msg[1].asInteger,msg[2],msg[3],msg[4]);
