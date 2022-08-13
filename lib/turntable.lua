@@ -38,6 +38,7 @@ function Turntable:init()
 
   -- setup params
   local id=self.id
+
   -- TODO: add pan and amp lfos
   local params_menu={
     {id="amp",name="amp",min=0,max=5,exp=false,div=0.01,default=1,response=1},
@@ -65,7 +66,7 @@ function Turntable:init()
     {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
   }
-  self.all_params={"file","output","load_channels","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","output","load_channels","stutter","stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -165,6 +166,18 @@ function Turntable:init()
 
     end)
   end
+
+  local stutter_lengths={"1/32","1/24","1/18","1/16","1/12","1/10","1/8","1/6","1/4","1/2"}
+  local stutter_lengths_num={1/32,1/24,1/18,1/16,1/12,1/10,1/8,1/6,1/4,1/2}
+  params:add{type="binary",name="stutter",id=id.."stutter",behavior="trigger",action=function(v)
+    if params:get(id.."play")==1 then
+      print("stutter",id)
+      engine.stutter(id,params:get(id.."stutter_repeats"),clock.get_beat_sec()*4*stutter_lengths_num[params:get(id.."stutter_length")],1)
+    end
+  end}
+  params:add_option(id.."stutter_length","stutter length",stutter_lengths,4)
+  params:add_number(id.."stutter_repeats","stutter repeats",1,64,8)
+
   params:add_number(id.."next","next",1,112,id,function(v) return v:get() end,true)
   params:add_option(id.."sequencer","sequencer",{"off","euclidean"})
   params:add_number(id.."n","n",1,128,16)
