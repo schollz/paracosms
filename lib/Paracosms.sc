@@ -131,13 +131,6 @@ Paracosms {
 				// time stretching
 				snd=((1-ts)*snd)+(ts*PlayBuf.ar(ch,bufnum,rate,Impulse.kr(1/tsSeconds),pos,1)*EnvGen.ar(Env.new([0,1,1,0],[0.005,tsSeconds-0.01,0.005]),Impulse.kr(1/tsSeconds)));
 
-				// balance the two channels
-				pan=Lag.kr(pan);
-				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
-				snd=Pan2.ar(snd,0.0);
-				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
-				snd=Balance2.ar(snd[0],snd[1],pan);
-
 				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
 				snd=snd*amp/4;
 
@@ -152,6 +145,13 @@ Paracosms {
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 
+				// balance the two channels
+				pan=Lag.kr(pan);
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
@@ -216,13 +216,6 @@ Paracosms {
 				// time stretching
 				snd=((1-ts)*snd)+(ts*PlayBuf.ar(ch,bufnum,rate,Impulse.kr(1/tsSeconds),pos,1)*EnvGen.ar(Env.new([0,1,1,0],[0.005,tsSeconds-0.01,0.005]),Impulse.kr(1/tsSeconds)));
 
-				// balance the two channels
-				pan=Lag.kr(pan);
-				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
-				snd=Pan2.ar(snd,0.0);
-				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
-				snd=Balance2.ar(snd[0],snd[1],pan);
-
 				amp=Clip.kr(amp+SinOsc.kr(1/amp_period,phase:rrand(0,3),mul:amp_strength),0,5);
 				snd=snd*amp/4;
 
@@ -237,7 +230,13 @@ Paracosms {
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 
-
+				// balance the two channels
+				pan=Lag.kr(pan);
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
@@ -295,6 +294,7 @@ Paracosms {
 				snd=RLPF.ar(snd,LinExp.kr(line,1-direction,direction,lpf/100,lpf),lpfqr);
 				snd=snd*EnvGen.ar(Env.new([0,1,1,0],[xfade,totalTime-xfade-xfade,xfade],\sine),doneAction:2);
 				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
 				snd=Balance2.ar(snd[0],snd[1],pan);
 				snd=snd*amp/4;
