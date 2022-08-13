@@ -256,7 +256,7 @@ Paracosms {
 				var snd, localin_data, readHead_changed, readHead_in, readHead, pos1,pos2,pos1trig,pos2trig,frames,framesStart,framesEnd;
 				var line=Line.kr(0,1,totalTime);
 				var bufDuration=BufDur.ir(bufnum);
-				loopStart=Latch.ar((In.ar(busPhase)+offset).mod(bufDuration)/bufDuration,Impulse.ar(0)).poll;
+				loopStart=Latch.ar((In.ar(busPhase)+offset).mod(bufDuration)/bufDuration,Impulse.ar(0));
 				loopStart=Wrap.ar(loopStart,sampleStart,sampleEnd);
 
 				loopEnd=loopStart+loopLength;
