@@ -40,7 +40,7 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row1"},
   {folder="/home/we/dust/audio/paracosms/row2"},
   {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row3"},
+  {folder="/home/we/dust/audio/paracosms/row4"},
   {folder="/home/we/dust/audio/paracosms/row5"},
   {folder="/home/we/dust/audio/paracosms/row6"},
   {folder="/home/we/dust/audio/paracosms/row7"},
@@ -84,17 +84,6 @@ style=function()
   -- end
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
-  params:set("1play",1)
-  clock.run(function()
-    -- clock.sleep(1)
-    -- engine.stutter(1,12,clock.get_beat_sec()/4)
-    -- clock.sleep(3)
-    -- engine.stutter(1,12,clock.get_beat_sec()/4)
-    -- clock.sleep(3)
-    -- engine.stutter(1,12,clock.get_beat_sec()/4)
-    -- clock.sleep(3)
-    -- params:set("1play",0)
-  end)
 end
 
 ---------------------------------

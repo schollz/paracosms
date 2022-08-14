@@ -100,7 +100,13 @@ function GGrid:init()
         if not on and hold_time>0.5 then
           params:set(id.."sequencer",3-params:get(dat.ti.."sequencer"))
         end
-      elseif hold_time>0.25 then
+      elseif hold_time>0.25 or (params:get("grid_touch")>1 and not on) then
+        if hold_time<0.25 and params:get("grid_touch")==2 then
+          hold_time=0.2
+        else
+          hold_time=math.pow(hold_time*1.5,2)
+        end
+        print("grid press hold",hold_time)
         if params:get(id.."play")==1 then
           params:set(id.."release",hold_time)
         else
