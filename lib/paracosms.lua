@@ -142,6 +142,9 @@ function init()
   global_divisions={1/32}
   global_reset_needed=0
 
+  -- grid options
+  params:add_group("GRID",1)
+  params:add_option("grid_touch","toggle press",{"short & long","only short"})
   -- crow
   params:add_group("CROW",8)
   for j=1,2 do
