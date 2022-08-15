@@ -20,7 +20,7 @@ function os_capture(cmd,raw)
   return s
 end
 
-function split_delimeter(inputstr,sep)
+function split_delimiter(inputstr,sep)
   if sep==nil then
     sep="%s"
   end
@@ -53,9 +53,8 @@ end
 function list_files(dir)
   local delim="!"
   local files=os_capture(string.format("find %s -type f ",dir).."-printf '%p"..delim.."'")
-  local tt=mysplit(files,delim)
   local files={}
-  for _,t in ipairs(tt) do
+  for _,t in ipairs(split_delimiter(files,delim)) do
     if #t>2 then
       table.insert(files,t)
     end
@@ -109,7 +108,7 @@ function install()
   -- create directory to install
   os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
   for _,filename in ipairs(files_to_install) do
-    _,filesname2,_=split_path(filename)
+    _,filename2,_=split_path(filename)
     if current_files[filename2]==nil then
       print("installing",filename2)
       os.execute(string.format("cp %s /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins",filename))
