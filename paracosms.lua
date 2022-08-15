@@ -20,6 +20,17 @@ function os_capture(cmd,raw)
   return s
 end
 
+function split_delimeter(inputstr,sep)
+  if sep==nil then
+    sep="%s"
+  end
+  local t={}
+  for str in string.gmatch(inputstr,"([^"..sep.."]+)") do
+    table.insert(t,str)
+  end
+  return t
+end
+
 function split_path(path)
   -- https://stackoverflow.com/questions/5243179/what-is-the-neatest-way-to-split-out-a-path-name-into-its-components-in-lua
   -- /home/zns/1.txt returns
@@ -37,6 +48,19 @@ function list_folders(directory)
   end
   pfile:close()
   return t
+end
+
+function list_files(dir)
+  local delim="!"
+  local files=os_capture(string.format("find %s -type f ",dir).."-printf '%p"..delim.."'")
+  local tt=mysplit(files,delim)
+  local files={}
+  for _,t in ipairs(tt) do
+    if #t>2 then
+      table.insert(files,t)
+    end
+  end
+  return files
 end
 
 function reinstall()
@@ -67,21 +91,33 @@ function install()
   os.execute("cd /home/we/dust/code/paracosms && unzip ignore.zip")
 
   -- find the supercollider plugins to install
-  os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
-  local installed_files=os_capture("find /home/we/.local/share/SuperCollider/Extensions -name '*.sc'")
-  installed_files=installed_files.."\n"..os_capture("find /home/we/dust/code -name '*.sc' -not -path '/home/we/dust/code/paracosms/*'")
-  installed_files=installed_files.."\n"..os_capture("find /usr/local/share/SuperCollider/Extensions -name '*.sc'")
-  for _,folder in ipairs(list_folders("/home/we/dust/code/paracosms/ignore")) do
-    local one_file=os_capture("find /home/we/dust/code/paracosms/ignore/"..folder.." -name '*.sc' | head -n1")
-    pathname,filename,ext=split_path(one_file)
-    -- check if file exists
-    if string.find(installed_files,filename) then
-      print("already have "..folder.." not installing.")
-    else
-      print("installing "..folder..".")
-      os.execute("cp -r /home/we/dust/code/paracosms/ignore/"..folder.." /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins/")
+  local folders_to_check={
+    "/usr/local/share/SuperCollider/Extensions",
+    "/home/we/dust/code",
+    "/home/we/.local/share/SuperCollider/Extensions",
+  }
+  local current_files={}
+  for _,folder in ipairs(folders_to_check) do
+    for _,file in ipairs(list_files(folder)) do
+      _,filename,_=split_path(file)
+      current_files[filename]=true
     end
   end
+
+  local files_to_install=list_files("home/we/dust/code/paracosms/ignore")
+
+  -- create directory to install
+  os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
+  for _,filename in ipairs(files_to_install) do
+    _,filesname2,_=split_path(filename)
+    if current_files[filename2]==nil then
+      print("installing",filename2)
+      os.execute(string.format("cp %s /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins",filename))
+    else
+      print("skipping",filename2)
+    end
+  end
+  
 
   print("downloading audiowaveform (3MB)...")
   install_message="downloading audiowaveform..."
@@ -147,3 +183,4 @@ function redraw()
   end
   screen.update()
 end
+
