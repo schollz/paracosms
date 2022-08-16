@@ -87,7 +87,7 @@ function install()
   redraw()
   print("downloading 3rd party supercollider plugins...")
   os.execute("wget -q -O /home/we/dust/code/paracosms/ignore.zip https://github.com/schollz/supercollider-plugins/releases/download/plugins/ignore.zip")
-  os.execute("cd /home/we/dust/code/paracosms && unzip -q ignore.zip")
+  os.execute("cd /home/we/dust/code/paracosms && unzip -o -q ignore.zip")
 
   -- find the supercollider plugins to install
   local folders_to_check={
@@ -123,7 +123,7 @@ function install()
   redraw()
 
   os.execute("wget -q -O /home/we/dust/code/paracosms/lib/extra.zip https://github.com/schollz/paracosms/releases/download/release/extra.zip")
-  os.execute("cd /home/we/dust/code/paracosms/lib && unzip extra.zip")
+  os.execute("cd /home/we/dust/code/paracosms/lib && unzip -q -o extra.zip")
   os.execute("chmod +x /home/we/dust/code/paracosms/lib/audiowaveform")
   os.execute("chmod +x /home/we/dust/code/paracosms/lib/seamlessloop")
 
@@ -131,7 +131,7 @@ function install()
   install_message="downloading samples..."
   redraw()
   os.execute("wget -q -O /home/we/dust/code/paracosms/lib/row1.zip https://github.com/schollz/paracosms/releases/download/release/row1.zip")
-  os.execute("cd /home/we/dust/code/paracosms/lib && unzip row1.zip")
+  os.execute("cd /home/we/dust/code/paracosms/lib && unzip -q -o row1.zip")
 
   please_wait=false
   has_installed=true
