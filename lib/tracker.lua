@@ -175,6 +175,9 @@ function Tracker:beat(beat_num,division)
       if util.round(beat_per_note*(v-1)+1)==beat then
         -- print("measure",self.measure,"beat",beat,note,v)
         self.note_played={self.measure,col}
+        if params:get("edit_mode")==3 then
+          self.cursor={self.measure-1,col}
+        end
         if self.recording or self.playing then
           if note>0 then
             self.note_off(self.id)
@@ -304,6 +307,9 @@ function Tracker:keyboard(code,value)
     end
     -- check if we have a new note
     if new_note>-3 and value>0 and (params:get("edit_mode")==1 or params:get("edit_mode")==3) then
+      if params:get("edit_mode")==3 and value==2 then
+        new_note=-2
+      end
       self:note_change(new_note,insert,false)
     end
     if new_note>0 and (params:get("edit_mode")>1) then
