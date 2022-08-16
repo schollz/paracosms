@@ -105,7 +105,7 @@ function install()
     end
   end
 
-  local files_to_install=list_files("home/we/dust/code/paracosms/ignore")
+  local files_to_install=list_files("/home/we/dust/code/paracosms/ignore")
 
   -- create directory to install
   os.execute("mkdir -p /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins")
