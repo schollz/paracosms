@@ -87,7 +87,7 @@ function install()
   redraw()
   print("downloading 3rd party supercollider plugins...")
   os.execute("wget -q -O /home/we/dust/code/paracosms/ignore.zip https://github.com/schollz/supercollider-plugins/releases/download/plugins/ignore.zip")
-  os.execute("cd /home/we/dust/code/paracosms && unzip ignore.zip")
+  os.execute("cd /home/we/dust/code/paracosms && unzip -q ignore.zip")
 
   -- find the supercollider plugins to install
   local folders_to_check={
