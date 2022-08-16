@@ -98,8 +98,10 @@ function install()
   local current_files={}
   for _,folder in ipairs(folders_to_check) do
     for _,file in ipairs(list_files(folder)) do
-      _,filename,_=split_path(file)
-      current_files[filename]=true
+      if not string.find(file,"ignore") then 
+        _,filename,_=split_path(file)
+        current_files[filename]=true
+      end
     end
   end
 
