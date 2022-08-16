@@ -52,9 +52,9 @@ end
 
 function list_files(dir)
   local delim="!"
-  local files=os_capture(string.format("find %s -type f ",dir).."-printf '%p"..delim.."'")
+  local file_list=os_capture(string.format("find %s -type f ",dir).."-printf '%p"..delim.."'")
   local files={}
-  for _,t in ipairs(split_delimiter(files,delim)) do
+  for _,t in ipairs(split_delimiter(file_list,delim)) do
     if #t>2 then
       table.insert(files,t)
     end
