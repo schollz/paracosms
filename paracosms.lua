@@ -113,7 +113,7 @@ function install()
       print("installing",filename2)
       os.execute(string.format("cp %s /home/we/.local/share/SuperCollider/Extensions/supercollider-plugins",filename))
     else
-      print("skipping",filename2)
+      --print("skipping",filename2)
     end
   end
   
