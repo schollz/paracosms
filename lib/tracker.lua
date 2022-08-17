@@ -249,6 +249,10 @@ function Tracker:keyboard(code,value)
     self:cursor_move(0,1)
   elseif code=="CTRL+C" and value>0 then
     self:copy()
+  elseif code=="CTRL+B" and value>0 then
+    self:make_blank()
+    params:set("edit_mode",3)
+    self:play(true)
   elseif code=="CTRL+V" and value>0 then
     self:paste()
   elseif code=="DELETE" and value>0 then
@@ -382,6 +386,13 @@ function Tracker:note_change(note,insert,delete)
     table.insert(self.notes,{note})
   end
 
+  self:recalculate()
+end
+
+function Tracker:make_blank()
+  for i=1,4 do
+    self.notes[i]={-1,-1,-1,-1,-1,-1,-1,-1}
+  end
   self:recalculate()
 end
 
