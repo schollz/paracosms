@@ -86,6 +86,15 @@ table.insert(enc_func,{
   {function(d) params:delta(dat.ti.."ts",d) end,function() return "timestretch "..(params:get(dat.ti.."ts")>0 and "on" or "off") end},
   {function(d) end},
 })
+-- page 2
+table.insert(enc_func,{
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."stutter_handle",d) end,function() return "stutter "..(params:get(dat.ti.."stutter_handle")>5 and "on" or "off") end},
+  {function(d) end},
+  {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."stutter_length",d) end,function() return "length "..params:string(dat.ti.."stutter_length") end},
+  {function(d) params:delta(dat.ti.."stutter_repeats",d) end,function() return "repeats "..params:string(dat.ti.."stutter_repeats") end},
+})
 -- page 5
 table.insert(enc_func,{
   {function(d) delta_ti(d) end},
