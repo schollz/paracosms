@@ -175,6 +175,23 @@ function Turntable:init()
       engine.stutter(id,params:get(id.."stutter_repeats"),clock.get_beat_sec()*4*stutter_lengths_num[params:get(id.."stutter_length")],1)
     end
   end}
+  params:add_number(id.."stutter_handle","stutter handle",1,10,1)
+  params:hide(id.."stutter_handle")
+  local has_stuttered=false
+  params:set_action(id.."stutter_handle",function(x)
+    if x>5 then
+      if not has_stuttered then
+        params:set(id.."stutter_handle",1,true)
+        if params:get(id.."play")==1 then
+          print("stutter",id)
+          engine.stutter(id,params:get(id.."stutter_repeats"),clock.get_beat_sec()*4*stutter_lengths_num[params:get(id.."stutter_length")],1)
+        end
+        local has_stuttered=true
+      end
+    else
+      local has_stuttered=false
+    end
+  end)
   params:add_option(id.."stutter_length","stutter length",stutter_lengths,4)
   params:add_number(id.."stutter_repeats","stutter repeats",1,64,8)
 
