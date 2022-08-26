@@ -18,20 +18,25 @@ Paracosms {
 	var oscMute;
 
 	*new {
-		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
-		^super.new.init(serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
+		arg serverName,argGroup,argBusPhasor,argBusSideChainargBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache;
+		^super.new.init(serverName,argGroup,argBusPhasor,argBusSideChainargBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache;
 
 		// set arguments
 		server=serverName;
 		group=argGroup;
-		busOut1=argBusOut1;
-		busOut2=argBusOut2;
-		busOut3=argBusOut3;
-		busOut4=argBusOut4;
+		busSideChain=argBusSideChain;
+		busOut1SC=argBusOut1;
+		busOut2SC=argBusOut2;
+		busOut3SC=argBusOut3;
+		busOut4SC=argBusOut4;
+		busOut1nsc=argBusOut1nsc;
+		busOut2nsc=argBusOut2nsc;
+		busOut3nsc=argBusOut3nsc;
+		busOut4nsc=argBusOut4nsc;
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();
@@ -252,7 +257,7 @@ Paracosms {
 			SynthDef("defStutter"++ch,{
 				arg id,bufnum,busPhase,offset,loopStart=0,loopEnd=1,sampleStart=0,sampleEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
 				lpf=20000,lpfqr=0.707,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 				var snd, localin_data, readHead_changed, readHead_in, readHead, pos1,pos2,pos1trig,pos2trig,frames,framesStart,framesEnd;
 				var line=Line.kr(0,1,totalTime);
 				var bufDuration=BufDur.ir(bufnum);
@@ -301,14 +306,14 @@ Paracosms {
 				SendReply.kr(TDelay.kr(Impulse.kr(0),totalTime-xfade),"/paracosmsMute",[id,0]);
 				Out.ar(out1,snd*send_main);
 				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_clouds);
+				Out.ar(out3,snd*send_grains);
 				Out.ar(out4,snd*send_reverb);
 			}).send(server);
 		});
 
 		SynthDef("defAudioIn",{
 			arg ch=0,lpf=20000,lpfqr=0.707,hpf=20,hpfqr=0.909,panL=-1.0,pan=0,amp=0,
-			out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+			out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 			var snd;
 			snd=SoundIn.ar(ch);
 			snd=Pan2.ar(snd,pan,amp);
@@ -316,7 +321,7 @@ Paracosms {
 			snd=RLPF.ar(snd,lpf,lpfqr);
 			Out.ar(out1,snd*send_main);
 			Out.ar(out2,snd*send_tape);
-			Out.ar(out3,snd*send_clouds);
+			Out.ar(out3,snd*send_grains);
 			Out.ar(out4,snd*send_reverb);
 		}).send(server);
 
