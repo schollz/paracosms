@@ -18,7 +18,7 @@ Paracosms {
 	var oscMute;
 
 	*new {
-		arg serverName,argGroup,argBusPhasor,argBusSideChainargBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache;
+		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache;
 		^super.new.init(serverName,argGroup,argBusPhasor,argBusSideChainargBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1nsc,argBusOut2nsc,argBusOut3nsc,argBusOut4nsc,argDirCache);
 	}
 

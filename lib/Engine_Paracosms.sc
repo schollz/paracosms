@@ -9,6 +9,7 @@ Engine_Paracosms : CroneEngine {
     var tapedeck;
     var greyhole;
     var grains;
+    var main;
     var fnOSC;
     var oscPhase;
     var startup;
@@ -17,6 +18,12 @@ Engine_Paracosms : CroneEngine {
     var busTapedeck;
     var busGrains;
     var busGreyhole;
+    var busMain;
+    var busSC;
+    var busTapedeckNSC;
+    var busGrainsNSC;
+    var busGreyholeNSC;
+    var busMainNSC;
     var groupSynths;
     var groupEffects;
     // Paracosms ^
@@ -31,6 +38,12 @@ Engine_Paracosms : CroneEngine {
         busTapedeck=Bus.audio(context.server,2);
         busGrains=Bus.audio(context.server,2);
         busGreyhole=Bus.audio(context.server,2);
+        busMain=Bus.audio(context.server,2);
+        busTapedeckNSC=Bus.audio(context.server,2);
+        busGrainsNSC=Bus.audio(context.server,2);
+        busGreyholeNSC=Bus.audio(context.server,2);
+        busMainNSC=Bus.audio(context.server,2);
+        busSC=Bus.audio(context.server,2);
         groupSynths=Group.new;
         context.server.sync;
         groupEffects=Group.new(groupSynths,\addAfter);
@@ -57,11 +70,12 @@ Engine_Paracosms : CroneEngine {
         },'/phase');
 
         context.server.sync;
-        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,0,busTapedeck,busGrains,busGreyhole,busPhasor,"/home/we/dust/data/paracosms/cache");
+        paracosms=Paracosms.new(context.server,groupSynths,busPhasor,busSC,busMain,busTapedeck,busGrains,busGreyhole,busMainNSC,busTapedeckNSC,busGrainsNSC,busGreyholeNSC,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
         tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
         grains=GrainsFX.new(context.server,groupEffects,busGrains,0);
         greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
+        main=MainFX.new(context.server,groupEffects,busMain,busMainNSC,busSC,0);
         context.server.sync;
 
         this.addCommand("add","isi", { arg msg;
