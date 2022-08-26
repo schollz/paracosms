@@ -148,7 +148,8 @@ function init()
 
   -- globals
   global_rec_queue={}
-  global_divisions={1/32}
+  global_divisions={1,1/2,1/3,1/4,1/6,1/8,1/12,1/16,1/24,1/32,1/48,1/64}
+  global_divisions_string={"1","1/2","1/2T","1/4","1/4T","1/8","1/8T","1/16","1/16T","1/32","1/32T","1/64"}
   global_reset_needed=0
 
   -- grid options

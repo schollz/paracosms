@@ -27,11 +27,7 @@ function Tracker:init()
     "Q","2","W","3","E","R","5","T","6","Y","7","U","I","9","O","0","P","LEFTBRACE","EQUAL","RIGHTBRACE"
   }
 
-  local divisions={}
-  for _,v in ipairs(global_divisions) do
-    table.insert(divisions,"1/"..math.floor(1/v))
-  end
-  params:add_option(self.id.."division","tracker division",divisions)
+  params:add_option(self.id.."division","tracker division",global_divisions_string)
   params:set_action(self.id.."division",function(x)
     self.beats_per_measure=1/global_divisions[x]
   end)
