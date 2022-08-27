@@ -52,7 +52,7 @@ function Turntable:init()
     {id="release",name="release",dontsend=true,min=0.01,max=30,exp=false,div=0.01,default=clock.get_beat_sec()*4,response=1,unit="s"},
     {id="lpf",name="lpf",min=100,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="lpfqr",name="lpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
-    {id="hpf",name="hpf",min=10,max=20000,exp=true,div=10,default=10,unit="Hz",response=1},
+    {id="hpf",name="hpf",min=10,max=20000,exp=false,div=1,default=10,unit="Hz",response=1},
     {id="hpfqr",name="hpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
     {id="ts",name="timestretch",min=0,max=1,exp=false,div=1,default=0,response=1,formatter=function(param) return param:get()==1 and "on" or "off" end},
     {id="tsSlow",name="timestretch slow",min=1,max=100,div=0.1,exp=false,default=1,response=1,unit="x"},
@@ -68,7 +68,7 @@ function Turntable:init()
     {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
   }
-  self.all_params={"file","output","load_channels","stutter","compressing","compressible", "stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","output","load_channels","stutter","compressing","compressible","stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then

@@ -151,7 +151,7 @@ Paracosms {
 				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
 
 				// main envelope
-				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+				snd=snd*EnvGen.ar(Env.asr(attack*(1-oneshot),1.0,release,\sine),gate,doneAction:2);
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 
@@ -235,13 +235,13 @@ Paracosms {
 				snd=snd*amp/4;
 
 				// one-shot envelope
-				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.005,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
+				snd=snd*EnvGen.ar(Env.new([1-oneshot,1,1,1-oneshot],[0.002,(duration*(sampleEnd-sampleStart)/rate)-0.015,0.005]),doneAction:oneshot*2);
 
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
 				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
 
 				// main envelope
-				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+				snd=snd*EnvGen.ar(Env.asr(attack*(1-oneshot),1.0,release,\sine),gate,doneAction:2);
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 

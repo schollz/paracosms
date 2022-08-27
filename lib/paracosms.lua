@@ -550,9 +550,11 @@ function init()
       end
       dat.beat=dat.beat+1
       -- TODO: make option to change the probability of reset
-      if dat.lcm_beat~=nil and (dat.beat-1)%dat.lcm_beat==0 and global_reset_needed>0 then
-        print("resetPhase from lcm beat")
-        engine.resetPhase()
+      if dat.lcm_beat~=nil and dat.lcm_beat>0 then
+        if (dat.beat-1)%dat.lcm_beat==0 and global_reset_needed>0 then
+          print("resetPhase from lcm beat")
+          engine.resetPhase()
+        end
       end
       for id,_ in pairs(dat.sequencing) do
         dat.tt[id]:emit(dat.beat)

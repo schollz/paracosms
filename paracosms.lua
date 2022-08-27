@@ -1,4 +1,4 @@
--- paracosms v1.2.0
+-- paracosms v1.3.0
 --
 --
 -- llllllll.co/t/paracosms
@@ -84,6 +84,9 @@ style=function()
   -- end
   -- things put here will run after startup is initiated
   -- useful to do things like load a specific save
+
+  -- maybe load a default setting?
+  -- params:default()
 end
 
 ---------------------------------
