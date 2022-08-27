@@ -332,13 +332,13 @@ Paracosms {
 		});
 
 		SynthDef("defAudioIn",{
-			arg ch=0,lpf=20000,lpfqr=0.707,hpf=20,hpfqr=0.909,pan=0,amp=0,
-			out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
-			var snd;
-			snd=SoundIn.ar(ch);
-			snd=Pan2.ar(snd,pan,amp);
-			snd=RHPF.ar(snd,hpf,hpfqr);
-			snd=RLPF.ar(snd,lpf,lpfqr);
+				arg ch=0,lpf=20000,lpfqr=0.707,hpf=20,hpfqr=0.909,pan=0,amp=1.0,
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				var snd;
+				snd=SoundIn.ar(ch);
+				snd=Pan2.ar(snd,pan,amp);
+				snd=RHPF.ar(snd,hpf,hpfqr);
+				snd=RLPF.ar(snd,lpf,lpfqr);
 				Out.ar(outsc,compressing*snd);
 				Out.ar(out1,compressible*snd*send_main);
 				Out.ar(out2,compressible*snd*send_tape);
@@ -396,6 +396,21 @@ Paracosms {
 		server.sync;
 
 		syns.put("phasor",Synth.head(group,"defPhasor",[\out,busPhasor]));
+
+		server.sync;
+
+		syns.put("audioInL",Synth.after(syns.at("phasor"),"defAudioIn",
+				[\ch,0,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+	\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+	\pan,-1]
+			));
+		syns.put("audioInR",Synth.after(syns.at("phasor"),"defAudioIn",
+			[\ch,1,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\pan,1]
+		));
+		NodeWatcher.register(syns.at("audioInR"));
+		NodeWatcher.register(syns.at("audioInL"));
 
 		server.sync;
 	}
@@ -638,6 +653,11 @@ Paracosms {
 		});
 	}
 
+	audioin_set {
+		arg lr,key,val;
+		[lr,key,val].postln;
+		syns.at("audioIn"++lr).set(key,val);
+	}
 
 	set {
 		arg id,key,val,doupdate;

@@ -48,7 +48,7 @@ this script wouldn't exist without the ceasless inspiration from the likes of @s
 ![norns](https://user-images.githubusercontent.com/6550035/181917591-51062ba1-773e-49ae-b06f-aba82b34d5f4.jpg)
 
 
-**E1 will select sample. K1+E1 will select sample *that is loaded*.**
+**E1 will select sample that is loaded. K1+E1 will select any sample.**
 
 **K3 will play a sample.** holding K3 will fade the sample (in or out dependong on whether its playing). 
 
