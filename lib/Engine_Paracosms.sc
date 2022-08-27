@@ -72,9 +72,9 @@ Engine_Paracosms : CroneEngine {
         context.server.sync;
         paracosms=Paracosms.new(context.server,groupSynths,busPhasor,busSC,busMain,busTapedeck,busGrains,busGreyhole,busMainNSC,busTapedeckNSC,busGrainsNSC,busGreyholeNSC,"/home/we/dust/data/paracosms/cache");
         ouroboros=Ouroboros.new(context.server,groupSynths,busPhasor,0);
-        tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,0);
-        grains=GrainsFX.new(context.server,groupEffects,busGrains,0);
-        greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,0);
+        tapedeck=TapedeckFX.new(context.server,groupEffects,busTapedeck,busTapedeckNSC,busSC,0);
+        grains=GrainsFX.new(context.server,groupEffects,busGrains,busGrainsNSC,busSC,0);
+        greyhole=GreyholeFX.new(context.server,groupEffects,busGreyhole,busGreyholeNSC,busSC,0);
         main=MainFX.new(context.server,groupEffects,busMain,busMainNSC,busSC,0);
         context.server.sync;
 

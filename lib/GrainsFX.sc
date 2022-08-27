@@ -2,6 +2,8 @@ GrainsFX {
 
 	var server;
 	var busIn;
+    var busInNSC;
+    var busSC;
 	var busOut;
 	var params;
 	var syn;
@@ -9,23 +11,25 @@ GrainsFX {
 
 
 	*new {
-		arg serverName,argGroup,argBusIn,argBusOut;
-		^super.new.init(serverName,argGroup,argBusIn,argBusOut);
+		arg serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut;
+		^super.new.init(serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut);
 	}
 
 	init {
-		arg serverName,argGroup,argBusIn, argBusOut;
+		arg serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut;
 
 		// set arguments
 		server=serverName;
 		group=argGroup;
 		busIn=argBusIn;
+        busInNSC=argBusInNSC;
+        busSC=argBusSC;
 		busOut=argBusOut;
 
 		params=Dictionary.new();
 
 		SynthDef("defGrains",{
-			arg outBus=0,inBus,amp=0.5,
+			arg outBus=0,inBusNSC,inSC,sidechain_mult=2,compress_thresh=0.1,compress_level=0.1,compress_attack=0.01,compress_release=1,inBus,amp=0.5,
 			pitMin=0,pitMax=1,pitPer=120,
 			posMin=0,posMax=1,posPer=120,
 			sizeMin=0,sizeMax=1,sizePer=120,
@@ -37,7 +41,14 @@ GrainsFX {
 			rvbMin=0,rvbMax=1,rvbPer=120,
 			fbMin=0,fbMax=1,fbPer=120,
 			grainMin=0.5,grainMax=4,grainPer=120;
-			var snd;
+			var snd,sndSC,sndNSC;
+			snd=In.ar(inBus,2);
+			sndNSC=In.ar(inBusNSC,2);
+			sndSC=In.ar(inSC,2);
+            snd = Compander.ar(snd, sndSC*sidechain_mult, 
+            	compress_thresh, 1, compress_level, 
+            	compress_attack, compress_release);
+            snd = snd + sndNSC;
 			snd=MiClouds.ar(In.ar(inBus,2),
 				pit:SinOsc.kr(1/pitPer,rrand(0,3),(pitMax-pitMin)/2,(pitMax-pitMin)/2+pitMin),
 				pos:SinOsc.kr(1/posPer,rrand(0,3),(posMax-pitMin)/2,(posMax-posMin)/2+posMin),
@@ -58,7 +69,7 @@ GrainsFX {
 	toggle {
 		arg on;
 		if (on==1,{
-			var pars=[\outBus,busOut,\inBus,busIn];
+			var pars=[\outBus,busOut,\inBus,busIn,\inBusNSC,busInNSC,\inSC,busSC];
 			params.keysValuesDo({ arg pk,pv; 
 				pars=pars++[pk,pv];
 			});

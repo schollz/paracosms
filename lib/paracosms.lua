@@ -621,7 +621,7 @@ function params_sidechain()
     {id="compress_thresh",name="threshold",min=0,max=1,exp=false,div=0.01,default=0.1},
     {id="compress_level",name="level",min=0,max=1,exp=false,div=0.01,default=0.1},
     {id="compress_attack",name="attack",min=0,max=1,exp=false,div=0.001,default=0.01,formatter=function(param) return (param:get()*1000).." ms" end},
-    {id="compress_release",name="release",min=0,max=2,exp=false,div=0.01,default=1.0,formatter=function(param) return (param:get()).." s" end},
+    {id="compress_release",name="release",min=0,max=2,exp=false,div=0.01,default=0.2,formatter=function(param) return (param:get()*1000).." ms" end},
   }
   params:add_group("SIDECHAIN",#params_menu)
   for _,pram in ipairs(params_menu) do

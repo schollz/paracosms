@@ -59,7 +59,7 @@ blocks={
 -- -- uncommment these to get a demo from when you first start
 blocks={
   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
-  {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=1,send_tape=0}},
+  {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=0,send_reverb=1}},
   -- or you can apply parameters to make a block a set of oneshots
   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
   {folder="/home/we/dust/audio/paracosms/row3"},
@@ -88,6 +88,7 @@ style=function()
   params:set("1compressible",2)
   params:set("17compressing",2)
   params:set("17send_main",0)
+
 end
 
 ---------------------------------

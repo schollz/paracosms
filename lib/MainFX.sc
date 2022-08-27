@@ -31,7 +31,7 @@ MainFX {
 			snd=In.ar(inBus,2);
 			sndNSC=In.ar(inBusNSC,2);
 			sndSC=In.ar(inSC,2);
-            snd = Compander.ar(snd, sndSC*sidechain_mult.poll, 
+            snd = Compander.ar(snd, sndSC*sidechain_mult, 
             	compress_thresh, 1, compress_level, 
             	compress_attack, compress_release);
             snd = snd + sndNSC;
