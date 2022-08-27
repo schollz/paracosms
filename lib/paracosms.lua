@@ -148,7 +148,8 @@ function init()
 
   -- globals
   global_rec_queue={}
-  global_divisions={1/32}
+  global_divisions={1,1/2,1/3,1/4,1/6,1/8,1/12,1/16,1/24,1/32,1/48,1/64}
+  global_divisions_string={"1","1/2","1/2T","1/4","1/4T","1/8","1/8T","1/16","1/16T","1/32","1/32T","1/64"}
   global_reset_needed=0
 
   -- grid options
@@ -240,6 +241,7 @@ function init()
   params_greyhole()
   params_grains()
   params_tapedeck()
+  params_sidechain()
 
   -- setup parameters
   params:add_group("RECORDING",7)
@@ -610,6 +612,32 @@ function debounce_params()
         debounce_fn[k]=v
       end
     end
+  end
+end
+
+function params_sidechain()
+  local params_menu={
+    {id="sidechain_mult",name="amount",min=0,max=8,exp=false,div=0.1,default=2.0},
+    {id="compress_thresh",name="threshold",min=0,max=1,exp=false,div=0.01,default=0.1},
+    {id="compress_level",name="level",min=0,max=1,exp=false,div=0.01,default=0.1},
+    {id="compress_attack",name="attack",min=0,max=1,exp=false,div=0.001,default=0.01,formatter=function(param) return (param:get()*1000).." ms" end},
+    {id="compress_release",name="release",min=0,max=2,exp=false,div=0.01,default=0.2,formatter=function(param) return (param:get()*1000).." ms" end},
+  }
+  params:add_group("SIDECHAIN",#params_menu)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id=pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    params:set_action(pram.id,function(v)
+      engine.main_set(pram.id,v)
+      engine.tapedeck_set(pram.id,v)
+      engine.grains_set(pram.id,v)
+      engine.greyhole_set(pram.id,v)
+    end)
   end
 end
 

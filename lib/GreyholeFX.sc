@@ -2,35 +2,44 @@ GreyholeFX {
 
 	var server;
 	var busIn;
+    var busInNSC;
+    var busSC;
 	var busOut;
 	var params;
 	var syn;
-	var buf;
 	var group;
 
 
 	*new {
-		arg serverName,argGroup,argBusIn,argBusOut;
-		^super.new.init(serverName,argGroup,argBusIn,argBusOut);
+		arg serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut;
+		^super.new.init(serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut);
 	}
 
 	init {
-		arg serverName,argGroup,argBusIn, argBusOut;
+		arg serverName,argGroup,argBusIn,argBusInNSC,argBusSC,argBusOut;
 
 		// set arguments
 		server=serverName;
 		group=argGroup;
 		busIn=argBusIn;
+        busInNSC=argBusInNSC;
+        busSC=argBusSC;
 		busOut=argBusOut;
-		buf=Buffer.alloc(server,server.sampleRate*180,2);
 
 		params=Dictionary.new();
 
 		SynthDef("defGreyhole",{
-			arg outBus=0,inBus,amp=1.0,
+			arg  outBus=0,inBusNSC,inSC,sidechain_mult=2,compress_thresh=0.1,compress_level=0.1,compress_attack=0.01,compress_release=1,inBus,amp=1.0,
             delayTime=2.0,damp=0.0,size=1.0,diff=0.707,feedback=0.9,modDepth=0.1,modFreq=2.0;
-			var snd;
-            snd=Greyhole.ar(In.ar(inBus,2), 
+			var snd,sndSC,sndNSC,snd2;
+			snd=In.ar(inBus,2);
+			sndNSC=In.ar(inBusNSC,2);
+			sndSC=In.ar(inSC,2);
+            snd = Compander.ar(snd, sndSC*sidechain_mult, 
+            	compress_thresh, 1, compress_level, 
+            	compress_attack, compress_release);
+            snd = snd + sndNSC;
+            snd=Greyhole.ar(snd, 
                 delayTime: delayTime, 
                 damp: damp, 
                 size: size, 
@@ -47,7 +56,7 @@ GreyholeFX {
 	toggle {
 		arg on;
 		if (on==1,{
-			var pars=[\outBus,busOut,\inBus,busIn,\buf,buf];
+			var pars=[\outBus,busOut,\inBus,busIn,\inBusNSC,busInNSC,\inSC,busSC];
 			params.keysValuesDo({ arg pk,pv; 
 				pars=pars++[pk,pv];
 			});
@@ -80,7 +89,6 @@ GreyholeFX {
 
 	free {
 		syn.free;
-		buf.free;
 	}
 
 }

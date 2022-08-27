@@ -6,6 +6,11 @@ Paracosms {
 	var busOut2;
 	var busOut3;
 	var busOut4;
+	var busOut1NSC;
+	var busOut2NSC;
+	var busOut3NSC;
+	var busOut4NSC;
+	var busSideChain;
 	var busPhasor;
 	var syns;
 	var synsFinished;
@@ -18,20 +23,25 @@ Paracosms {
 	var oscMute;
 
 	*new {
-		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
-		^super.new.init(serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache);
+		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1NSC,argBusOut2NSC,argBusOut3NSC,argBusOut4NSC,argDirCache;
+		^super.new.init(serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1NSC,argBusOut2NSC,argBusOut3NSC,argBusOut4NSC,argDirCache);
 	}
 
 	init {
-		arg serverName,argGroup,argBusPhasor,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argDirCache;
+		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1NSC,argBusOut2NSC,argBusOut3NSC,argBusOut4NSC,argDirCache;
 
 		// set arguments
 		server=serverName;
 		group=argGroup;
+		busSideChain=argBusSideChain;
 		busOut1=argBusOut1;
 		busOut2=argBusOut2;
 		busOut3=argBusOut3;
 		busOut4=argBusOut4;
+		busOut1NSC=argBusOut1NSC;
+		busOut2NSC=argBusOut2NSC;
+		busOut3NSC=argBusOut3NSC;
+		busOut4NSC=argBusOut4NSC;
 		dirCache=argDirCache;
 
 		syns=Dictionary.new();
@@ -55,7 +65,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in,readHead_changed;
@@ -155,10 +165,15 @@ Paracosms {
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				Out.ar(out1,snd*send_main);
-				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_grains);
-				Out.ar(out4,snd*send_reverb);
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
 			}).send(server);
 		});
 
@@ -175,7 +190,7 @@ Paracosms {
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
 				var snd,pos,seconds,tsWindow;
 				var pos1,pos2,pos1trig,pos2trig,pos2trig_in;
@@ -240,10 +255,15 @@ Paracosms {
 
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
-				Out.ar(out1,snd*send_main);
-				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_grains);
-				Out.ar(out4,snd*send_reverb);
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
 			}).send(server);
 		});
 
@@ -252,7 +272,7 @@ Paracosms {
 			SynthDef("defStutter"++ch,{
 				arg id,bufnum,busPhase,offset,loopStart=0,loopEnd=1,sampleStart=0,sampleEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
 				lpf=20000,lpfqr=0.707,
-				out1=0,out2,out3,out4,send_main=1.0,send_tape=0,send_clouds=0,send_reverb=0;
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 				var snd, localin_data, readHead_changed, readHead_in, readHead, pos1,pos2,pos1trig,pos2trig,frames,framesStart,framesEnd;
 				var line=Line.kr(0,1,totalTime);
 				var bufDuration=BufDur.ir(bufnum);
@@ -299,12 +319,36 @@ Paracosms {
 				snd=Balance2.ar(snd[0],snd[1],pan);
 				snd=snd*amp/4;
 				SendReply.kr(TDelay.kr(Impulse.kr(0),totalTime-xfade),"/paracosmsMute",[id,0]);
-				Out.ar(out1,snd*send_main);
-				Out.ar(out2,snd*send_tape);
-				Out.ar(out3,snd*send_clouds);
-				Out.ar(out4,snd*send_reverb);
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
 			}).send(server);
 		});
+
+		SynthDef("defAudioIn",{
+			arg ch=0,lpf=20000,lpfqr=0.707,hpf=20,hpfqr=0.909,pan=0,amp=0,
+			out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+			var snd;
+			snd=SoundIn.ar(ch);
+			snd=Pan2.ar(snd,pan,amp);
+			snd=RHPF.ar(snd,hpf,hpfqr);
+			snd=RLPF.ar(snd,lpf,lpfqr);
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+		}).send(server);
 
 		SynthDef("defMetronome",{
 			arg bpm=120,busPhase,note=60,amp=1.0,t_free=0;
@@ -353,6 +397,20 @@ Paracosms {
 
 		syns.put("phasor",Synth.head(group,"defPhasor",[\out,busPhasor]));
 
+		server.sync;
+		
+		syns.put("audioInL",Synth.after(syns.at("phasor"),"defAudioIn",
+			[\ch,0,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\pan,-1]
+		));
+		syns.put("audioInR",Synth.after(syns.at("phasor"),"defAudioIn",
+			[\ch,1,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\pan,1]
+		));
+
+		server.sync;
 	}
 
 	pattern {
@@ -428,7 +486,9 @@ Paracosms {
 			if (bufs.at(id).notNil,{
 				if (syns.at(id).notNil,{
 					if (syns.at(id).isRunning,{
-						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade,\cut_fade,cut_fade];
+						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,xfade,\cut_fade,cut_fade];
 
 						params.at(id).put("sampleStart",sampleStart);
 						params.at(id).put("sampleEnd",sampleEnd);
@@ -466,7 +526,9 @@ Paracosms {
 				if (syns.at(id).notNil,{
 					if (syns.at(id).isRunning,{
 						var totalTime=repeatTime*repeats;
-						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id)];
+						var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\busPhase,busPhasor,\bufnum,bufs.at(id)];
 						params.at(id).keysValuesDo({ arg pk,pv; 
 							pars=pars++[pk,pv];
 						});
@@ -490,7 +552,9 @@ Paracosms {
 		if (params.at(id).notNil,{
 			if (bufs.at(id).notNil,{
 				var makeNew=true;
-				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,fadeIn,\cut_fade,cut_fade];
+				var pars=[\id,id,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\busPhase,busPhasor,\bufnum,bufs.at(id),\dataout,1,\gate,1,\attack,fadeIn,\cut_fade,cut_fade];
 				params.at(id).keysValuesDo({ arg pk,pv; 
 					pars=pars++[pk,pv];
 				});
