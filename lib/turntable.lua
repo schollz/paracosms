@@ -48,7 +48,7 @@ function Turntable:init()
     {id="pan_period",name="pan lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="pan_strength",name="pan lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
     {id="rate",name="rate",min=-2,max=2,exp=false,div=0.01,default=1,response=1,formatter=function(param) return param:get().."x" end},
-    {id="attack",name="attack",dontsend=true,min=0.001,max=10,exp=false,div=0.005,default=clock.get_beat_sec(),response=1,unit="s"},
+    {id="attack",name="attack",dontsend=true,min=0.001,max=10,exp=false,div=0.001,default=0.001,response=1,unit="s"},
     {id="release",name="release",dontsend=true,min=0.01,max=30,exp=false,div=0.01,default=clock.get_beat_sec()*4,response=1,unit="s"},
     {id="lpf",name="lpf",min=100,max=20000,exp=true,div=100,default=20000,unit="Hz",response=1},
     {id="lpfqr",name="lpf qr",min=0.01,max=1.0,exp=false,div=0.01,default=0.707,response=1},
