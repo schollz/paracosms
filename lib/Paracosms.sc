@@ -398,19 +398,6 @@ Paracosms {
 		syns.put("phasor",Synth.head(group,"defPhasor",[\out,busPhasor]));
 
 		server.sync;
-		
-		syns.put("audioInL",Synth.after(syns.at("phasor"),"defAudioIn",
-			[\ch,0,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
-\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
-\pan,-1]
-		));
-		syns.put("audioInR",Synth.after(syns.at("phasor"),"defAudioIn",
-			[\ch,1,\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
-\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
-\pan,1]
-		));
-
-		server.sync;
 	}
 
 	pattern {
