@@ -154,6 +154,11 @@ Engine_Paracosms : CroneEngine {
             startupNum=1.0.neg;
         });
 
+        // main 
+        this.addCommand("main_set","sf",{arg msg;
+            main.set(msg[1],msg[2]);
+        });
+
         // tapedeck
         this.addCommand("tapedeck_toggle","i",{arg msg;
             tapedeck.toggle(msg[1]);
@@ -195,6 +200,7 @@ Engine_Paracosms : CroneEngine {
         // Paracosms Specific v0.0.1
         paracosms.free;
         ouroboros.free;
+        main.free;
         tapedeck.free;
         greyhole.free;
         grains.free;
@@ -204,6 +210,12 @@ Engine_Paracosms : CroneEngine {
         busTapedeck.free;
         busPhasor.free;
         oscPhase.free;
+        busMain.free;
+        busTapedeckNSC.free;
+        busMainNSC.free;
+        busGreyholeNSC.free;
+        busGrainsNSC.free;
+        busSC.free;
         // ^ Paracosms specific
     }
 }

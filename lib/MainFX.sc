@@ -26,18 +26,21 @@ MainFX {
 		busOut=argBusOut;
 
 		SynthDef("defMain",{
-			arg outBus=0,inBusNSC,inSC,thresh=0.1,compression=0.1,attack=0.01,release=1,inBus;
+			arg outBus=0,inBusNSC,inSC,sidechain_mult=2,compress_thresh=0.1,compress_level=0.1,compress_attack=0.01,compress_release=1,inBus;
 			var snd,sndSC,sndNSC;
 			snd=In.ar(inBus,2);
 			sndNSC=In.ar(inBusNSC,2);
 			sndSC=In.ar(inSC,2);
-            snd = Compander.ar(snd, sndSC, thresh, 1, compression, attack, release);
+            snd = Compander.ar(snd, sndSC*sidechain_mult.poll, 
+            	compress_thresh, 1, compress_level, 
+            	compress_attack, compress_release);
             snd = snd + sndNSC;
 			Out.ar(outBus,snd);
 		}).send(server);
 
         server.sync;
-        syn=Synth.tail(group,"defMain",[\outBus,0,\inBus,busIn,\inBusNSC,busInNSC,\inSC,busSC]);
+        syn=Synth.tail(group,"defMain",[\outBus,0,\sidechain_mult,0.5,\inBus,busIn,\inBusNSC,busInNSC,\inSC,busSC]);
+        NodeWatcher.register(syn);
 	}
 
 	set {
@@ -46,7 +49,7 @@ MainFX {
 		if (syn.notNil,{
 			if (syn.isRunning,{
 				["Main: setting",k,v].postln;
-				syn.set(k,v)
+				syn.set(k.asString,v);
 			});
 		});
 	}

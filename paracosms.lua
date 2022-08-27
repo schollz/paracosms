@@ -87,6 +87,7 @@ style=function()
   params:set("17sequencer",2)
   params:set("1compressible",2)
   params:set("17compressing",2)
+  params:set("17send_main",0)
 end
 
 ---------------------------------
