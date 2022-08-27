@@ -110,6 +110,9 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("set","isf", { arg msg;
             paracosms.set(msg[1].asInteger,msg[2],msg[3],1);
         });
+        this.addCommand("audioin_set","ssf", { arg msg;
+            paracosms.audioin_set(msg[1],msg[2],msg[3]);
+        });
         this.addCommand("set_silent","isf", { arg msg;
             paracosms.set(msg[1].asInteger,msg[2],msg[3],0);
         });

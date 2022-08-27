@@ -26,19 +26,19 @@ local ui_page=1
 local enc_func={}
 -- page 1
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta("metronome",d) end,function() return "metronome: "..(params:get("metronome")==0 and "off" or params:get("metronome")) end},
   {function(d) params:delta("record_beats",d)end,function() return string.format("%2.3f beats",params:get("record_beats")) end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."offset",d)end,function() return "offset: "..params:string(dat.ti.."offset") end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return params:string(dat.ti.."oneshot") end},
 })
 
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."amp",d) end,function() return "volume: "..params:string(dat.ti.."amp") end},
   {function(d) params:delta(dat.ti.."amp",d) end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."amp_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."amp_strength")==0 and "off" or params:string(dat.ti.."amp_strength"))
   end},
@@ -48,10 +48,10 @@ table.insert(enc_func,{
 })
 -- page 1
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."pan",d) end,function() return "pan: "..params:string(dat.ti.."pan") end},
   {function(d) params:delta(dat.ti.."pan",d) end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."pan_strength",d) end,function()
     return "lfo: "..(params:get(dat.ti.."pan_strength")==0 and "off" or params:string(dat.ti.."pan_strength"))
   end},
@@ -61,55 +61,55 @@ table.insert(enc_func,{
 })
 -- page 3
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."lpf",d) end,function() return "lpf: "..params:string(dat.ti.."lpf") end},
   {function(d) params:delta(dat.ti.."lpfqr",d) end,function() return "1/q: "..params:string(dat.ti.."lpfqr") end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."hpf",d) end,function() return "hpf: "..params:string(dat.ti.."hpf") end},
   {function(d) params:delta(dat.ti.."hpfqr",d) end,function() return "1/q: "..params:string(dat.ti.."hpfqr") end},
 })
 -- page 3
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."sampleStart",d) end,function() return "start: "..params:string(dat.ti.."sampleStart") end},
   {function(d) params:delta(dat.ti.."sampleEnd",d) end,function() return "end: "..params:string(dat.ti.."sampleEnd") end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."oneshot",d) end,function() return "mode: "..params:string(dat.ti.."oneshot") end},
   {function(d) params:delta(dat.ti.."offset",d) end,function() return "offset:"..params:string(dat.ti.."offset") end},
 })
 -- page 2
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."tsSeconds",d) end,function() return "window "..params:string(dat.ti.."tsSeconds") end},
   {function(d) params:delta(dat.ti.."tsSlow",d) end,function() return "slow "..params:string(dat.ti.."tsSlow") end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."ts",d) end,function() return "timestretch "..(params:get(dat.ti.."ts")>0 and "on" or "off") end},
   {function(d) end},
 })
 -- page 2
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."stutter_handle",d) end,function() return "stutter "..(params:get(dat.ti.."stutter_handle")>5 and "on" or "off") end},
   {function(d) end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."stutter_length",d) end,function() return "length "..params:string(dat.ti.."stutter_length") end},
   {function(d) params:delta(dat.ti.."stutter_repeats",d) end,function() return "repeats "..params:string(dat.ti.."stutter_repeats") end},
 })
 -- page 5
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."send_main",d) end,function() return "main: "..params:string(dat.ti.."send_main") end},
   {function(d) params:delta(dat.ti.."send_reverb",d) end,function() return "greyhole: "..params:string(dat.ti.."send_reverb") end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."send_tape",d) end,function() return "tapedeck: "..params:string(dat.ti.."send_tape") end},
   {function(d) params:delta(dat.ti.."send_grains",d) end,function() return "grains: "..params:string(dat.ti.."send_grains") end},
 })
 -- page 4
 table.insert(enc_func,{
-  {function(d) delta_ti(d) end},
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."sequencer",d) end,function() return "sequencer: "..params:string(dat.ti.."sequencer") end},
   {function(d) params:delta(dat.ti.."k",d) end,function() return "k: "..params:string(dat.ti.."k") end},
-  {function(d) delta_ti(d,true) end},
+  {function(d) delta_ti(d) end},
   {function(d) params:delta(dat.ti.."n",d) end,function() return "n: "..params:string(dat.ti.."n") end},
   {function(d) params:delta(dat.ti.."w",d) end,function() return "w: "..params:string(dat.ti.."w") end},
 })
@@ -140,6 +140,8 @@ function shuffle(tbl)
 end
 
 function init()
+  original_monitor_level=params:get("monitor_level")
+  params:set("monitor_level",-96)
   norns.enc.sens(1,7)
 
   if substance~=nil then
@@ -238,6 +240,7 @@ function init()
   end
 
   -- setup effects parameters
+  params_audioin()
   params_greyhole()
   params_grains()
   params_tapedeck()
@@ -584,6 +587,10 @@ function init()
   lattice:start()
 end
 
+function cleanup()
+  params:set("monitor_level",original_monitor_level)
+end
+
 function clock.transport.start()
   if ignore_transport>0 then
     do return end
@@ -615,6 +622,50 @@ function debounce_params()
       end
     end
   end
+end
+
+function params_audioin()
+  local params_menu={
+    {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
+    {id="pan",name="pan",min=-1,max=1,exp=false,div=0.01,default=-1,response=1},
+    {id="hpf",name="hpf",min=10,max=2000,exp=true,div=5,default=10},
+    {id="hpfqr",name="hpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
+    {id="lpf",name="lpf",min=200,max=20000,exp=true,div=100,default=18000},
+    {id="lpfqr",name="lpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
+    {id="send_main",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_tape",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+  }
+  params:add_group("AUDIO IN",#params_menu*2+1)
+  params:add_option("audioin_linked","audio in",{"mono+mono","stereo"},2)
+  local lrs={"L","R"}
+  for _,pram in ipairs(params_menu) do
+    for lri,lr in ipairs(lrs) do
+      params:add{
+        type="control",
+        id="audioin"..pram.id..lr,
+        name=pram.name.." "..lr,
+        controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+        formatter=pram.formatter,
+      }
+      params:set_action("audioin"..pram.id..lr,function(v)
+        engine.audioin_set(lr,pram.id,v)
+        if params:get("audioin_linked")==2 then
+          if pram.id~="pan" then
+            params:set("audioin"..pram.id..lrs[3-lri],v,true)
+            engine.audioin_set(lrs[3-lri],pram.id,v)
+          else
+            params:set("audioin"..pram.id..lrs[3-lri],-v,true)
+            engine.audioin_set(lrs[3-lri],pram.id,-1*v)
+          end
+        end
+      end)
+    end
+  end
+  params:set("audioinpanR",1)
 end
 
 function params_sidechain()
@@ -662,7 +713,7 @@ function params_tapedeck()
     {id="flutter_amp",name="flutter amp",min=0,max=1,exp=false,div=0.01,default=0.03},
     {id="flutter_fixedfreq",name="flutter freq",min=0.1,max=12,exp=false,div=0.1,default=6},
     {id="flutter_variationfreq",name="flutter var freq",min=0.1,max=12,exp=false,div=0.1,default=2},
-    {id="hpf",name="hpf",min=10,max=2000,exp=true,div=5,default=60},
+    {id="hpf",name="hpf",min=10,max=2000,exp=true,div=5,default=10},
     {id="hpfqr",name="hpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
     {id="lpf",name="lpf",min=200,max=20000,exp=true,div=100,default=18000},
     {id="lpfqr",name="lpf qr",min=0.05,max=0.99,exp=false,div=0.01,default=0.61},
