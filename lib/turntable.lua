@@ -168,6 +168,11 @@ function Turntable:init()
             engine.cut(id,params:get(id.."sampleStart"),params:get(id.."sampleEnd"),0.05) -- TODO: make cross-fade time an option
           end,
         }
+        debounce_fn[id.."gatedebounce"]={
+          4,function()
+            self:update_gating()
+          end,
+        }
       else
         debounce_fn[id..pram.id]={
           pram.response or 3,function()

@@ -652,6 +652,7 @@ function set_gate_sequence(id,numdash)
       isminus=false
     end
   end
+  engine.set(id,"bpm",clock.get_tempo())
   engine.set_gating_sequence(id,
     vals[1],vals[2],vals[3],vals[4],vals[5],vals[6],vals[7],vals[8],
     vals[9],vals[10],vals[11],vals[12],vals[13],vals[14],vals[15],vals[16],
