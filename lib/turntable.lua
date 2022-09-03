@@ -331,7 +331,7 @@ function Turntable:duration()
 end
 
 function Turntable:load_file(path)
-  print(string.format("[%d] turntable: loading%s",self.id,path))
+  print(string.format("[%d] turntable: loading %s",self.id,path))
   self.path_original=path
   self.path=path
   local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -404,22 +404,22 @@ function Turntable:retune()
     local pathname,filename,ext=string.match(self.path_original,"(.-)([^\\/]-%.?([^%.\\/]*))$")
     local newpath=string.format("%s%s_%d_pitch%d_%d_%d_bpm%d.flac",self.cache,filename,params:get(self.id.."type"),params:get(self.id.."tune"),params:get(self.id.."source_bpm"),params:get(self.id.."load_channels"),math.floor(clock.get_tempo()))
     if not util.file_exists(newpath) then
-      print(string.format("turntable%d: retuning%s",self.id,self.path_original))
-      local cmd=string.format("sox%s%s ",self.path,newpath)
+      print(string.format("turntable%d: retuning %s",self.id,self.path_original))
+      local cmd=string.format("sox %s %s ",self.path,newpath)
       if bpm~=clock_tempo then
         if params:get(self.id.."type")==2 then
-          cmd=string.format("%s speed%2.6f ",cmd,clock_tempo/bpm)
+          cmd=string.format("%s speed %2.6f ",cmd,clock_tempo/bpm)
         else
-          cmd=string.format("%s tempo-m%2.6f",cmd,clock_tempo/bpm)
+          cmd=string.format("%s tempo -m %2.6f",cmd,clock_tempo/bpm)
         end
       end
       if tune~=0 then
-        cmd=string.format("%s pitch%d",cmd,tune*100)
+        cmd=string.format("%s pitch %d",cmd,tune*100)
       end
       if (params:get(self.id.."load_channels")==1 and channels==2) then
         cmd=string.format("%s remix 1,2",cmd)
       end
-      cmd=cmd.." rate-v 48k"
+      cmd=cmd.." rate -v 48k"
       print(cmd)
       os.execute(cmd)
     else
@@ -429,7 +429,7 @@ function Turntable:retune()
   end
   self.last_tune=tune
   self.retuned=true
-  -- print(string.format("[%d] turntable: adding to engine%s",self.id,self.path))
+  -- print(string.format("[%d] turntable: adding to engine %s",self.id,self.path))
   engine.add(self.id,self.path,self.play_on_load==true and 1 or 0)
   self.play_on_load=false
 end
