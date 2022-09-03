@@ -189,6 +189,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
+				bpm=120,gating_amt=0.5,gating_period=4,gating_strength=0.5,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -197,6 +198,14 @@ Paracosms {
 				var readHead=0;
 				var readHead_in=0;
 				var localin_data;
+
+				var mainPhase=In.ar(busPhase);
+
+				var thirtySecondNotes=(bpm/60*mainPhase*16).floor;
+				var gating=Demand.kr(Changed.kr(A2K.kr(thirtySecondNotes)),Trig.kr(thirtySecondNotes%128<1),
+					Dseq(NamedControl.kr(\gating_sequence,
+						[0,0,6,0,0,0,0,0,8,0,0,0,0,0,0,0,2,0,2,0,4,0,0,0,8,0,0,0,0,0,0,0,4,0,0,0,4,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,]
+					),inf));
 
 				// determine constants
 				var frames=BufFrames.ir(bufnum);
@@ -207,7 +216,7 @@ Paracosms {
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
 					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
 				var manuTrig=Trig.ar(t_manu);
-				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((mainPhase+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				var syncOrManuTrig=syncTrig+manuTrig;
@@ -244,6 +253,9 @@ Paracosms {
 				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
+
+				// gating
+				snd=snd*SelectX.ar(Clip.kr(gating_amt+SinOsc.kr(1/gating_period,phase:rrand(0,3),mul:gating_strength),0,1),[DC.ar(1),(1-EnvGen.ar(Env.new([0,1,1,0],[0.01,Latch.kr(gating,gating>0)/64,0.01],\sine),Trig.kr(gating>0,0.01)))]);
 
 				// balance the two channels
 				pan=Lag.kr(pan);
