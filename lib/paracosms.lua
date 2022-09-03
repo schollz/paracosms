@@ -89,6 +89,19 @@ table.insert(enc_func,{
 -- page 2
 table.insert(enc_func,{
   {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."gating_amt",d) end,function() return "gate: "..(params:get(dat.ti.."gating_amt")==0 and "off" or params:string(dat.ti.."gating_amt")) end},
+  {function(d) params:delta(dat.ti.."gating_option",d) end,function() return params:string(dat.ti.."gating_option") end},
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."gating_strength",d) end,function()
+    return "lfo: "..(params:get(dat.ti.."gating_strength")==0 and "off" or params:string(dat.ti.."gating_strength"))
+  end},
+  {function(d) params:delta(dat.ti.."gating_period",d) end,function()
+    return "period: "..params:string(dat.ti.."gating_period")
+  end},
+})
+-- page 2
+table.insert(enc_func,{
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."stutter_handle",d) end,function() return "stutter "..(params:get(dat.ti.."stutter_handle")>5 and "on" or "off") end},
   {function(d) end},
   {function(d) delta_ti(d) end},
