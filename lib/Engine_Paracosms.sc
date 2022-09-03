@@ -126,6 +126,16 @@ Engine_Paracosms : CroneEngine {
             var id=msg[1].asInteger;
             ouroboros.recordStart(id);
         });
+
+        // engine.set_gating_sequence(1,8,0,0,0,8,0,0,0,8,0,0,0,8,0,0,0,8,0,0,0,8,0,0,0,8,0,0,0,8,0,0,0)
+        this.addCommand("set_gating_sequence","iffffffffffffffffffffffffffffffff", { arg msg;
+            var arr=Array.fill(64,{0});
+            (1..32).do({arg i;
+                arr[(2*i)-1]=msg[i+1];
+            });
+            paracosms.set_gating_sequence(msg[1].asInteger,arr);
+        });
+
         this.addCommand("record","isffffiif", { arg msg;
             var id=msg[1].asInteger;
             var filename=msg[2].asString;

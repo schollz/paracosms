@@ -189,7 +189,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
-				bpm=120,gating_amt=0.5,gating_period=4,gating_strength=0.5,
+				bpm=120,gating_amt=1.0,gating_period=4,gating_strength=0.0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -684,6 +684,15 @@ Paracosms {
 				if (syns.at(id).isRunning,{
 					syns.at(id).set(key,val);
 				});
+			});
+		});
+	}
+
+	set_gating_sequence {
+		arg id,arr;
+		if (syns.at(id).notNil,{
+			if (syns.at(id).isRunning,{
+				syns.at(id).setn(\gating_sequence,arr);
 			});
 		});
 	}

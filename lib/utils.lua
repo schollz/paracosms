@@ -55,4 +55,20 @@ function utils.lcm(arr)
   return l
 end
 
+-- function utils.gate_sequence(xox)
+--   local vals={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+--   local lastval=0
+--   local i=0
+--   for c in xox:gmatch"." do
+--     i=i+1
+--     if c=="x" then
+--       lastval=i
+--       vals[lastval]=2
+--     elseif c=="o" then
+--       vals[lastval]=vals[lastval]+2
+--     end
+--   end
+--   return vals
+-- end
+
 return utils
