@@ -326,20 +326,20 @@ Paracosms {
 				// resetPosition to trigger
 				init_steps=((init_steps>0)*init_steps)+((init_steps<1)*slices);
 				resetPos=(beatNum%init_steps);
-				resetPos=resetPos+TWChoose.kr(measureChange,[0,2,4,8,12]/16*slices,[1*be_normal,0.001,0.05,0.05,0.05],1);
-				resetPos=resetPos+TWChoose.kr(beatChange,[0,LFNoise0.kr(1).range(1,slices).floor],[0.98*be_normal,0.2],1);
+				resetPos=resetPos+TWChoose.kr(measureChange,[0,2,4,8,12]/16*slices,[0.9*be_normal,0.001,0.05,0.05,0.05],1);
+				resetPos=resetPos+TWChoose.kr(beatChange,[0,LFNoise0.kr(1).range(1,slices).floor],[0.9*be_normal,0.1],1);
 				resetPos=resetPos%slices;
 				resetPos=resetPos/slices*frames;
 
 				// retrigger rate
-				retriggerRate=TWChoose.kr(measureChange,[1,2,4,8,16,32],[2*be_normal,0.1,0.05,0.025,0.025,0.005],1);
+				retriggerRate=TWChoose.kr(measureChange,[1,2,4,8,16,32],[0.9*be_normal,0.1,0.05,0.025,0.025,0.005],1);
 				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
 				retriggerTrig=Changed.kr(retriggerNum);
 
 
 				// rate changes
 				rate=rate*Lag.kr(TWChoose.kr(beatChange,[1,0.5,0.25,1.25],[0.9*be_normal,0.03,0.02,0.01],1));
-				rate=rate*TWChoose.kr(beat2Change,[1,-1],[0.95*be_normal,0.05],1);
+				rate=rate*TWChoose.kr(beat2Change,[1,-1],[0.9*be_normal,0.1],1);
 
 				// toggling
 				aOrB=ToggleFF.kr(retriggerTrig);
@@ -361,11 +361,11 @@ Paracosms {
 					numChannels:ch,
 					bufnum:bufnum,
 					phase:posA,
-				)*crossfade)+(BufRd.ar(
+				)*(1-crossfade))+(BufRd.ar(
 					numChannels:ch,
 					bufnum:bufnum,
 					phase:posB,
-				)*(1-crossfade));
+				)*(crossfade));
 
 				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,30,130],[seconds/slices/4,seconds/slices*2]),Changed.kr(retriggerRate)*(retriggerRate>1)).midicps,0.707);
 				snd=snd*EnvGen.kr(Env.new([1,0,1],[seconds/slices/4,seconds/slices*2]),Changed.kr(retriggerRate)*(retriggerRate>1));

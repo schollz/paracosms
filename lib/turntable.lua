@@ -354,7 +354,7 @@ function Turntable:load_file(path)
     bpm=clock.get_tempo()
   end
   params:set(self.id.."source_bpm",bpm,true)
-  engine.set_silent(self.id,"bpm_source",bpm)
+  engine.set_silent(self.id,"bpm_source",clock.get_tempo())
   engine.set_silent(self.id,"bpm_target",clock.get_tempo())
   if string.find(self.path,"drum") then
     params:set(self.id.."type",2,true)
