@@ -306,9 +306,9 @@ Paracosms {
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 				var snd,snd2,crossfade,aOrB,resetPos,retriggerNum,retriggerTrig,retriggerRate,doGate;
-				var posA,posB;
+				var pos,posA,posB;
 				var lpfOpen;
-				var mainPhase=Phasor.ar(1,1/s.sampleRate,0,1000000);
+				var mainPhase=In.ar(busPhase);
 				var slices=(BufDur.ir(bufnum)/(60/bpm_source)).round*slice_factor;
 				var beatNum=(bpm_target/60*A2K.kr(mainPhase)).floor%slices;
 				var measureNum=(bpm_target/60*A2K.kr(mainPhase)/4).floor%slices;
@@ -341,7 +341,7 @@ Paracosms {
 				rate=rate*TWChoose.kr(beat2Change,[1,-1],[0.95*be_normal,0.05],1);
 
 				// toggling
-				aOrB=ToggleFF.kr(t_trig+retriggerTrig);
+				aOrB=ToggleFF.kr(retriggerTrig);
 				crossfade=VarLag.ar(K2A.ar(aOrB),xfade,warp:\sine);
 
 				posA=Phasor.ar(
@@ -387,6 +387,7 @@ Paracosms {
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
 				snd=Balance2.ar(snd[0],snd[1],pan);
 
+				pos=SelectX.ar(crossfade,[posB,posA]);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
 				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
 				Out.ar(outsc,compressing*snd);
