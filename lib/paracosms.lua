@@ -89,6 +89,19 @@ table.insert(enc_func,{
 -- page 2
 table.insert(enc_func,{
   {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."gating_amt",d) end,function() return "gate: "..(params:get(dat.ti.."gating_amt")==0 and "off" or params:string(dat.ti.."gating_amt")) end},
+  {function(d) params:delta(dat.ti.."gating_option",d) end,function() return params:string(dat.ti.."gating_option") end},
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."gating_strength",d) end,function()
+    return "lfo: "..(params:get(dat.ti.."gating_strength")==0 and "off" or params:string(dat.ti.."gating_strength"))
+  end},
+  {function(d) params:delta(dat.ti.."gating_period",d) end,function()
+    return "period: "..params:string(dat.ti.."gating_period")
+  end},
+})
+-- page 2
+table.insert(enc_func,{
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."stutter_handle",d) end,function() return "stutter "..(params:get(dat.ti.."stutter_handle")>5 and "on" or "off") end},
   {function(d) end},
   {function(d) delta_ti(d) end},
@@ -622,6 +635,29 @@ function debounce_params()
       end
     end
   end
+end
+
+function set_gate_sequence(id,numdash)
+  local vals={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  local isminus=false
+  local i=1
+  for c in numdash:gmatch"." do
+    if c=="-" then
+      isminus=true
+    else
+      if not isminus and i<33 then
+        vals[i]=tonumber(c)*2
+      end
+      i=i+tonumber(c)
+      isminus=false
+    end
+  end
+  engine.set(id,"bpm",clock.get_tempo())
+  engine.set_gating_sequence(id,
+    vals[1],vals[2],vals[3],vals[4],vals[5],vals[6],vals[7],vals[8],
+    vals[9],vals[10],vals[11],vals[12],vals[13],vals[14],vals[15],vals[16],
+    vals[17],vals[18],vals[19],vals[20],vals[21],vals[22],vals[23],vals[24],
+  vals[25],vals[26],vals[27],vals[28],vals[29],vals[30],vals[31],vals[32])
 end
 
 function params_audioin()

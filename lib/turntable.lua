@@ -67,8 +67,11 @@ function Turntable:init()
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="gating_amt",name="gating send",min=0,max=1,exp=false,div=0.01,default=0,response=1},
+    {id="gating_period",name="gating lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
+    {id="gating_strength",name="gating lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
   }
-  self.all_params={"file","output","load_channels","stutter","compressing","compressible","stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
+  self.all_params={"file","output","load_channels","gating_amt","gating_period","gating_strength","gating_option","stutter","compressing","compressible","stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
   params:set_action(id.."file",function(x)
     if file_exists(x) and string.sub(x,-1)~="/" then
@@ -80,6 +83,13 @@ function Turntable:init()
   params:add{type="binary",name="play",id=id.."play",behavior="toggle",action=function(v)
     if v~=self.last_play then
       engine[v==1 and "play" or "stop"](id,params:get(id..(v==1 and "attack" or "release")))
+      if v==1 then
+        debounce_fn[id.."gatedebounce"]={
+          3,function()
+            self:update_gating()
+          end,
+        }
+      end
       self.last_play=v
       if params:get(id.."oneshot")==1 then
         -- check all playing loops and get the lcm_beat
@@ -158,16 +168,34 @@ function Turntable:init()
             engine.cut(id,params:get(id.."sampleStart"),params:get(id.."sampleEnd"),0.05) -- TODO: make cross-fade time an option
           end,
         }
+        debounce_fn[id.."gatedebounce"]={
+          4,function()
+            self:update_gating()
+          end,
+        }
       else
         debounce_fn[id..pram.id]={
           pram.response or 3,function()
             engine[params:get(id.."oneshot")==1 and "set" or "set_silent"](id,pram.id,params:get(id..pram.id))
           end,
         }
+        if string.find(pram.id,"gating") then
+          debounce_fn[id.."gatedebounce"]={
+            5,function()
+              self:update_gating()
+            end,
+          }
+        end
       end
 
     end)
   end
+
+  local gating_options={"48848","-22-26-26-22-26","-288444","-22-62-64","-24444444-2","-248484-2","-266484-2","-26648-112-2","-28-11284-112-2","-246-248-22-2","-48848","-4824248","-44-42-2248","-48844-11-11","-4884-11-11-11-11","-4884-11-22-11","-42-22-284-11-22-11","-4884-11-11-11-11","-4-11-11-2-284-11-11-11-11"}
+  params:add_option(id.."gating_option","gating",gating_options)
+  params:set_action(id.."gating_option",function(x)
+    self:update_gating()
+  end)
 
   local stutter_lengths={"1/32","1/24","1/18","1/16","1/12","1/10","1/8","1/6","1/4","1/2"}
   local stutter_lengths_num={1/32,1/24,1/18,1/16,1/12,1/10,1/8,1/6,1/4,1/2}
@@ -277,6 +305,12 @@ function Turntable:show()
       params:show(self.id..pram)
     end
     self.hidden=false
+  end
+end
+
+function Turntable:update_gating()
+  if params:get(self.id.."gating_amt")>0 then
+    set_gate_sequence(self.id,params:string(self.id.."gating_option"))
   end
 end
 
