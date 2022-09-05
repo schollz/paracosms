@@ -88,6 +88,10 @@ style=function()
 
   -- maybe load a default setting?
   -- params:default()
+  
+  params:set("4break",1)
+  params:set("1play",1)
+  params:set("sel",4)
 end
 
 ---------------------------------

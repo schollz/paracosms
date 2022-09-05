@@ -291,9 +291,10 @@ Paracosms {
 		});
 
 		(1..2).do({arg ch;
-			SynthDef("defBreak"++ch,{
+			// defBreak
+			SynthDef("defPlay3"++ch,{
 				arg amp=1.0,pan=0,mute=0,
-				bpm_source=170,bpm_target=180,xfade=0.005,slice_factor=1,compression=1,init_steps=0,be_normal=1,
+				bpm_source=170,bpm_target=180,xfade=0.005,slice_factor=1,compression=0.25,init_steps=0,be_normal=1,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
@@ -324,14 +325,14 @@ Paracosms {
 
 				// resetPosition to trigger
 				init_steps=((init_steps>0)*init_steps)+((init_steps<1)*slices);
-				resetPos=(beatNum%init_steps.poll);
+				resetPos=(beatNum%init_steps);
 				resetPos=resetPos+TWChoose.kr(measureChange,[0,2,4,8,12]/16*slices,[1*be_normal,0.001,0.05,0.05,0.05],1);
 				resetPos=resetPos+TWChoose.kr(beatChange,[0,LFNoise0.kr(1).range(1,slices).floor],[0.98*be_normal,0.2],1);
 				resetPos=resetPos%slices;
-				resetPos=resetPos.poll/slices*frames;
+				resetPos=resetPos/slices*frames;
 
 				// retrigger rate
-				retriggerRate=TWChoose.kr(measureChange,[1,2,4,8,16,32],[2*be_normal,0.1,0.05,0.025,0.025,0.005],1).poll;
+				retriggerRate=TWChoose.kr(measureChange,[1,2,4,8,16,32],[2*be_normal,0.1,0.05,0.025,0.025,0.005],1);
 				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
 				retriggerTrig=Changed.kr(retriggerNum);
 
@@ -379,6 +380,9 @@ Paracosms {
 				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
 				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
 
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
 				// balance the two channels
 				pan=Lag.kr(pan);
 				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
@@ -386,6 +390,8 @@ Paracosms {
 				pan=1.neg*pan;
 				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
 				snd=Balance2.ar(snd[0],snd[1],pan);
+
+				snd=snd*amp/4;
 
 				pos=SelectX.ar(crossfade,[posB,posA]);
 				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
@@ -726,6 +732,11 @@ Paracosms {
 				if (params.at(id).at("oneshot").notNil,{
 					if (params.at(id).at("oneshot")>0,{
 						defPlay=1;
+					});
+				});
+				if (params.at(id).at("break").notNil,{
+					if (params.at(id).at("break")>0,{
+						defPlay=3;
 					});
 				});
 

@@ -70,6 +70,7 @@ function Turntable:init()
     {id="gating_amt",name="gating send",min=0,max=1,exp=false,div=0.01,default=0,response=1},
     {id="gating_period",name="gating lfo period",min=0.1,max=60,exp=false,div=0.05,default=math.random(100,300)/10,response=1,unit="s"},
     {id="gating_strength",name="gating lfo strength",min=0,max=2,exp=false,div=0.01,default=0,response=1},
+    {id="break",name="break",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
   }
   self.all_params={"file","output","load_channels","gating_amt","gating_period","gating_strength","gating_option","stutter","compressing","compressible","stutter_length","stutter_repeats","source_note","mute_group","tracker_slices","release","division","next","play","oneshot","amp","attack","sequencer","n","k","w","guess","type","tune","source_bpm","record_on"}
   params:add_file(id.."file","file",_path.audio)
@@ -353,6 +354,8 @@ function Turntable:load_file(path)
     bpm=clock.get_tempo()
   end
   params:set(self.id.."source_bpm",bpm,true)
+  engine.set_silent(self.id,"bpm_source",bpm)
+  engine.set_silent(self.id,"bpm_target",clock.get_tempo())
   if string.find(self.path,"drum") then
     params:set(self.id.."type",2,true)
   end
