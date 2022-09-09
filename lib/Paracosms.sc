@@ -290,6 +290,7 @@ Paracosms {
 			}).send(server);
 		});
 
+		// breakcore version 1
 		(1..2).do({arg ch;
 			// defBreak
 			SynthDef("defPlay3"++ch,{
