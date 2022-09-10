@@ -409,6 +409,181 @@ Paracosms {
 			}).send(server);
 		});
 
+		// breakcore version 2?
+		(1..2).do({arg ch;
+			// defBreak
+			SynthDef("defPlay4"++ch,{
+				arg amp=1.0,pan=0,mute=0,
+				bpm_source=170,bpm_target=180,xfade=0.005,slice_factor=1,compression=0.25,init_steps=0,be_normal=1,
+				lpf=20000,lpfqr=0.707,
+				hpf=20,hpfqr=0.707,
+				offset=0,t_sync=1,t_manu=0,
+				oneshot=0, cut_fade=0.2,
+				rate=1.0,rateLag=0.0,
+				sampleStart=0,sampleEnd=1.0,
+				ts=0,tsSeconds=0.25,tsSlow=1,
+				pan_period=16,pan_strength=0,
+				amp_period=16,amp_strength=0,
+				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				var snd,snd2,crossfade,aOrB,resetPos,retriggerNum,retriggerTrig,retriggerRate,doGate;
+				var pos,posA,posB;
+				var lpfOpen;
+				var mainPhase=In.ar(busPhase);
+
+				var beatsInPhrase=32;
+				var slices=(BufDur.ir(bufnum)/(60/bpm_source)).round*slice_factor;
+				var slicesPlus=slices+0.999;
+				var start=Impulse.kr(0);
+				var numBeat=(bpm_target/60*A2K.kr(mainPhase)).floor;
+				var changeBeat1=start+Changed.kr(numBeat);
+				var changeBeatEighth=start+Changed.kr((bpm_target/60*A2K.kr(mainPhase)*2).floor);
+				var changeBeat2=start+Changed.kr(numBeat%2<1);
+				var changeBeat4=start+Changed.kr(numBeat%4<1);
+				var changeBeat16=start+Changed.kr(numBeat%16<1);
+				var changeBeatEnd=Trig.kr(numBeat%beatsInPhrase>(beatsInPhrase-2));
+				var changeBeatStart=Trig.kr((numBeat%beatsInPhrase)<1);
+				var frames=BufFrames.ir(bufnum);
+				var duration=BufDur.ir(bufnum);
+				var seconds=duration*bpm_source/bpm_target;
+				var secondsPerSlice=seconds/slices;
+				var beatPos=[
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+				];
+
+
+				rate = rate*BufRateScale.ir(bufnum)*bpm_target/bpm_source;
+
+
+				// resetPosition to trigger
+				resetPos=Demand.kr(changeBeatEighth,0,Dseq([
+					beatPos[0],beatPos[0],
+					beatPos[1],beatPos[1],
+					beatPos[2],beatPos[2],
+					beatPos[3],beatPos[3],
+				],inf));
+				resetPos=resetPos+Demand.kr(changeBeatEighth,0,Dseq([
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+				],inf));
+				resetPos=resetPos%slices;
+				resetPos=resetPos/slices*frames;
+
+				// retrigger rate
+				retriggerRate=Demand.kr(changeBeat4,0,Dseq([
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,3.999,changeBeatEnd).floor,
+					TRand.kr(1,4.999,changeBeatEnd).floor,
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,3.999,changeBeatEnd).floor,
+					TRand.kr(1,4.999,changeBeatEnd).floor,
+				],inf));
+				retriggerRate=retriggerRate*Demand.kr(changeBeat2,0,Dseq([
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+				],inf));
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-5),[1,16/retriggerRate]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),[1,TRand.kr(1,6.999,changeBeatStart).floor/2]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-3),[1,TRand.kr(1,6.999,changeBeatStart).floor/2]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-2),[1,TRand.kr(1,2.999,changeBeatStart).floor]); // at end of each phrase
+				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
+				retriggerTrig=Changed.kr(retriggerNum);
+
+				// rate changes
+				rate=rate*Lag.kr(TWChoose.kr(changeBeat1,[1,0.5,0.25,1.25],[0.9*be_normal,0.03,0.02,0.01],1));
+				rate=rate*TWChoose.kr(changeBeat4,[1,-1],[0.8375*be_normal,0.05],1);
+				rate=rate*Select.kr((numBeat%16<1)*(TRand.kr(0,1,changeBeat1)<0.75),[1,0.5]); // at end of each phrase
+
+				// toggling
+				aOrB=ToggleFF.kr(retriggerTrig);
+				crossfade=VarLag.ar(K2A.ar(aOrB),xfade,warp:\sine);
+
+				posA=Phasor.ar(
+					trig:(1-aOrB),
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,1-aOrB)
+				);
+				posB=Phasor.ar(
+					trig:aOrB,
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,aOrB)
+				);
+				snd=(BufRd.ar(
+					numChannels:2,
+					bufnum:bufnum,
+					phase:posA,
+				)*(1-crossfade))+(BufRd.ar(
+					numChannels:2,
+					bufnum:bufnum,
+					phase:posB,
+				)*(crossfade));
+
+				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,45,130],[seconds/slices/4,seconds/slices*4]),
+					// gate
+					(numBeat%beatsInPhrase>(beatsInPhrase-4)) +
+					(Trig.kr(TRand.kr(0,1,changeBeat2)>0.95,secondsPerSlice*2))
+				).midicps,0.707);
+				// snd=snd*EnvGen.kr(Env.new([1,0,1],[seconds/slices/4,seconds/slices*2]),numBeat%beatsInPhrase>(beatsInPhrase-5));
+				// doGate=Changed.kr(changeBeat1)*LFNoise0.kr(1)>0.9;
+				// snd=snd*EnvGen.kr(Env.new([1,1,0,1],[seconds/slices*0.5,seconds/slices*0.5,seconds/slices]),doGate);
+				snd=Compander.ar(snd,snd,1,1-compression,1/4,0.01,0.1);
+				snd=SelectX.ar(Lag.kr(TRand.kr(0,1,changeBeat4)>0.8),[snd,Decimator.ar(snd,6000,6)]);
+
+				// filters
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
+
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
+				// balance the two channels
+				pan=Lag.kr(pan);
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
+
+				snd=snd*amp/4;
+
+				pos=SelectX.ar(crossfade,[posB,posA]);
+				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
+				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+			}).send(server);
+		});
+
 
 		(1..2).do({arg ch;
 			SynthDef("defStutter"++ch,{
