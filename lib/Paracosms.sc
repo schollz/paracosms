@@ -585,6 +585,30 @@ Paracosms {
 		});
 
 
+        SynthDef("kick", { 
+        	arg basefreq = 40, ratio = 6, sweeptime = 0.05, preamp = 1, amp = 1,
+            decay1 = 0.3, decay1L = 0.8, decay2 = 0.15, clicky=0.0
+            out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+            var snd;
+            var    fcurve = EnvGen.kr(Env([basefreq * ratio, basefreq], [sweeptime], \exp)),
+            env = EnvGen.kr(Env([clicky,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
+            sig = SinOsc.ar(fcurve, 0.5pi, preamp).distort * env ;
+            snd = (sig*amp).tanh!2;
+
+			Out.ar(outsc,compressing*snd);
+			Out.ar(out1,compressible*snd*send_main);
+			Out.ar(out2,compressible*snd*send_tape);
+			Out.ar(out3,compressible*snd*send_grains);
+			Out.ar(out4,compressible*snd*send_reverb);
+			Out.ar(out1NSC,(1-compressible)*snd*send_main);
+			Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+			Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+			Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+
+            Out.ar(out,sig);
+        }).send(server);
+
+
 		(1..2).do({arg ch;
 			SynthDef("defStutter"++ch,{
 				arg id,bufnum,busPhase,offset,loopStart=0,loopEnd=1,sampleStart=0,sampleEnd=1,loopLength=1,rate=1.0,cut_fade=0.5,totalTime=1,direction=1,xfade=0.1,amp=1.0,pan=0,
@@ -912,7 +936,7 @@ Paracosms {
 				});
 				if (params.at(id).at("break").notNil,{
 					if (params.at(id).at("break")>0,{
-						defPlay=3;
+						defPlay=4;
 					});
 				});
 
