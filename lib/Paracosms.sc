@@ -585,7 +585,7 @@ Paracosms {
 		});
 
 
-        SynthDef("kick", { 
+        SynthDef("defKick", { 
         	arg basefreq = 40, ratio = 6, sweeptime = 0.05, preamp = 1, amp = 1,
             decay1 = 0.3, decay1L = 0.8, decay2 = 0.15, clicky=0.0
             out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
@@ -886,6 +886,19 @@ Paracosms {
 				});
 			});
 		});
+	}
+
+	kick {
+		var id="kick";
+		var pars=[\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\busPhase,busPhasor];
+		if (params.at(id).notNil,{
+			params.at(id).keysValuesDo({ arg pk,pv; 
+				pars=pars++[pk,pv];
+			});
+		});
+		Synth.after(syns.at("phasor"),"defKick",pars).onFree({"freed kick".postln;});
 	}
 
 	play {

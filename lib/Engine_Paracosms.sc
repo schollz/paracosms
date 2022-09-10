@@ -204,6 +204,11 @@ Engine_Paracosms : CroneEngine {
             paracosms.metronome(bpm,note,amp);
         });
 
+        // kick 
+        this.addCommand("kick","",{ arg msg;
+            paracosms.kick();
+        });
+
 
         // ^ Paracosms specific
 
