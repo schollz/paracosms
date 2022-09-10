@@ -587,7 +587,7 @@ Paracosms {
 
         SynthDef("defKick", { 
         	arg basefreq = 40, ratio = 6, sweeptime = 0.05, preamp = 1, amp = 1,
-            decay1 = 0.3, decay1L = 0.8, decay2 = 0.15, clicky=0.0
+            decay1 = 0.3, decay1L = 0.8, decay2 = 0.15, clicky=0.0,
             out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
             var snd;
             var    fcurve = EnvGen.kr(Env([basefreq * ratio, basefreq], [sweeptime], \exp)),
@@ -604,8 +604,6 @@ Paracosms {
 			Out.ar(out2NSC,(1-compressible)*snd*send_tape);
 			Out.ar(out3NSC,(1-compressible)*snd*send_grains);
 			Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
-
-            Out.ar(out,sig);
         }).send(server);
 
 
