@@ -64,7 +64,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
-				bpm=120,gating_amt=1.0,gating_period=4,gating_strength=0.0,
+				bpm=120,gating_amt=0.0,gating_period=4,gating_strength=0.0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -201,7 +201,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
-				bpm=120,gating_amt=1.0,gating_period=4,gating_strength=0.0,
+				bpm=120,gating_amt=0.0,gating_period=4,gating_strength=0.0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -591,7 +591,7 @@ Paracosms {
             out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
             var snd;
             var    fcurve = EnvGen.kr(Env([basefreq * ratio, basefreq], [sweeptime], \exp)),
-            env = EnvGen.kr(Env([clicky,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
+            env = EnvGen.kr(Env([clicky/10,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
             sig = SinOsc.ar(fcurve, 0.5pi, preamp).distort * env ;
             snd = (sig*amp).tanh!2;
 
@@ -887,7 +887,7 @@ Paracosms {
 	}
 
 	kick {
-		var id="kick";
+		var id=5425;
 		var pars=[\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
 \out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
 \busPhase,busPhasor];
@@ -896,6 +896,7 @@ Paracosms {
 				pars=pars++[pk,pv];
 			});
 		});
+		pars.postln;
 		Synth.after(syns.at("phasor"),"defKick",pars).onFree({"freed kick".postln;});
 	}
 

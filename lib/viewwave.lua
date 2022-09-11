@@ -23,6 +23,7 @@ function ViewWave:init()
   if not string.find(foo,"Options") then
     self.audiowaveform="audiowaveform"
   end
+  print("AUDIOWAVEFORM: "..self.audiowaveform)
   -- extract filename
   local pathname,filename,ext=string.match(self.path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
 

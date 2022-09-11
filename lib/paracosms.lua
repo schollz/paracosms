@@ -707,15 +707,15 @@ end
 
 function params_kick()
   local params_menu={
-    {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=0.0,unit="amp"},
+    {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=1.0,unit="amp"},
     {id="preamp",name="preamp",min=0,max=4,exp=false,div=0.01,default=1,unit="amp"},
     {id="basefreq",name="base freq",min=10,max=200,exp=false,div=0.1,default=32.7,unit="Hz"},
     {id="ratio",name="ratio",min=1,max=20,exp=false,div=1,default=6},
-    {id="sweeptime",name="sweep time",min=0,max=200,exp=false,div=1,default=50,unit="ms"},
-    {id="decay1",name="decay1",min=5,max=2000,exp=false,div=10,default=300,unit="ms"},
-    {id="decay1L",name="decay1L",min=5,max=2000,exp=false,div=10,default=800,unit="ms"},
-    {id="decay2",name="decay2",min=5,max=2000,exp=false,div=10,default=150,unit="ms"},
-    {id="clicky",name="clicky",min=0,max=100,exp=false,div=1,default=0,unit="%"},
+    {id="sweeptime",name="sweep time",min=0,max=1,exp=false,div=0.01,default=0.05,unit="s"},
+    {id="decay1",name="decay1",min=0,max=2,exp=false,div=0.01,default=0.3,unit="s"},
+    {id="decay1L",name="decay1L",min=0,max=2,exp=false,div=0.01,default=0.8,unit="s"},
+    {id="decay2",name="decay2",min=0,max=2,exp=false,div=0.01,default=0.15,unit="s"},
+    {id="clicky",name="clicky",min=0,max=1,exp=false,div=0.01,default=0},
     {id="send_main",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_tape",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
@@ -727,13 +727,14 @@ function params_kick()
   for _,pram in ipairs(params_menu) do
     params:add{
       type="control",
-      id=pram.id,
+      id="kick"..pram.id,
       name=pram.name,
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    params:set_action(pram.id,function(v)
-      engine.set("kick",pram.id,v)
+    params:set_action("kick"..pram.id,function(v)
+
+      engine.set(5425,pram.id,v)
     end)
   end
 end
