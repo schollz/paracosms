@@ -582,6 +582,7 @@ function init()
       for _,v in ipairs(dat.tt) do
         v.sample_pattern:emit(dat.beat)
       end
+      process_kick(dat.beat)
     end,
     division=1/16,
   }
@@ -705,6 +706,18 @@ function params_audioin()
   params:set("audioinpanR",1)
 end
 
+function process_kick(beat_num)
+  local beat=beat_num-1 -- "1" is the first beat, so make "0" the first beat
+  for i=1,3 do
+    if beat%params:get("kickmod_eq"..i)==0 and math.random()<params:get("kickmod_eq"..i.."p") then
+      engine.kick()
+    end
+  end
+  if beat%64>params:get("kickmod_gt1") and math.random()<params:get("kickmod_gt1p") then
+    engine.kick()
+  end
+end
+
 function params_kick()
   local params_menu={
     {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=1.0,unit="amp"},
@@ -722,6 +735,15 @@ function params_kick()
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="mod_on",name="modulo on",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="mod_eq1",name="mod1",min=1,max=64,exp=false,div=1,default=4,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq1p",name="mod1 probability",min=0,max=1,exp=false,div=0.01,default=0.55,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_eq2",name="mod2",min=1,max=64,exp=false,div=1,default=8,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq2p",name="mod2 probability",min=0,max=1,exp=false,div=0.01,default=0.75,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_eq3",name="mod3",min=1,max=64,exp=false,div=1,default=16,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq3p",name="mod3 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_gt1",name="mod4",min=1,max=64,exp=false,div=1,default=57,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
+    {id="mod_gt1p",name="mod4 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
   }
   params:add_group("KICK",#params_menu)
   for _,pram in ipairs(params_menu) do
@@ -732,10 +754,11 @@ function params_kick()
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    params:set_action("kick"..pram.id,function(v)
-
-      engine.set(5425,pram.id,v)
-    end)
+    if not string.find(pram.id,"mod_") then
+      params:set_action("kick"..pram.id,function(v)
+        engine.set(5425,pram.id,v) -- 5425 == "kick"
+      end)
+    end
   end
 end
 

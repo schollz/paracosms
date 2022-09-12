@@ -591,7 +591,7 @@ Paracosms {
             out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
             var snd;
             var    fcurve = EnvGen.kr(Env([basefreq * ratio, basefreq], [sweeptime], \exp)),
-            env = EnvGen.kr(Env([clicky/10,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
+            env = EnvGen.kr(Env([clicky,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
             sig = SinOsc.ar(fcurve, 0.5pi, preamp).distort * env ;
             snd = (sig*amp).tanh!2;
 
