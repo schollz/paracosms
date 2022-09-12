@@ -87,6 +87,15 @@ there are a bunch of sample-specific parameters: volume (+lfo), panning (+lfo), 
 
 there are three global effects - greyhole, grains and tapedeck. their parameters are editable in the main parameters menu. every parameter for grains is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
 
+### sidechaining
+
+any instrument can be sidechained through a bus to compress any other track. there is only one sidechain bus, though, that is shared among the cosms. to make a track the source for the sidechaining turn on the `PARAMS > compressing`, and to have a track be sidechained just turn on the `PARAMS > compressible`.
+
+### kicks
+
+there is a special menu for creating kick patterns using modulo math. in the `KICK` params menu you can alter the sound of the kick as well as modify when it will be triggered against the internal beat counter. make sure to turn `PARAMS > KICK > kick on` to `yes` in order to activate it. 
+
+
 ### automatic warping
 
 imported audio is automatically warped when either the `guess bpm` parameter is activated (i.e. from the startup script), or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automatically stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
