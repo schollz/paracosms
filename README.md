@@ -178,9 +178,9 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
-- countdown for recording manually
-- tutorial video
-- midi input (for tracker?)
+- ~~countdown for recording manually~~
+- ~~tutorial video~~
+- ~~midi input (for tracker?)~~
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
 - utilize @sixolet's more canonical syncing [between sc](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/engine/Engine_NotYourDreamLooper.sc#L470) [and lua](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/nydl.lua#L1475)
