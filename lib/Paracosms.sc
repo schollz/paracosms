@@ -896,7 +896,6 @@ Paracosms {
 				pars=pars++[pk,pv];
 			});
 		});
-		pars.postln;
 		Synth.after(syns.at("phasor"),"defKick",pars).onFree({"freed kick".postln;});
 	}
 
