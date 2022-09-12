@@ -707,6 +707,9 @@ function params_audioin()
 end
 
 function process_kick(beat_num)
+  if params:get("kickmod_on")==0 then
+    do return end
+  end
   local beat=beat_num-1 -- "1" is the first beat, so make "0" the first beat
   for i=1,3 do
     if beat%params:get("kickmod_eq"..i)==0 and math.random()<params:get("kickmod_eq"..i.."p") then
