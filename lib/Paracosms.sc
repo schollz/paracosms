@@ -948,6 +948,7 @@ Paracosms {
 				});
 				if (params.at(id).at("break").notNil,{
 					if (params.at(id).at("break")>0,{
+						("breaking"+id).postln;
 						defPlay=4;
 					});
 				});
