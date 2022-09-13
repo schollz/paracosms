@@ -725,7 +725,7 @@ end
 
 function params_kick()
   local params_menu={
-    {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=1.0,unit="amp"},
+    {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=0.25,unit="amp"},
     {id="preamp",name="preamp",min=0,max=4,exp=false,div=0.01,default=1,unit="amp"},
     {id="basefreq",name="base freq",min=10,max=200,exp=false,div=0.1,default=32.7,unit="Hz"},
     {id="ratio",name="ratio",min=1,max=20,exp=false,div=1,default=6},
@@ -747,7 +747,7 @@ function params_kick()
     {id="mod_eq2p",name="mod2 probability",min=0,max=1,exp=false,div=0.01,default=0.75,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
     {id="mod_eq3",name="mod3",min=1,max=64,exp=false,div=1,default=16,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
     {id="mod_eq3p",name="mod3 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
-    {id="mod_gt1",name="mod4",min=1,max=64,exp=false,div=1,default=57,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
+    {id="mod_gt1",name="mod4",min=1,max=64,exp=false,div=1,default=55,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
     {id="mod_gt1p",name="mod4 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
   }
   params:add_group("KICK",#params_menu)

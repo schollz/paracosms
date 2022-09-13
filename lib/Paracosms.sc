@@ -738,25 +738,27 @@ Paracosms {
 			var beat=msg[3];
 			if (params.at(5425).notNil,{
 				if (params.at(5425).at("mod_on").notNil,{
-					if ((beat%params.at(5425).at("mod_eq1")<1)
-						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq1p")),{
-							["mod1 kick"+beat].postln;
-							this.kick();
-					});
-					if ((beat%params.at(5425).at("mod_eq2")<1)
-						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq2p")),{
-							["mod2 kick"+beat].postln;
-							this.kick();
-					});
-					if ((beat%params.at(5425).at("mod_eq3")<1)
-						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq3p")),{
-							["mod3 kick"+beat].postln;
-							this.kick();
-					});
-					if ((beat%64>params.at(5425).at("mod_gt1"))
-						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt1p")),{
-							["gt1 kick"+beat].postln;
-							this.kick();
+					if (params.at(5425).at("mod_on")>0,{
+						if ((beat%params.at(5425).at("mod_eq1")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq1p")),{
+								["mod1 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq2")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq2p")),{
+								["mod2 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq3")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq3p")),{
+								["mod3 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%64>params.at(5425).at("mod_gt1"))
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt1p")),{
+								["gt1 kick"+beat].postln;
+								this.kick();
+						});
 					});
 				});
 			});
