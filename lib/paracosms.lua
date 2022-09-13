@@ -557,6 +557,8 @@ function init()
 ]])
   end)
 
+  engine.bpm(clock.get_tempo())
+
   -- initialize lattice
   lattice=lattice_:new()
   dat.beat=0
@@ -710,15 +712,15 @@ function process_kick(beat_num)
   if params:get("kickmod_on")==0 then
     do return end
   end
-  local beat=beat_num-1 -- "1" is the first beat, so make "0" the first beat
-  for i=1,3 do
-    if beat%params:get("kickmod_eq"..i)==0 and math.random()<params:get("kickmod_eq"..i.."p") then
-      engine.kick()
-    end
-  end
-  if beat%64>params:get("kickmod_gt1") and math.random()<params:get("kickmod_gt1p") then
-    engine.kick()
-  end
+  -- local beat=beat_num-1 -- "1" is the first beat, so make "0" the first beat
+  -- for i=1,3 do
+  --   if beat%params:get("kickmod_eq"..i)==0 and math.random()<params:get("kickmod_eq"..i.."p") then
+  --     engine.kick()
+  --   end
+  -- end
+  -- if beat%64>params:get("kickmod_gt1") and math.random()<params:get("kickmod_gt1p") then
+  --   engine.kick()
+  -- end
 end
 
 function params_kick()
@@ -757,11 +759,11 @@ function params_kick()
       controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
       formatter=pram.formatter,
     }
-    if not string.find(pram.id,"mod_") then
-      params:set_action("kick"..pram.id,function(v)
-        engine.set(5425,pram.id,v) -- 5425 == "kick"
-      end)
-    end
+    -- if not string.find(pram.id,"mod_") then
+    params:set_action("kick"..pram.id,function(v)
+      engine.set(5425,pram.id,v) -- 5425 == "kick"
+    end)
+    -- end
   end
 end
 

@@ -33,7 +33,7 @@
 substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
-  params:set("clock_tempo",120)
+  params:set("clock_tempo",130)
 end
 
 blocks={

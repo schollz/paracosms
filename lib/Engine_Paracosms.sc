@@ -208,6 +208,10 @@ Engine_Paracosms : CroneEngine {
         this.addCommand("kick","",{ arg msg;
             paracosms.kick();
         });
+        // kick 
+        this.addCommand("bpm","f",{ arg msg;
+            paracosms.bpm(msg[1]);
+        });
 
 
         // ^ Paracosms specific

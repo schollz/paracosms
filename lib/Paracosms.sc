@@ -21,6 +21,7 @@ Paracosms {
 	var group;
 	var cut_fade;
 	var oscMute;
+	var oscBeat;
 
 	*new {
 		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1NSC,argBusOut2NSC,argBusOut3NSC,argBusOut4NSC,argDirCache;
@@ -705,9 +706,10 @@ Paracosms {
 		}).send(server);
 
 		SynthDef("defPhasor",{
-			arg out,rate=1.0,rateLag=0.2,t_sync=0;
+			arg out,rate=1.0,rateLag=0.2,t_sync=0,bpm_target=120;
 			var phase=Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0);
-			// SendReply.kr(Impulse.kr(8),"/phase",[phase]);
+			var eigthBeat=(bpm_target/60*A2K.kr(phase)*2).floor;
+			SendReply.kr(trig: Changed.kr(eigthBeat), cmdName: '/paracosmsBeat',values: [eigthBeat]);
 			Out.ar(out,phase);
 		}).send(server);
 
@@ -731,6 +733,34 @@ Paracosms {
 				});
 			});
 		}, '/paracosmsMute');
+
+		oscBeat = OSCFunc({ |msg| 
+			var beat=msg[3];
+			if (params.at(5425).notNil,{
+				if (params.at(5425).at("mod_on").notNil,{
+					if ((beat%params.at(5425).at("mod_eq1")<1)
+						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq1p")),{
+							["mod1 kick"+beat].postln;
+							this.kick();
+					});
+					if ((beat%params.at(5425).at("mod_eq2")<1)
+						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq2p")),{
+							["mod2 kick"+beat].postln;
+							this.kick();
+					});
+					if ((beat%params.at(5425).at("mod_eq3")<1)
+						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq3p")),{
+							["mod3 kick"+beat].postln;
+							this.kick();
+					});
+					if ((beat%64>params.at(5425).at("mod_gt1"))
+						&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt1p")),{
+							["gt1 kick"+beat].postln;
+							this.kick();
+					});
+				});
+			});
+		}, '/paracosmsBeat');
 
 		server.sync;
 
@@ -1017,6 +1047,11 @@ Paracosms {
 		syns.at("audioIn"++lr).set(key,val);
 	}
 
+	bpm {
+		arg val;
+		syns.at("phasor").set(\bpm_target,val);
+	}
+
 	set {
 		arg id,key,val,doupdate;
 		if (params.at(id).isNil,{
@@ -1070,6 +1105,7 @@ Paracosms {
 		syns.free;
 		bufs.free;
 		oscMute.free;
+		oscBeat.free;
 	}
 
 }
