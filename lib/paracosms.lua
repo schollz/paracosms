@@ -741,14 +741,16 @@ function params_kick()
     {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="mod_on",name="kick on",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
-    {id="mod_eq1",name="mod1",min=1,max=64,exp=false,div=1,default=4,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq1",name="mod1",min=1,max=128,exp=false,div=1,default=8,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
     {id="mod_eq1p",name="mod1 probability",min=0,max=1,exp=false,div=0.01,default=0.55,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
-    {id="mod_eq2",name="mod2",min=1,max=64,exp=false,div=1,default=8,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq2",name="mod2",min=1,max=128,exp=false,div=1,default=16,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
     {id="mod_eq2p",name="mod2 probability",min=0,max=1,exp=false,div=0.01,default=0.75,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
-    {id="mod_eq3",name="mod3",min=1,max=64,exp=false,div=1,default=16,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq3",name="mod3",min=1,max=128,exp=false,div=1,default=32,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
     {id="mod_eq3p",name="mod3 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
-    {id="mod_gt1",name="mod4",min=1,max=64,exp=false,div=1,default=55,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
+    {id="mod_gt1",name="mod4",min=1,max=128,exp=false,div=1,default=128-32,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
     {id="mod_gt1p",name="mod4 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_gt2",name="mod5",min=1,max=128,exp=false,div=1,default=120,response=1,formatter=function(param) return string.format("beat%%64>%d",math.floor(param:get())) end},
+    {id="mod_gt2p",name="mod5 probability",min=0,max=1,exp=false,div=0.01,default=0.85,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
   }
   params:add_group("KICK",#params_menu)
   for _,pram in ipairs(params_menu) do

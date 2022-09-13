@@ -33,7 +33,7 @@
 substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
-  params:set("clock_tempo",130)
+  params:set("clock_tempo",136)
 end
 
 blocks={
@@ -89,11 +89,15 @@ style=function()
   -- maybe load a default setting?
   -- params:default()
   params:set("4break",2)
+  params:set("7break",2)
+  params:set("8break",2)
+  params:set("9break",2)
+  -- params:set("9break",2)
   -- params:set("1break",0)
-  params:set("sel",1)
+  params:set("sel",4)
   params:set("kickmod_on",1)
-  params:set("kickamp",0.65)
-  -- params:set("1play",1); params:set("4play",1)
+  params:set("kickamp",0.5)
+  -- params:set("4play",1); params:set("7play",1); params:set("8play",1); params:set("9play",1)
 end
 
 ---------------------------------
