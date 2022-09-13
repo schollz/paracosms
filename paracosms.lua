@@ -90,7 +90,7 @@ style=function()
   -- params:default()
   params:set("4break",2)
   -- params:set("1play",1)
-  params:set("sel",4)
+  params:set("sel",1)
 end
 
 ---------------------------------

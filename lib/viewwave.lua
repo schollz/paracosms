@@ -49,8 +49,10 @@ function ViewWave:init()
 
   if not util.file_exists(self.png_file) then
     local resolution=2
-    os.execute(string.format("%s -q -i '%s' -o %s -z %d -b 8",self.audiowaveform,self.path,self.dat_file,resolution))
-    os.execute(string.format("%s -q -i '%s' -o %s -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.audiowaveform,self.dat_file,self.png_file,0,self.duration,self.width,self.height))
+    local cmd=string.format("%s -q -i '%s' -o '%s' -z %d -b 8",self.audiowaveform,self.path,self.dat_file,resolution)
+    os.execute(cmd)
+    cmd=string.format("%s -q -i '%s' -o '%s' -s %2.4f -e %2.4f -w %2.0f -h %2.0f --background-color 000000 --waveform-color aaaaaa --no-axis-labels --compression 0",self.audiowaveform,self.dat_file,self.png_file,0,self.duration,self.width,self.height)
+    os.execute(cmd)
     os.execute("rm "..self.dat_file)
   end
   self.loaded=true
