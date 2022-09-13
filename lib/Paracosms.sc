@@ -492,12 +492,12 @@ Paracosms {
 				retriggerRate=Demand.kr(changeBeat4,0,Dseq([
 					TRand.kr(1,1.999,changeBeatEnd).floor,
 					TRand.kr(1,2.999,changeBeatEnd).floor,
-					TRand.kr(1,3.999,changeBeatEnd).floor,
-					TRand.kr(1,4.999,changeBeatEnd).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
 					TRand.kr(1,1.999,changeBeatEnd).floor,
 					TRand.kr(1,2.999,changeBeatEnd).floor,
-					TRand.kr(1,3.999,changeBeatEnd).floor,
-					TRand.kr(1,4.999,changeBeatEnd).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
+					(TRand.kr(0.5,4.4999,changeBeatEnd)*2).floor,
 				],inf));
 				retriggerRate=retriggerRate*Demand.kr(changeBeat2,0,Dseq([
 					TRand.kr(1,1.999,changeBeatEnd).floor,
@@ -534,11 +534,11 @@ Paracosms {
 					resetPos:Latch.kr(resetPos,aOrB)
 				);
 				snd=(BufRd.ar(
-					numChannels:2,
+					numChannels:ch,
 					bufnum:bufnum,
 					phase:posA,
 				)*(1-crossfade))+(BufRd.ar(
-					numChannels:2,
+					numChannels:ch,
 					bufnum:bufnum,
 					phase:posB,
 				)*(crossfade));
