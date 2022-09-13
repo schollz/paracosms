@@ -725,6 +725,7 @@ end
 
 function params_kick()
   local params_menu={
+    {id="mod_on",name="kick on",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=0.25,unit="amp"},
     {id="preamp",name="preamp",min=0,max=4,exp=false,div=0.01,default=1,unit="amp"},
     {id="basefreq",name="base freq",min=10,max=200,exp=false,div=0.1,default=32.7,unit="Hz"},
@@ -740,7 +741,6 @@ function params_kick()
     {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
     {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
-    {id="mod_on",name="kick on",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
     {id="mod_eq1",name="mod1",min=1,max=128,exp=false,div=1,default=8,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
     {id="mod_eq1p",name="mod1 probability",min=0,max=1,exp=false,div=0.01,default=1,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
     {id="mod_eq2",name="mod2",min=1,max=128,exp=false,div=1,default=32,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
