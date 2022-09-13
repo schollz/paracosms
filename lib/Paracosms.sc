@@ -415,7 +415,7 @@ Paracosms {
 			// defBreak
 			SynthDef("defPlay4"++ch,{
 				arg amp=1.0,pan=0,mute=0,
-				bpm_source=170,bpm_target=180,xfade=0.005,slice_factor=1,compression=0.5,init_steps=0,be_normal=1,
+				bpm_source=170,bpm_target=180,xfade=0.02,slice_factor=1,compression=0.5,init_steps=0,be_normal=1,
 				lpf=20000,lpfqr=0.707,
 				hpf=20,hpfqr=0.707,
 				offset=0,t_sync=1,t_manu=0,
@@ -448,6 +448,7 @@ Paracosms {
 				var duration=BufDur.ir(bufnum);
 				var seconds=duration*bpm_source/bpm_target;
 				var secondsPerSlice=seconds/slices;
+				var secondsPerBeat=60/bpm_target;
 				var beatPos=[
 					TRand.kr(0,slicesPlus,changeBeatStart).floor,
 					TRand.kr(0,slicesPlus,changeBeatStart).floor,
@@ -505,16 +506,16 @@ Paracosms {
 					TRand.kr(1,1.999,changeBeatEnd).floor,
 				],inf));
 				retriggerRate=Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-5),[retriggerRate,16]); // at end of each phrase
-				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),[1,TRand.kr(1,2.999,changeBeatStart).floor]); // at end of each phrase
-				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-3),[1,TRand.kr(1,2.999,changeBeatStart).floor]); // at end of each phrase
-				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-2),[1,TRand.kr(2,3.999,changeBeatStart).floor]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),[1,2]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-3),[1,2]); // at end of each phrase TRand.kr(1,2.999,changeBeatStart).floor
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-2),[1,2]); // at end of each phrase
 				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
 				retriggerTrig=Changed.kr(retriggerNum);
 
 				// rate changes
 				rate=rate*Lag.kr(TWChoose.kr(changeBeat1,[1,0.5,0.25,1.25],[0.9*be_normal,0.03,0.02,0.01],1));
 				rate=rate*TWChoose.kr(changeBeat4,[1,-1],[0.8375*be_normal,0.05],1);
-				rate=rate*Select.kr((numBeat%16<1)*(TRand.kr(0,1,changeBeat1)<0.75),[1,0.5]); // at end of each phrase
+				rate=rate*Select.kr((numBeat%beatsInPhrase>2)*(numBeat%16<1)*(TRand.kr(0,1,changeBeat1)<0.9),[1,0.5]); // at end of each phrase
 
 				// toggling
 				aOrB=ToggleFF.kr(retriggerTrig);
@@ -542,14 +543,15 @@ Paracosms {
 					phase:posB,
 				)*(crossfade));
 
-				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,45,130],[seconds/slices/4,seconds/slices*4]),
+				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,30,130],[secondsPerBeat/4,secondsPerBeat*2.5]),
 					// gate
-					(numBeat%beatsInPhrase>(beatsInPhrase-4)) +
-					(Trig.kr(TRand.kr(0,1,changeBeat2)>0.95,secondsPerSlice*2))
+					(Trig.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),secondsPerBeat*4)*(TRand.kr(0,100,changeBeatStart)<75))
+					+ (Trig.kr(TRand.kr(0,1,changeBeat2)>0.95,secondsPerSlice*2))
 				).midicps,0.707);
 				// snd=snd*EnvGen.kr(Env.new([1,0,1],[seconds/slices/4,seconds/slices*2]),numBeat%beatsInPhrase>(beatsInPhrase-5));
 				// doGate=Changed.kr(changeBeat1)*LFNoise0.kr(1)>0.9;
 				// snd=snd*EnvGen.kr(Env.new([1,1,0,1],[seconds/slices*0.5,seconds/slices*0.5,seconds/slices]),doGate);
+				compression=Lag.kr(Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-1),[compression,1]),0.05);
 				snd=Compander.ar(snd,snd,1,1-compression,1/4,0.01,0.1);
 				snd=SelectX.ar(Lag.kr(TRand.kr(0,1,changeBeat4)>0.8),[snd,Decimator.ar(snd,6000,6)]);
 
@@ -741,28 +743,33 @@ Paracosms {
 					if (params.at(5425).at("mod_on")>0,{
 						if ((beat%params.at(5425).at("mod_eq1")<1)
 							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq1p")),{
-								["mod1 kick"+beat].postln;
+								// ["mod1 kick"+beat].postln;
 								this.kick();
 						});
 						if ((beat%params.at(5425).at("mod_eq2")<1)
 							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq2p")),{
-								["mod2 kick"+beat].postln;
+								// ["mod2 kick"+beat].postln;
 								this.kick();
 						});
 						if ((beat%params.at(5425).at("mod_eq3")<1)
 							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq3p")),{
-								["mod3 kick"+beat].postln;
+								// ["mod3 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq4")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq4p")),{
+								// ["mod3 kick"+beat].postln;
 								this.kick();
 						});
 						if ((beat%128>params.at(5425).at("mod_gt1"))
 							&&(beat%2<1)
 							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt1p")),{
-								["gt1 kick"+beat].postln;
+								// ["gt1 kick"+beat].postln;
 								this.kick();
 						});
 						if ((beat%128>params.at(5425).at("mod_gt2"))
 							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt2p")),{
-								["gt2 kick"+beat].postln;
+								// ["gt2 kick"+beat].postln;
 								this.kick();
 						});
 					});
@@ -934,7 +941,7 @@ Paracosms {
 				pars=pars++[pk,pv];
 			});
 		});
-		Synth.after(syns.at("phasor"),"defKick",pars).onFree({"freed kick".postln;});
+		Synth.after(syns.at("phasor"),"defKick",pars);
 	}
 
 	play {
