@@ -46,18 +46,18 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
 
--- uncommment these to get a demo from when you first start
-blocks={
-  -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
-  {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=1}},
-  -- or you can apply parameters to make a block a set of oneshots
-  {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
-  {folder="/home/we/dust/audio/paracosms/row3"},
-  {folder="/home/we/dust/audio/paracosms/row4"},
-  {folder="/home/we/dust/audio/paracosms/row5"},
-  {folder="/home/we/dust/audio/paracosms/row6"},
-  {folder="/home/we/dust/audio/paracosms/row7"},
-}
+-- -- uncommment these to get a demo from when you first start
+-- blocks={
+--   -- you can apply parameters to specific blocks, for example the amplitude, the pan, or the sends
+--   {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100,send_main=1}},
+--   -- or you can apply parameters to make a block a set of oneshots
+--   {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
+--   {folder="/home/we/dust/audio/paracosms/row3"},
+--   {folder="/home/we/dust/audio/paracosms/row4"},
+--   {folder="/home/we/dust/audio/paracosms/row5"},
+--   {folder="/home/we/dust/audio/paracosms/row6"},
+--   {folder="/home/we/dust/audio/paracosms/row7"},
+-- }
 
 
 style=function()
