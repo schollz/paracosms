@@ -87,6 +87,22 @@ there are a bunch of sample-specific parameters: volume (+lfo), panning (+lfo), 
 
 there are three global effects - greyhole, grains and tapedeck. their parameters are editable in the main parameters menu. every parameter for grains is controlled by an LFO. every sample has its own send to the main bus (no fx) and to these two effects.
 
+### gating
+
+there is a "gating" feature where you can activate to provide syncopated gating to a given track. there are multiple patterns available (hard-coded). to turn on gating for a track, just change the `PARAMS > gating send` parameter to a non-zero value.
+
+### sidechaining
+
+any instrument can be sidechained through a bus to compress any other track. there is only one sidechain bus, though, that is shared among the cosms. to make a track the source for the sidechaining turn on the `PARAMS > compressing`, and to have a track be sidechained just turn on the `PARAMS > compressible`.
+
+### kicks
+
+there is a special menu for creating kick patterns using modulo math. in the `KICK` params menu you can alter the sound of the kick as well as modify when it will be triggered against the internal beat counter. make sure to turn `PARAMS > KICK > kick on` to `yes` in order to activate it. 
+
+### broken beats
+
+there is a parameter `PARAMS > break`, which will create a breakbeat-style playback. the track needs to be stopped and played after this is activated/de-activated for it to take effect.
+
 ### automatic warping
 
 imported audio is automatically warped when either the `guess bpm` parameter is activated (i.e. from the startup script), or when "`bpmX`" occurs in the filename. for example of this latter case: if your sample is called "`cool_sound_bpm120.wav`" then it will assume a bpm of 120 and automatically stretch it to match the current norns clock in a way that doesn't affect pitch. _note:_ if you change the norns clock after starting *paracosms* then the samples will not be warped to fit anymore.  
@@ -178,9 +194,9 @@ saving and loading is done by writing and reading `PSET`s. the save will store a
 
 ### future
 
-- countdown for recording manually
-- tutorial video
-- midi input (for tracker?)
+- ~~countdown for recording manually~~
+- ~~tutorial video~~
+- ~~midi input (for tracker?)~~
 - rain on a windowpane thing for composing songs from loops
 - more fx (strobe)
 - utilize @sixolet's more canonical syncing [between sc](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/engine/Engine_NotYourDreamLooper.sc#L470) [and lua](https://github.com/sixolet/nydl/blob/7ec1654636241ba116fdfcbb49ca52e543c72108/nydl.lua#L1475)

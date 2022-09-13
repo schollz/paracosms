@@ -89,6 +89,19 @@ table.insert(enc_func,{
 -- page 2
 table.insert(enc_func,{
   {function(d) delta_ti(d,true) end},
+  {function(d) params:delta(dat.ti.."gating_amt",d) end,function() return "gate: "..(params:get(dat.ti.."gating_amt")==0 and "off" or params:string(dat.ti.."gating_amt")) end},
+  {function(d) params:delta(dat.ti.."gating_option",d) end,function() return params:string(dat.ti.."gating_option") end},
+  {function(d) delta_ti(d) end},
+  {function(d) params:delta(dat.ti.."gating_strength",d) end,function()
+    return "lfo: "..(params:get(dat.ti.."gating_strength")==0 and "off" or params:string(dat.ti.."gating_strength"))
+  end},
+  {function(d) params:delta(dat.ti.."gating_period",d) end,function()
+    return "period: "..params:string(dat.ti.."gating_period")
+  end},
+})
+-- page 2
+table.insert(enc_func,{
+  {function(d) delta_ti(d,true) end},
   {function(d) params:delta(dat.ti.."stutter_handle",d) end,function() return "stutter "..(params:get(dat.ti.."stutter_handle")>5 and "on" or "off") end},
   {function(d) end},
   {function(d) delta_ti(d) end},
@@ -241,6 +254,7 @@ function init()
 
   -- setup effects parameters
   params_audioin()
+  params_kick()
   params_greyhole()
   params_grains()
   params_tapedeck()
@@ -543,6 +557,8 @@ function init()
 ]])
   end)
 
+  engine.bpm(clock.get_tempo())
+
   -- initialize lattice
   lattice=lattice_:new()
   dat.beat=0
@@ -568,6 +584,7 @@ function init()
       for _,v in ipairs(dat.tt) do
         v.sample_pattern:emit(dat.beat)
       end
+      process_kick(dat.beat)
     end,
     division=1/16,
   }
@@ -624,6 +641,29 @@ function debounce_params()
   end
 end
 
+function set_gate_sequence(id,numdash)
+  local vals={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+  local isminus=false
+  local i=1
+  for c in numdash:gmatch"." do
+    if c=="-" then
+      isminus=true
+    else
+      if not isminus and i<33 then
+        vals[i]=tonumber(c)*2
+      end
+      i=i+tonumber(c)
+      isminus=false
+    end
+  end
+  engine.set(id,"bpm",clock.get_tempo())
+  engine.set_gating_sequence(id,
+    vals[1],vals[2],vals[3],vals[4],vals[5],vals[6],vals[7],vals[8],
+    vals[9],vals[10],vals[11],vals[12],vals[13],vals[14],vals[15],vals[16],
+    vals[17],vals[18],vals[19],vals[20],vals[21],vals[22],vals[23],vals[24],
+  vals[25],vals[26],vals[27],vals[28],vals[29],vals[30],vals[31],vals[32])
+end
+
 function params_audioin()
   local params_menu={
     {id="amp",name="amp",min=0,max=2,exp=false,div=0.01,default=1.0},
@@ -666,6 +706,69 @@ function params_audioin()
     end
   end
   params:set("audioinpanR",1)
+end
+
+function process_kick(beat_num)
+  if params:get("kickmod_on")==0 then
+    do return end
+  end
+  -- local beat=beat_num-1 -- "1" is the first beat, so make "0" the first beat
+  -- for i=1,3 do
+  --   if beat%params:get("kickmod_eq"..i)==0 and math.random()<params:get("kickmod_eq"..i.."p") then
+  --     engine.kick()
+  --   end
+  -- end
+  -- if beat%64>params:get("kickmod_gt1") and math.random()<params:get("kickmod_gt1p") then
+  --   engine.kick()
+  -- end
+end
+
+function params_kick()
+  local params_menu={
+    {id="mod_on",name="kick on",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="amp",name="amp",min=0,max=4,exp=false,div=0.01,default=0.25,unit="amp"},
+    {id="preamp",name="preamp",min=0,max=4,exp=false,div=0.01,default=1,unit="amp"},
+    {id="basefreq",name="base freq",min=10,max=200,exp=false,div=0.1,default=32.7,unit="Hz"},
+    {id="ratio",name="ratio",min=1,max=20,exp=false,div=1,default=6},
+    {id="sweeptime",name="sweep time",min=0,max=1,exp=false,div=0.01,default=0.05,unit="s"},
+    {id="decay1",name="decay1",min=0,max=2,exp=false,div=0.01,default=0.3,unit="s"},
+    {id="decay1L",name="decay1L",min=0,max=2,exp=false,div=0.01,default=0.8,unit="s"},
+    {id="decay2",name="decay2",min=0,max=2,exp=false,div=0.01,default=0.15,unit="s"},
+    {id="clicky",name="clicky",min=0,max=1,exp=false,div=0.01,default=0},
+    {id="send_main",name="main send",min=0,max=1,exp=false,div=0.01,default=1.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_tape",name="tapedeck send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_grains",name="grains send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="send_reverb",name="greyhole send",min=0,max=1,exp=false,div=0.01,default=0.0,response=1,formatter=function(param) return string.format("%2.0f%%",param:get()*100) end},
+    {id="compressing",name="compressing",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="compressible",name="compressible",min=0,max=1,exp=false,div=1,default=0.0,response=1,formatter=function(param) return param:get()==1 and "yes" or "no" end},
+    {id="mod_eq1",name="mod1",min=1,max=128,exp=false,div=1,default=8,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq1p",name="mod1 probability",min=0,max=1,exp=false,div=0.01,default=1,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_eq2",name="mod2",min=1,max=128,exp=false,div=1,default=32,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq2p",name="mod2 probability",min=0,max=1,exp=false,div=0.01,default=1,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_eq3",name="mod3",min=1,max=128,exp=false,div=1,default=1,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq3p",name="mod3 probability",min=0,max=1,exp=false,div=0.01,default=0.02,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_eq4",name="mod4",min=1,max=128,exp=false,div=1,default=4,response=1,formatter=function(param) return string.format("beat%%%d==0",math.floor(param:get())) end},
+    {id="mod_eq4p",name="mod4 probability",min=0,max=1,exp=false,div=0.01,default=0.04,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_gt1",name="mod5",min=1,max=128,exp=false,div=1,default=128-16,response=1,formatter=function(param) return string.format("beat%%128>%d",math.floor(param:get())) end},
+    {id="mod_gt1p",name="mod5 probability",min=0,max=1,exp=false,div=0.01,default=0.95,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+    {id="mod_gt2",name="mod6",min=1,max=128,exp=false,div=1,default=124,response=1,formatter=function(param) return string.format("beat%%128>%d",math.floor(param:get())) end},
+    {id="mod_gt2p",name="mod6 probability",min=0,max=1,exp=false,div=0.01,default=0.99,response=1,formatter=function(param) return string.format("%2.1f%%",param:get()*100) end},
+  }
+  params:add_group("KICK",#params_menu)
+  for _,pram in ipairs(params_menu) do
+    params:add{
+      type="control",
+      id="kick"..pram.id,
+      name=pram.name,
+      controlspec=controlspec.new(pram.min,pram.max,pram.exp and "exp" or "lin",pram.div,pram.default,pram.unit or "",pram.div/(pram.max-pram.min)),
+      formatter=pram.formatter,
+    }
+    -- if not string.find(pram.id,"mod_") then
+    params:set_action("kick"..pram.id,function(v)
+      engine.set(5425,pram.id,v) -- 5425 == "kick"
+    end)
+    -- end
+  end
 end
 
 function params_sidechain()

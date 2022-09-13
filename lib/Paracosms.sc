@@ -21,6 +21,7 @@ Paracosms {
 	var group;
 	var cut_fade;
 	var oscMute;
+	var oscBeat;
 
 	*new {
 		arg serverName,argGroup,argBusPhasor,argBusSideChain,argBusOut1,argBusOut2,argBusOut3,argBusOut4,argBusOut1NSC,argBusOut2NSC,argBusOut3NSC,argBusOut4NSC,argDirCache;
@@ -64,6 +65,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
+				bpm=120,gating_amt=0.0,gating_period=4,gating_strength=0.0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -80,11 +82,19 @@ Paracosms {
 				var frames=BufFrames.ir(bufnum);
 				var duration=BufDur.ir(bufnum);
 
+				// gating
+				var mainPhase=In.ar(busPhase);
+				var thirtySecondNotes=(bpm/60*mainPhase*16).floor;
+				var gating=Demand.kr(Changed.kr(A2K.kr(thirtySecondNotes)),Trig.kr(thirtySecondNotes%128<1),
+					Dseq(NamedControl.kr(\gating_sequence,
+						[0,0,6,0,0,0,0,0,8,0,0,0,0,0,0,0,2,0,2,0,4,0,0,0,8,0,0,0,0,0,0,0,4,0,0,0,4,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,]
+					),inf));
+
 				// determine triggers
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
 					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd),0.01);
 				var manuTrig=Trig.ar(t_manu,0.01);
-				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((mainPhase+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				var syncOrManuTrig=syncTrig+manuTrig;
@@ -155,6 +165,9 @@ Paracosms {
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 
+				// gating
+				snd=snd*SelectX.ar(Clip.kr(gating_amt+SinOsc.kr(1/gating_period,phase:rrand(0,3),mul:gating_strength),0,1),[DC.ar(1),(1-EnvGen.ar(Env.new([0,1,1,0],[0.01,Latch.kr(gating,gating>0)/64,0.01],\sine),Trig.kr(gating>0,0.01)))]);
+
 				// balance the two channels
 				pan=Lag.kr(pan);
 				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
@@ -189,6 +202,7 @@ Paracosms {
 				ts=0,tsSeconds=0.25,tsSlow=1,
 				pan_period=16,pan_strength=0,
 				amp_period=16,amp_strength=0,
+				bpm=120,gating_amt=0.0,gating_period=4,gating_strength=0.0,
 				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
 				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
 
@@ -197,6 +211,13 @@ Paracosms {
 				var readHead=0;
 				var readHead_in=0;
 				var localin_data;
+
+				var mainPhase=In.ar(busPhase);
+				var thirtySecondNotes=(bpm/60*mainPhase*16).floor;
+				var gating=Demand.kr(Changed.kr(A2K.kr(thirtySecondNotes)),Trig.kr(thirtySecondNotes%128<1),
+					Dseq(NamedControl.kr(\gating_sequence,
+						[0,0,6,0,0,0,0,0,8,0,0,0,0,0,0,0,2,0,2,0,4,0,0,0,8,0,0,0,0,0,0,0,4,0,0,0,4,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,]
+					),inf));
 
 				// determine constants
 				var frames=BufFrames.ir(bufnum);
@@ -207,7 +228,7 @@ Paracosms {
 				var syncTrig=Trig.ar(t_sync+((1-ts)*Changed.kr(ts))+Changed.kr
 					(offset)+Changed.kr(rate)+Changed.kr(sampleStart)+Changed.kr(sampleEnd));
 				var manuTrig=Trig.ar(t_manu);
-				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((In.ar(busPhase)+offset).mod(duration)/duration*frames,syncTrig);
+				var syncPos=SetResetFF.ar(syncTrig,manuTrig)*Latch.ar((mainPhase+offset).mod(duration)/duration*frames,syncTrig);
 				var manuPos=SetResetFF.ar(manuTrig,syncTrig)*Wrap.ar(syncPos+Latch.ar(t_manu*frames,t_manu),0,frames);
 				var resetPos=syncPos+manuPos;
 				var syncOrManuTrig=syncTrig+manuTrig;
@@ -245,6 +266,9 @@ Paracosms {
 				// mute
 				snd=snd*Lag.kr(1-mute,0.1);
 
+				// gating
+				snd=snd*SelectX.ar(Clip.kr(gating_amt+SinOsc.kr(1/gating_period,phase:rrand(0,3),mul:gating_strength),0,1),[DC.ar(1),(1-EnvGen.ar(Env.new([0,1,1,0],[0.01,Latch.kr(gating,gating>0)/64,0.01],\sine),Trig.kr(gating>0,0.01)))]);
+
 				// balance the two channels
 				pan=Lag.kr(pan);
 				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
@@ -266,6 +290,324 @@ Paracosms {
 				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
 			}).send(server);
 		});
+
+		// breakcore version 1?
+		(1..2).do({arg ch;
+			// defBreak
+			SynthDef("defPlay3"++ch,{
+				arg amp=1.0,pan=0,mute=0,
+				bpm_source=170,bpm_target=180,xfade=0.005,slice_factor=1,compression=0.25,init_steps=0,be_normal=1,
+				lpf=20000,lpfqr=0.707,
+				hpf=20,hpfqr=0.707,
+				offset=0,t_sync=1,t_manu=0,
+				oneshot=0, cut_fade=0.2,
+				rate=1.0,rateLag=0.0,
+				sampleStart=0,sampleEnd=1.0,
+				ts=0,tsSeconds=0.25,tsSlow=1,
+				pan_period=16,pan_strength=0,
+				amp_period=16,amp_strength=0,
+				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				var snd,snd2,crossfade,aOrB,resetPos,retriggerNum,retriggerTrig,retriggerRate,doGate;
+				var pos,posA,posB;
+				var lpfOpen;
+				var mainPhase=In.ar(busPhase);
+				var slices=(BufDur.ir(bufnum)/(60/bpm_source)).round*slice_factor;
+				var beatNum=(bpm_target/60*A2K.kr(mainPhase)).floor%slices;
+				var measureNum=(bpm_target/60*A2K.kr(mainPhase)/4).floor%slices;
+				var beat2Change=Changed.kr((bpm_target/60*A2K.kr(mainPhase)/2).floor%slices);
+				var beatChange=Changed.kr(beatNum);
+				var measureChange=Changed.kr(measureNum);
+
+				var frames=BufFrames.ir(bufnum);
+				var duration=BufDur.ir(bufnum);
+				var seconds=duration*bpm_source/bpm_target;
+				rate = rate*BufRateScale.ir(bufnum)*bpm_target/bpm_source;
+
+
+				// resetPosition to trigger
+				init_steps=((init_steps>0)*init_steps)+((init_steps<1)*slices);
+				resetPos=(beatNum%init_steps);
+				resetPos=resetPos+TWChoose.kr(measureChange,[0,2,4,8,12]/16*slices,[0.9*be_normal,0.001,0.05,0.05,0.05],1);
+				resetPos=resetPos+TWChoose.kr(beatChange,[0,LFNoise0.kr(1).range(1,slices).floor],[0.9*be_normal,0.1],1);
+				resetPos=resetPos%slices;
+				resetPos=resetPos/slices*frames;
+
+				// retrigger rate
+				retriggerRate=TWChoose.kr(measureChange,[1,2,4,8,16,32],[0.9*be_normal,0.1,0.05,0.025,0.025,0.005],1);
+				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
+				retriggerTrig=Changed.kr(retriggerNum);
+
+
+				// rate changes
+				rate=rate*Lag.kr(TWChoose.kr(beatChange,[1,0.5,0.25,1.25],[0.9*be_normal,0.03,0.02,0.01],1));
+				rate=rate*TWChoose.kr(beat2Change,[1,-1],[0.9*be_normal,0.1],1);
+
+				// toggling
+				aOrB=ToggleFF.kr(retriggerTrig);
+				crossfade=VarLag.ar(K2A.ar(aOrB),xfade,warp:\sine);
+
+				posA=Phasor.ar(
+					trig:(1-aOrB),
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,1-aOrB)
+				);
+				posB=Phasor.ar(
+					trig:aOrB,
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,aOrB)
+				);
+				snd=(BufRd.ar(
+					numChannels:ch,
+					bufnum:bufnum,
+					phase:posA,
+				)*(1-crossfade))+(BufRd.ar(
+					numChannels:ch,
+					bufnum:bufnum,
+					phase:posB,
+				)*(crossfade));
+
+				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,30,130],[seconds/slices/4,seconds/slices*2]),Changed.kr(retriggerRate)*(retriggerRate>1)).midicps,0.707);
+				snd=snd*EnvGen.kr(Env.new([1,0,1],[seconds/slices/4,seconds/slices*2]),Changed.kr(retriggerRate)*(retriggerRate>1));
+				doGate=Changed.kr(beatChange)*LFNoise0.kr(1)>0.9;
+				snd=snd*EnvGen.kr(Env.new([1,1,0,1],[seconds/slices*0.5,seconds/slices*0.5,seconds/slices]),doGate);
+				snd=Compander.ar(snd,snd,1,1-compression,1/4,0.01,0.1);
+				snd=SelectX.ar(Lag.kr(LFNoise0.kr(slices/seconds/4)>0.8),[snd,Decimator.ar(snd,6000,6)]);
+
+				snd=RHPF.ar(snd,60,0.707);
+
+				// filters
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
+
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
+				// balance the two channels
+				pan=Lag.kr(pan);
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
+
+				snd=snd*amp/4;
+
+				pos=SelectX.ar(crossfade,[posB,posA]);
+				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
+				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+			}).send(server);
+		});
+
+		// breakcore version 2?
+		(1..2).do({arg ch;
+			// defBreak
+			SynthDef("defPlay4"++ch,{
+				arg amp=1.0,pan=0,mute=0,
+				bpm_source=170,bpm_target=180,xfade=0.02,slice_factor=1,compression=0.5,init_steps=0,be_normal=1,
+				lpf=20000,lpfqr=0.707,
+				hpf=20,hpfqr=0.707,
+				offset=0,t_sync=1,t_manu=0,
+				oneshot=0, cut_fade=0.2,
+				rate=1.0,rateLag=0.0,
+				sampleStart=0,sampleEnd=1.0,
+				ts=0,tsSeconds=0.25,tsSlow=1,
+				pan_period=16,pan_strength=0,
+				amp_period=16,amp_strength=0,
+				id=0,dataout=0,attack=0.001,release=1,gate=0,bufnum,busPhase,
+				out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+				var snd,snd2,crossfade,aOrB,resetPos,retriggerNum,retriggerTrig,retriggerRate,doGate;
+				var pos,posA,posB;
+				var lpfOpen;
+				var mainPhase=In.ar(busPhase);
+
+				var beatsInPhrase=32;
+				var slices=(BufDur.ir(bufnum)/(60/bpm_source)).round*slice_factor;
+				var slicesPlus=slices+0.999;
+				var start=Impulse.kr(0);
+				var numBeat=(bpm_target/60*A2K.kr(mainPhase)).floor;
+				var changeBeat1=start+Changed.kr(numBeat);
+				var changeBeatEighth=start+Changed.kr((bpm_target/60*A2K.kr(mainPhase)*2).floor);
+				var changeBeat2=start+Changed.kr(numBeat%2<1);
+				var changeBeat4=start+Changed.kr(numBeat%4<1);
+				var changeBeat16=start+Changed.kr(numBeat%16<1);
+				var changeBeatEnd=Trig.kr(numBeat%beatsInPhrase>(beatsInPhrase-2));
+				var changeBeatStart=Trig.kr((numBeat%beatsInPhrase)<1);
+				var frames=BufFrames.ir(bufnum);
+				var duration=BufDur.ir(bufnum);
+				var seconds=duration*bpm_source/bpm_target;
+				var secondsPerSlice=seconds/slices;
+				var secondsPerBeat=60/bpm_target;
+				var beatPos=[
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+					TRand.kr(0,slicesPlus,changeBeatStart).floor,
+				];
+
+
+				rate = rate*BufRateScale.ir(bufnum)*bpm_target/bpm_source;
+
+
+				// resetPosition to trigger
+				resetPos=Demand.kr(changeBeatEighth,0,Dseq([
+					beatPos[0],beatPos[0],
+					beatPos[1],beatPos[1],
+					beatPos[2],beatPos[2],
+					beatPos[3],beatPos[3],
+				],inf));
+				resetPos=resetPos+Demand.kr(changeBeatEighth,0,Dseq([
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+					TRand.kr(0,slicesPlus,changeBeatStart).floor*(TRand.kr(0,1,changeBeatStart)>0.8375),
+				],inf));
+				resetPos=resetPos%slices;
+				resetPos=resetPos/slices*frames;
+
+				// retrigger rate
+				retriggerRate=Demand.kr(changeBeat4,0,Dseq([
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					(TRand.kr(0.5,3.4999,changeBeatEnd)*2).floor,
+					(TRand.kr(0.5,4.4999,changeBeatEnd)*2).floor,
+				],inf));
+				retriggerRate=retriggerRate*Demand.kr(changeBeat2,0,Dseq([
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,2.999,changeBeatEnd).floor,
+					TRand.kr(1,1.999,changeBeatEnd).floor,
+				],inf));
+				retriggerRate=Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-5),[retriggerRate,16]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),[1,2]); // at end of each phrase
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-3),[1,2]); // at end of each phrase TRand.kr(1,2.999,changeBeatStart).floor
+				retriggerRate=retriggerRate*Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-2),[1,2]); // at end of each phrase
+				retriggerNum=(bpm_target/60*A2K.kr(mainPhase)/4*retriggerRate).floor%slices;
+				retriggerTrig=Changed.kr(retriggerNum);
+
+				// rate changes
+				rate=rate*Lag.kr(TWChoose.kr(changeBeat1,[1,0.5,0.25,1.25],[0.9*be_normal,0.03,0.02,0.01],1));
+				rate=rate*TWChoose.kr(changeBeat4,[1,-1],[0.8375*be_normal,0.05],1);
+				rate=rate*Select.kr((numBeat%beatsInPhrase>2)*(numBeat%16<1)*(TRand.kr(0,1,changeBeat1)<0.9),[1,0.5]); // at end of each phrase
+
+				// toggling
+				aOrB=ToggleFF.kr(retriggerTrig);
+				crossfade=VarLag.ar(K2A.ar(aOrB),xfade,warp:\sine);
+
+				posA=Phasor.ar(
+					trig:(1-aOrB),
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,1-aOrB)
+				);
+				posB=Phasor.ar(
+					trig:aOrB,
+					rate:rate.abs,
+					end:BufFrames.ir(bufnum),
+					resetPos:Latch.kr(resetPos,aOrB)
+				);
+				snd=(BufRd.ar(
+					numChannels:ch,
+					bufnum:bufnum,
+					phase:posA,
+				)*(1-crossfade))+(BufRd.ar(
+					numChannels:ch,
+					bufnum:bufnum,
+					phase:posB,
+				)*(crossfade));
+
+				snd=RLPF.ar(snd,EnvGen.kr(Env.new([130,30,130],[secondsPerBeat/4,secondsPerBeat*2.5]),
+					// gate
+					(Trig.kr(numBeat%beatsInPhrase>(beatsInPhrase-4),secondsPerBeat*4)*(TRand.kr(0,100,changeBeatStart)<75))
+					+ (Trig.kr(TRand.kr(0,1,changeBeat2)>0.95,secondsPerSlice*2))
+				).midicps,0.707);
+				// snd=snd*EnvGen.kr(Env.new([1,0,1],[seconds/slices/4,seconds/slices*2]),numBeat%beatsInPhrase>(beatsInPhrase-5));
+				// doGate=Changed.kr(changeBeat1)*LFNoise0.kr(1)>0.9;
+				// snd=snd*EnvGen.kr(Env.new([1,1,0,1],[seconds/slices*0.5,seconds/slices*0.5,seconds/slices]),doGate);
+				compression=Lag.kr(Select.kr(numBeat%beatsInPhrase>(beatsInPhrase-1),[compression,1]),0.05);
+				snd=Compander.ar(snd,snd,1,1-compression,1/4,0.01,0.1);
+				snd=SelectX.ar(Lag.kr(TRand.kr(0,1,changeBeat4)>0.8),[snd,Decimator.ar(snd,6000,6)]);
+
+				// filters
+				snd=RLPF.ar(snd,VarLag.kr(lpf.log,0.2,warp:\sine).exp,lpfqr);
+				snd=RHPF.ar(snd,VarLag.kr(hpf.log,0.2,warp:\sine).exp,hpfqr);
+
+				// main envelope
+				snd=snd*EnvGen.ar(Env.asr(attack,1.0,release,\sine),gate,doneAction:2);
+
+				// balance the two channels
+				pan=Lag.kr(pan);
+				pan=Clip.kr(pan+SinOsc.kr(1/pan_period,phase:rrand(0,3),mul:pan_strength),-1,1);
+				snd=Pan2.ar(snd,0.0);
+				pan=1.neg*pan;
+				snd=Pan2.ar(snd[0],1.neg+(2*pan))+Pan2.ar(snd[1],1+(2*pan));
+				snd=Balance2.ar(snd[0],snd[1],pan);
+
+				snd=snd*amp/4;
+
+				pos=SelectX.ar(crossfade,[posB,posA]);
+				SendTrig.kr(Impulse.kr((dataout>0)*10),id,pos/frames*duration);
+				SendTrig.kr(Impulse.kr(10),200+id,Amplitude.kr(snd));
+				Out.ar(outsc,compressing*snd);
+				Out.ar(out1,compressible*snd*send_main);
+				Out.ar(out2,compressible*snd*send_tape);
+				Out.ar(out3,compressible*snd*send_grains);
+				Out.ar(out4,compressible*snd*send_reverb);
+				Out.ar(out1NSC,(1-compressible)*snd*send_main);
+				Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+				Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+				Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+			}).send(server);
+		});
+
+
+        SynthDef("defKick", { 
+        	arg basefreq = 40, ratio = 6, sweeptime = 0.05, preamp = 1, amp = 1,
+            decay1 = 0.3, decay1L = 0.8, decay2 = 0.15, clicky=0.0,
+            out1=0,out2,out3,out4,out1NSC,out2NSC,out3NSC,out4NSC,outsc,compressible=1,compressing=0,send_main=1.0,send_tape=0,send_grains=0,send_reverb=0;
+            var snd;
+            var    fcurve = EnvGen.kr(Env([basefreq * ratio, basefreq], [sweeptime], \exp)),
+            env = EnvGen.kr(Env([clicky,1, decay1L, 0], [0.0,decay1, decay2], -4), doneAction: Done.freeSelf),
+            sig = SinOsc.ar(fcurve, 0.5pi, preamp).distort * env ;
+            snd = (sig*amp).tanh!2;
+
+			Out.ar(outsc,compressing*snd);
+			Out.ar(out1,compressible*snd*send_main);
+			Out.ar(out2,compressible*snd*send_tape);
+			Out.ar(out3,compressible*snd*send_grains);
+			Out.ar(out4,compressible*snd*send_reverb);
+			Out.ar(out1NSC,(1-compressible)*snd*send_main);
+			Out.ar(out2NSC,(1-compressible)*snd*send_tape);
+			Out.ar(out3NSC,(1-compressible)*snd*send_grains);
+			Out.ar(out4NSC,(1-compressible)*snd*send_reverb);
+        }).send(server);
 
 
 		(1..2).do({arg ch;
@@ -366,9 +708,10 @@ Paracosms {
 		}).send(server);
 
 		SynthDef("defPhasor",{
-			arg out,rate=1.0,rateLag=0.2,t_sync=0;
+			arg out,rate=1.0,rateLag=0.2,t_sync=0,bpm_target=120;
 			var phase=Phasor.ar(t_sync,Lag.kr(rate,rateLag)/server.sampleRate,0,120000.0);
-			// SendReply.kr(Impulse.kr(8),"/phase",[phase]);
+			var snBeat=(bpm_target/60*A2K.kr(phase)*4).floor;
+			SendReply.kr(trig: Changed.kr(snBeat), cmdName: '/paracosmsBeat',values: [snBeat]);
 			Out.ar(out,phase);
 		}).send(server);
 
@@ -392,6 +735,47 @@ Paracosms {
 				});
 			});
 		}, '/paracosmsMute');
+
+		oscBeat = OSCFunc({ |msg| 
+			var beat=msg[3];
+			if (params.at(5425).notNil,{
+				if (params.at(5425).at("mod_on").notNil,{
+					if (params.at(5425).at("mod_on")>0,{
+						if ((beat%params.at(5425).at("mod_eq1")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq1p")),{
+								// ["mod1 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq2")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq2p")),{
+								// ["mod2 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq3")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq3p")),{
+								// ["mod3 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%params.at(5425).at("mod_eq4")<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_eq4p")),{
+								// ["mod3 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%128>params.at(5425).at("mod_gt1"))
+							&&(beat%2<1)
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt1p")),{
+								// ["gt1 kick"+beat].postln;
+								this.kick();
+						});
+						if ((beat%128>params.at(5425).at("mod_gt2"))
+							&&((rrand(1,1000)/1000)<params.at(5425).at("mod_gt2p")),{
+								// ["gt2 kick"+beat].postln;
+								this.kick();
+						});
+					});
+				});
+			});
+		}, '/paracosmsBeat');
 
 		server.sync;
 
@@ -547,6 +931,19 @@ Paracosms {
 		});
 	}
 
+	kick {
+		var id=5425;
+		var pars=[\out1,busOut1,\out2,busOut2,\out3,busOut3,\out4,busOut4,
+\out1NSC,busOut1NSC,\out2NSC,busOut2NSC,\out3NSC,busOut3NSC,\out4NSC,busOut4NSC,\outsc,busSideChain,
+\busPhase,busPhasor];
+		if (params.at(id).notNil,{
+			params.at(id).keysValuesDo({ arg pk,pv; 
+				pars=pars++[pk,pv];
+			});
+		});
+		Synth.after(syns.at("phasor"),"defKick",pars);
+	}
+
 	play {
 		arg id,fadeIn,forceNew;
 		var defPlay=1;
@@ -591,6 +988,12 @@ Paracosms {
 				if (params.at(id).at("oneshot").notNil,{
 					if (params.at(id).at("oneshot")>0,{
 						defPlay=1;
+					});
+				});
+				if (params.at(id).at("break").notNil,{
+					if (params.at(id).at("break")>0,{
+						("breaking"+id).postln;
+						defPlay=4;
 					});
 				});
 
@@ -659,6 +1062,11 @@ Paracosms {
 		syns.at("audioIn"++lr).set(key,val);
 	}
 
+	bpm {
+		arg val;
+		syns.at("phasor").set(\bpm_target,val);
+	}
+
 	set {
 		arg id,key,val,doupdate;
 		if (params.at(id).isNil,{
@@ -672,6 +1080,15 @@ Paracosms {
 				if (syns.at(id).isRunning,{
 					syns.at(id).set(key,val);
 				});
+			});
+		});
+	}
+
+	set_gating_sequence {
+		arg id,arr;
+		if (syns.at(id).notNil,{
+			if (syns.at(id).isRunning,{
+				syns.at(id).setn(\gating_sequence,arr);
 			});
 		});
 	}
@@ -703,6 +1120,7 @@ Paracosms {
 		syns.free;
 		bufs.free;
 		oscMute.free;
+		oscBeat.free;
 	}
 
 }
