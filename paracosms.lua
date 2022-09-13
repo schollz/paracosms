@@ -33,7 +33,7 @@
 substance=function()
   -- things put here will run before startup is initiated
   -- useful for setting up a specific clock tempo, e.g.:
-  params:set("clock_tempo",165)
+  -- params:set("clock_tempo",165)
 end
 
 blocks={
@@ -45,16 +45,6 @@ blocks={
   {folder="/home/we/dust/audio/paracosms/row6"},
   {folder="/home/we/dust/audio/paracosms/row7"},
 }
-
--- blocks={
---   {folder="/home/we/dust/audio/seamlessloops/drums-dnb/136"},
---   {folder="/home/we/dust/audio/seamlessloops/synth-arp-a/140"},
---   {folder="/home/we/dust/audio/seamlessloops/pad-synth-am/140"},
---   {folder="/home/we/dust/audio/paracosms/row3"},
---   {folder="/home/we/dust/audio/paracosms/row5"},
---   {folder="/home/we/dust/audio/paracosms/row6"},
---   {folder="/home/we/dust/audio/paracosms/row7"},
--- }
 
 -- uncommment these to get a demo from when you first start
 blocks={
@@ -88,16 +78,6 @@ style=function()
 
   -- maybe load a default setting?
   -- params:default()
-  params:set("4break",2)
-  params:set("7break",2)
-  params:set("8break",2)
-  --params:set("9break",0)
-  params:set("sel",7)
-  params:set("kickmod_on",1)
-  params:set("kickamp",0.5)
-  params:set("kickcompressing",2)
-  params:set("9compressible",2)
-  -- params:set("4play",1); params:set("7play",1); params:set("8play",1); params:set("9play",1)
 end
 
 ---------------------------------
