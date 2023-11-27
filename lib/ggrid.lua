@@ -1,3 +1,14 @@
+-- make using grid 64 nicer.
+--    change sample slot layout to 7 rows of 8 samples, sample slots higher than 56 ignored on device
+--    clamp sample loading to 8 samples per row
+--    decrease time scale of sample start/end/duration to fit on 8x7 layout
+
+-- nice-to-have:
+--    detect changing grid device so proper layout maintained for 64 and 128 grids
+--      (do this in lib/paracosms?)
+--    samples then higher than 56 populate slots
+--    affect on time-scale? TBD
+   
 local GGrid={}
 
 function GGrid:new(args)
