@@ -20,7 +20,7 @@ function GGrid:new(args)
 
   -- initiate the grid
   local midigrid=util.file_exists(_path.code.."midigrid")
-  local grid=midigrid and include "midigrid/lib/mg_128" or grid
+  local grid=midigrid and include "midigrid/lib/mg_128" or grid -- TODO allow for midigrid 64?
   m.g=grid.connect()
   m.g.key=function(x,y,z)
     if m.grid_on then
@@ -31,10 +31,10 @@ function GGrid:new(args)
 
   -- setup visual
   m.visual={}
-  m.grid_width=16
+  m.grid_width=16   		-- TODO check m.g.cols for m.grid_width
   for i=1,8 do
     m.visual[i]={}
-    for j=1,16 do
+    for j=1,16 do		-- TODO iterate per width
       m.visual[i][j]=0
     end
   end
@@ -54,7 +54,7 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  for i=3,16 do
+  for i=3,16 do			-- TODO iterate per width
     table.insert(m.patterns,patterner:new())
   end
 
@@ -66,7 +66,7 @@ function GGrid:init()
   self.blink=0
   self.blink2=0
   self.fader={}
-  for i=1,16 do
+  for i=1,16 do			-- TODO iterate per width
     table.insert(self.fader,{0,0.75,3})
   end
   self.page=3
@@ -74,7 +74,7 @@ function GGrid:init()
   self.key_press_fn={}
   -- page 1 recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    params:set("record_beats",id/4)
+		  params:set("record_beats",id/4) -- TODO is id/4 based on width of 16? (quarter of beat)
   end)
   -- page 2 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time,datti)
@@ -88,11 +88,11 @@ function GGrid:init()
     -- check to see if two notes are held down and set the start/end based on them
     if row<5 then
       -- set sample start position
-      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64))
+      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64)) -- TODO assumes width of 16?
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-      params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80))
+      params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80)) -- TODO assumes width of 16?
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     end
     if not from_pattern then
@@ -101,7 +101,7 @@ function GGrid:init()
     end
   end)
   -- page 3 and beyond: playing
-  for i=3,16 do
+  for i=3,16 do			-- TODO iterate per width
     table.insert(self.key_press_fn,function(row,col,on,id,hold_time,from_pattern)
       if on and from_pattern==nil then
         switch_view(id)
@@ -140,7 +140,7 @@ end
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
   local hold_time=0
-  local id=(row-1)*16+col
+  local id=(row-1)*16+col	-- TODO set per width, if ids persisted, a problem with reloading on grid device change?
   if on then
     self.pressed_buttons[row..","..col]=ct
     self.pressed_ids[id]=true
@@ -195,11 +195,11 @@ function GGrid:get_visual()
   local id=0
   local sampleSD={}
   if self.page==2 then
-    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart")))
-    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration")))
-    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd")))
+    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart"))) -- TODO per width
+    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration"))) -- TODO per width
+    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- TODO per width
   end
-
+  -- TODO modify following tests of ids based on range available per width
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
@@ -219,7 +219,7 @@ function GGrid:get_visual()
         end
       elseif self.page==1 then
         -- recording
-        if id<=params:get("record_beats")*4 then
+        if id<=params:get("record_beats")*4 then -- TODO modify test related to duration per width?
           self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
         else
           self.visual[row][col]=0
