@@ -200,28 +200,28 @@ function GGrid:get_visual()
     sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration"))) -- TODO per width
     sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- TODO per width
   end
-  -- TODO modify following tests of ids based on range available per width
+  -- DONE modify following tests of ids based on range available per width
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
       if self.page==2 then
         if id==sampleSD[1] then
           self.visual[row][col]=5
-        elseif id>0 and id<=64 and id<=sampleSD[3] and id>sampleSD[1] then
+        elseif id>0 and id<=self.grid_width*4 and id<=sampleSD[3] and id>sampleSD[1] then
           self.visual[row][col]=3
-        elseif id>80 and id-80<=sampleSD[2] then
+        elseif id>self.grid_width*5 and id-(self.grid_width*5)<=sampleSD[2] then
           self.visual[row][col]=5
-        elseif id>0 and id<=64 then
+        elseif id>0 and id<=self.grid_width*4 then
           self.visual[row][col]=2
-        elseif id>80 and id<=112 then
+        elseif id>self.grid_width*5 and id<=self.grid_width*7 then
           self.visual[row][col]=2
         else
           self.visual[row][col]=0
         end
       elseif self.page==1 then
         -- recording
-        if id<=params:get("record_beats")*4 then -- TODO modify test related to duration per width?
-          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
+	 if id<=params:get("record_beats")*(self.grid_width/4) then -- DONE modify test related to duration per width as earlier
+          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3 -- TODO modify per width?
         else
           self.visual[row][col]=0
         end
