@@ -141,7 +141,7 @@ end
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
   local hold_time=0
-  local id=(row-1)*16+col	-- TODO set per width, if ids persisted, a problem with reloading on grid device change?
+  local id=(row-1)*self.grid_width+col	-- DONE set per width, if ids persisted, a problem with reloading on grid device change?
   if on then
     self.pressed_buttons[row..","..col]=ct
     self.pressed_ids[id]=true
