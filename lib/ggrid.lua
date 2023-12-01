@@ -67,7 +67,7 @@ function GGrid:init()
   self.blink2=0
   self.fader={}
   print("while init, width is " ..self.grid_width)
-  for i=1,16 do			-- TODO iterate per width
+  for i=1,self.grid_width do			-- DONE iterate per width
     table.insert(self.fader,{0,0.75,3})
   end
   self.page=3
@@ -75,7 +75,7 @@ function GGrid:init()
   self.key_press_fn={}
   -- page 1 recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-		  params:set("record_beats",id/4) -- TODO is id/4 based on width of 16? (quarter of beat)
+		  params:set("record_beats",id/(self.grid_width/4)) -- DONE assuming id/4 was based on width of 16
   end)
   -- page 2 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time,datti)
@@ -93,7 +93,7 @@ function GGrid:init()
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-      params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80)) -- TODO assumes width of 16?
+       params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg is width*16
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     end
     if not from_pattern then
@@ -102,7 +102,7 @@ function GGrid:init()
     end
   end)
   -- page 3 and beyond: playing
-  for i=3,16 do			-- TODO iterate per width
+  for i=3,self.grid_width do			-- DONE iterate per width
     table.insert(self.key_press_fn,function(row,col,on,id,hold_time,from_pattern)
       if on and from_pattern==nil then
         switch_view(id)
