@@ -31,10 +31,10 @@ function GGrid:new(args)
 
   -- setup visual
   m.visual={}
-  m.grid_width=16   		-- TODO check m.g.cols for m.grid_width
+  m.grid_width=m.g.cols   		-- DONE check m.g.cols for m.grid_width
   for i=1,8 do
     m.visual[i]={}
-    for j=1,16 do		-- TODO iterate per width
+    for j=1,m.grid_width do		-- DONE iterate per width
       m.visual[i][j]=0
     end
   end
@@ -54,7 +54,7 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  for i=3,16 do			-- TODO iterate per width
+  for i=3,m.grid_width do			-- DONE iterate per width
     table.insert(m.patterns,patterner:new())
   end
 
