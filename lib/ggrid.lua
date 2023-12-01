@@ -66,6 +66,7 @@ function GGrid:init()
   self.blink=0
   self.blink2=0
   self.fader={}
+  print("while init, width is " ..self.grid_width)
   for i=1,16 do			-- TODO iterate per width
     table.insert(self.fader,{0,0.75,3})
   end
