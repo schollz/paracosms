@@ -196,11 +196,11 @@ function GGrid:get_visual()
   local id=0
   local sampleSD={}
   if self.page==2 then
-    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart"))) -- TODO per width
-    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration"))) -- TODO per width
-    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- TODO per width
+    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart"))) -- DONE assuming safe as previous sampleStart
+    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration"))) -- DONE supra
+    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- DONE supra
   end
-  -- DONE modify following tests of ids based on range available per width
+  -- DONE modify following tests of ids based on range available per width; 
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
