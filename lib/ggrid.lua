@@ -89,11 +89,11 @@ function GGrid:init()
     -- check to see if two notes are held down and set the start/end based on them
     if row<5 then
       -- set sample start position
-      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64)) -- TODO assumes width of 16?
+      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64)) --DONE safe to not change per https://github.com/schollz/paracosms/issues/16#issuecomment-1836432419
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-       params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg is width*16
+       params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg originally was row*width
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     end
     if not from_pattern then
