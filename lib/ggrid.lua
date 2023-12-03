@@ -20,7 +20,8 @@ function GGrid:new(args)
 
   -- initiate the grid
   local midigrid=util.file_exists(_path.code.."midigrid")
-  local grid=midigrid and include "midigrid/lib/mg_128" or grid -- TODO allow for midigrid 64?
+  local grid=midigrid and include "midigrid/lib/mg_128" or grid -- DONE allow for midigrid 64 - midigrid defaults to 64, so if the previous line evals we should be good
+  
   m.g=grid.connect()
   m.g.key=function(x,y,z)
     if m.grid_on then
