@@ -221,7 +221,7 @@ function GGrid:get_visual()
       elseif self.page==1 then
         -- recording
 	 if id<=params:get("record_beats")*(self.grid_width/4) then -- DONE modify test related to duration per width as earlier
-          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3 -- TODO modify per width?
+          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3 -- CHECK I think this is fine as is
         else
           self.visual[row][col]=0
         end
