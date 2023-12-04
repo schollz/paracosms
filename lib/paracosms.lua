@@ -227,7 +227,7 @@ function init()
     os.execute("mkdir -p /home/we/dust/audio/paracosms/row"..i)
   end
   if first_time then
-    dat.rows={
+    dat.rows={			-- CHECK I think we're safe if there are more than eight samples per folder for a 64 grid
       {folder="/home/we/dust/code/paracosms/lib/row1",params={amp=0.5,pan=math.random(-30,30)/100}},
       {folder="/home/we/dust/audio/x0x/909",params={oneshot=2,attack=0.002}},
       {folder="/home/we/dust/audio/paracosms/row3"},

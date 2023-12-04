@@ -1,3 +1,14 @@
+-- make using grid 64 nicer.
+--    change sample slot layout to 7 rows of 8 samples, sample slots higher than 56 ignored on device
+--    clamp sample loading to 8 samples per row
+--    decrease time scale of sample start/end/duration to fit on 8x7 layout
+
+-- nice-to-have:
+--    detect changing grid device so proper layout maintained for 64 and 128 grids
+--      (do this in lib/paracosms?)
+--    samples then higher than 56 populate slots
+--    affect on time-scale? TBD
+   
 local GGrid={}
 
 function GGrid:new(args)
@@ -9,7 +20,8 @@ function GGrid:new(args)
 
   -- initiate the grid
   local midigrid=util.file_exists(_path.code.."midigrid")
-  local grid=midigrid and include "midigrid/lib/mg_128" or grid
+  local grid=midigrid and include "midigrid/lib/mg_128" or grid -- DONE allow for midigrid 64 - midigrid defaults to 64, so if the previous line evals we should be good
+  
   m.g=grid.connect()
   m.g.key=function(x,y,z)
     if m.grid_on then
@@ -20,10 +32,10 @@ function GGrid:new(args)
 
   -- setup visual
   m.visual={}
-  m.grid_width=16
+  m.grid_width=m.g.cols   		-- DONE check m.g.cols for m.grid_width
   for i=1,8 do
     m.visual[i]={}
-    for j=1,16 do
+    for j=1,m.grid_width do		-- DONE iterate per width
       m.visual[i][j]=0
     end
   end
@@ -43,7 +55,7 @@ function GGrid:new(args)
 
   m.light_setting={}
   m.patterns={}
-  for i=3,16 do
+  for i=3,m.grid_width do			-- DONE iterate per width
     table.insert(m.patterns,patterner:new())
   end
 
@@ -55,7 +67,7 @@ function GGrid:init()
   self.blink=0
   self.blink2=0
   self.fader={}
-  for i=1,16 do
+  for i=1,self.grid_width do			-- DONE iterate per width
     table.insert(self.fader,{0,0.75,3})
   end
   self.page=3
@@ -63,7 +75,7 @@ function GGrid:init()
   self.key_press_fn={}
   -- page 1 recording
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time)
-    params:set("record_beats",id/4)
+		  params:set("record_beats",id/(self.grid_width/4)) -- DONE assuming id/4 was based on width of 16
   end)
   -- page 2 sample start/end
   table.insert(self.key_press_fn,function(row,col,on,id,hold_time,datti)
@@ -77,11 +89,11 @@ function GGrid:init()
     -- check to see if two notes are held down and set the start/end based on them
     if row<5 then
       -- set sample start position
-      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64))
+      params:set(datti.."sampleStart",util.round(util.linlin(1,64,0,1,id),1/64)) --DONE safe to not change per https://github.com/schollz/paracosms/issues/16#issuecomment-1836432419
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-      params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-80))
+       params:set(datti.."sampleDuration",util.linlin(1,(self.grid_width*2),1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg originally was row*width
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     end
     if not from_pattern then
@@ -90,7 +102,7 @@ function GGrid:init()
     end
   end)
   -- page 3 and beyond: playing
-  for i=3,16 do
+  for i=3,self.grid_width do			-- DONE iterate per width
     table.insert(self.key_press_fn,function(row,col,on,id,hold_time,from_pattern)
       if on and from_pattern==nil then
         switch_view(id)
@@ -129,7 +141,7 @@ end
 function GGrid:key_press(row,col,on)
   local ct=clock.get_beats()*clock.get_beat_sec()
   local hold_time=0
-  local id=(row-1)*16+col
+  local id=(row-1)*self.grid_width+col	-- CHECK set per width, if ids persisted, a problem with reloading on grid device change?
   if on then
     self.pressed_buttons[row..","..col]=ct
     self.pressed_ids[id]=true
@@ -184,32 +196,32 @@ function GGrid:get_visual()
   local id=0
   local sampleSD={}
   if self.page==2 then
-    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart")))
-    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration")))
-    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd")))
+    sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart"))) -- DONE assuming safe as previous sampleStart
+    sampleSD[2]=util.round(util.linlin(1/64,1,1,(self.grid_width*2),params:get(dat.ti.."sampleDuration"))) -- DONE supra
+    sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- DONE supra
   end
-
+  -- DONE modify following tests of ids based on range available per width; 
   for row=1,7 do
     for col=1,self.grid_width do
       id=id+1
       if self.page==2 then
         if id==sampleSD[1] then
           self.visual[row][col]=5
-        elseif id>0 and id<=64 and id<=sampleSD[3] and id>sampleSD[1] then
+        elseif id>0 and id<=self.grid_width*4 and id<=sampleSD[3] and id>sampleSD[1] then
           self.visual[row][col]=3
-        elseif id>80 and id-80<=sampleSD[2] then
+        elseif id>self.grid_width*5 and id-(self.grid_width*5)<=sampleSD[2] then
           self.visual[row][col]=5
-        elseif id>0 and id<=64 then
+        elseif id>0 and id<=self.grid_width*4 then
           self.visual[row][col]=2
-        elseif id>80 and id<=112 then
+        elseif id>self.grid_width*5 and id<=self.grid_width*7 then
           self.visual[row][col]=2
         else
           self.visual[row][col]=0
         end
       elseif self.page==1 then
         -- recording
-        if id<=params:get("record_beats")*4 then
-          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3
+	 if id<=params:get("record_beats")*(self.grid_width/4) then -- DONE modify test related to duration per width as earlier
+          self.visual[row][col]=dat.tt[dat.ti].recording and 10 or 3 -- CHECK I think this is fine as is
         else
           self.visual[row][col]=0
         end
