@@ -93,7 +93,7 @@ function GGrid:init()
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     elseif row>5 then
       -- set sample duration
-       params:set(datti.."sampleDuration",util.linlin(1,32,1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg originally was row*width
+       params:set(datti.."sampleDuration",util.linlin(1,(self.grid_width*2),1/64,1.0,id-(5*self.grid_width))) -- DONE assuming fifth arg originally was row*width
       params:set(datti.."sampleEnd",params:get(datti.."sampleStart")+params:get(datti.."sampleDuration"))
     end
     if not from_pattern then
@@ -197,7 +197,7 @@ function GGrid:get_visual()
   local sampleSD={}
   if self.page==2 then
     sampleSD[1]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleStart"))) -- DONE assuming safe as previous sampleStart
-    sampleSD[2]=util.round(util.linlin(1/64,1,1,32,params:get(dat.ti.."sampleDuration"))) -- DONE supra
+    sampleSD[2]=util.round(util.linlin(1/64,1,1,(self.grid_width*2),params:get(dat.ti.."sampleDuration"))) -- DONE supra
     sampleSD[3]=util.round(util.linlin(0,1,1,64,params:get(dat.ti.."sampleEnd"))) -- DONE supra
   end
   -- DONE modify following tests of ids based on range available per width; 
